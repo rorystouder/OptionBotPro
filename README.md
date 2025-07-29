@@ -84,6 +84,7 @@ python src/main.py
 - [Architecture](docs/architecture/ARCHITECTURE.md) - System design and component overview
 - [API Integration](docs/api/API_INTEGRATION.md) - TastyTrade API usage guide
 - [Claude Rules](docs/development/CLAUDE.md) - AI assistant guidelines
+- [Trading Rules](docs/guides/TRADING_RULES.md) - Stock option picking and trading criteria
 
 ## Contributing
 
