@@ -18,7 +18,36 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
+
+# Authentication
+gem "devise", "~> 4.9"
+
+# HTTP requests
+gem "httparty", "~> 0.21"
+gem "faraday", "~> 2.0"
+
+# WebSocket support
+gem "faye-websocket", "~> 0.11"
+
+# Background processing
+gem "sidekiq", "~> 7.0"
+gem "sidekiq-cron", "~> 1.12"
+
+# Redis for caching and Sidekiq
+gem "redis", "~> 5.0"
+
+# PostgreSQL adapter
+gem "pg", "~> 1.5"
+
+# Environment variables
+gem "dotenv-rails", "~> 3.1"
+
+# State machines
+gem "aasm", "~> 5.5"
+
+# Data validation
+gem "dry-validation", "~> 1.10"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -49,6 +78,15 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  
+  # Testing framework
+  gem "rspec-rails", "~> 6.0"
+  gem "factory_bot_rails", "~> 6.2"
+  gem "faker", "~> 3.2"
+  
+  # HTTP mocking for tests only
+  gem "webmock", "~> 3.19"
+  gem "vcr", "~> 6.2"
 end
 
 group :development do
