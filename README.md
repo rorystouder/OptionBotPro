@@ -1,10 +1,10 @@
 # TastyTrades Option Trader UI
 
-A Python-based automated stock option trading application with a local web interface that integrates with the TastyTrade API. The system features autonomous trading capabilities that scan markets and execute trades based on predefined rules without user intervention.
+A Ruby on Rails-based automated stock option trading application with a web interface that integrates with the TastyTrade API. The system features autonomous trading capabilities that scan markets and execute trades based on predefined rules without user intervention.
 
 ## Project Overview
 
-This application provides both manual and automated trading capabilities for stock options through TastyTrade's API. Built with Python and modern web technologies, it offers real-time option chain data, automated trade scanning and execution, portfolio management, and comprehensive risk controls.
+This application provides both manual and automated trading capabilities for stock options through TastyTrade's API. Built with Ruby on Rails and modern web technologies, it offers real-time option chain data via Action Cable, automated trade scanning and execution through Active Job, portfolio management, and comprehensive risk controls.
 
 ### Key Features (Planned)
 
@@ -26,34 +26,45 @@ This application provides both manual and automated trading capabilities for sto
 
 ## Technology Stack
 
-- **Backend**: Python 3.9+
-- **Web Framework**: FastAPI or Flask (TBD)
-- **Frontend**: React/Vue.js with WebSocket support
-- **API Integration**: TastyTrade API
-- **Database**: PostgreSQL/SQLite for local data storage
-- **Message Queue**: Redis for real-time updates
+- **Backend**: Ruby 3.2+ with Rails 7.1+
+- **Web Framework**: Ruby on Rails
+- **Real-time**: Action Cable for WebSocket support
+- **Background Jobs**: Sidekiq for automated trading
+- **Frontend**: Stimulus.js/Turbo (Hotwire) or React
+- **API Integration**: TastyTrade API via Faraday
+- **Database**: PostgreSQL with Active Record
+- **Cache**: Redis for real-time data and Sidekiq
 - **Deployment**: Docker containers
 
 ## Project Structure
 
 ```
 tastytradesUI/
-├── src/
-│   ├── api/              # TastyTrade API integration
-│   ├── core/             # Core business logic
-│   ├── web/              # Web interface backend
-│   ├── static/           # Frontend assets
-│   └── utils/            # Helper utilities
-├── tests/                # Test suite
-├── docs/                 # Additional documentation
-├── config/               # Configuration files
-└── requirements/         # Python dependencies
+├── app/
+│   ├── channels/         # Action Cable channels
+│   ├── controllers/      # Rails controllers
+│   ├── jobs/            # Active Job for automated trading
+│   ├── models/          # Active Record models
+│   ├── services/        # Business logic and API integration
+│   ├── views/           # Rails views
+│   └── javascript/      # Stimulus controllers
+├── config/              # Rails configuration
+├── db/                  # Database migrations and schema
+├── lib/
+│   ├── tastytrade/      # TastyTrade API client
+│   └── trading/         # Trading engine and strategies
+├── spec/                # RSpec test suite
+├── docs/                # Additional documentation
+└── Gemfile              # Ruby dependencies
 ```
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.9 or higher
+- Ruby 3.2 or higher
+- Rails 7.1 or higher
+- PostgreSQL 14+
+- Redis 7+
 - TastyTrade account with API access
 - Git
 
@@ -65,33 +76,54 @@ git clone https://github.com/rorystouder/tastytradesUI.git
 cd tastytradesUI
 ```
 
-2. Create a virtual environment:
+2. Install Ruby dependencies:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+bundle install
 ```
 
-3. Install dependencies:
+3. Install JavaScript dependencies:
 ```bash
-pip install -r requirements.txt
+yarn install
 ```
 
-4. Configure API credentials:
+4. Setup database:
 ```bash
-cp config/example.env .env
-# Edit .env with your TastyTrade API credentials
+rails db:create
+rails db:migrate
 ```
 
-5. Configure automated trading (optional):
+5. Configure API credentials:
 ```bash
-# Enable automated trading in .env
+# Rails 7.1+ uses encrypted credentials
+EDITOR="code --wait" rails credentials:edit
+
+# Add your TastyTrade credentials:
+# tastytrade:
+#   client_id: your_client_id
+#   client_secret: your_secret
+#   api_url: https://api.tastyworks.com
+```
+
+6. Configure automated trading (optional):
+```bash
+# In config/application.yml or .env
 AUTO_TRADING_ENABLED=true
 PAPER_TRADING=true  # Start with paper trading
 ```
 
-6. Run the application:
+7. Start Redis:
 ```bash
-python src/main.py
+redis-server
+```
+
+8. Start Sidekiq (in another terminal):
+```bash
+bundle exec sidekiq
+```
+
+9. Run the application:
+```bash
+rails server
 ```
 
 ### Automated Trading Setup

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive guidance for integrating with the TastyTrade API for options trading functionality.
+This document provides comprehensive guidance for integrating with the TastyTrade API for options trading functionality using Ruby on Rails.
 
 ## API Documentation Links
 
@@ -13,88 +13,141 @@ This document provides comprehensive guidance for integrating with the TastyTrad
 
 ### OAuth 2.0 Flow
 
-TastyTrade uses OAuth 2.0 for authentication:
+TastyTrade uses OAuth 2.0 for authentication. Here's the Ruby implementation:
 
-```python
-# Example authentication flow
-import requests
-from typing import Dict, Optional
-
-class TastyTradeAuth:
-    BASE_URL = "https://api.tastyworks.com"
+```ruby
+# app/services/tastytrade_auth_service.rb
+class TastytradeAuthService
+  include HTTParty
+  base_uri 'https://api.tastyworks.com'
+  
+  def initialize(client_id:, client_secret:)
+    @client_id = client_id
+    @client_secret = client_secret
+    @access_token = nil
+    @refresh_token = nil
+  end
+  
+  def authenticate(username:, password:)
+    response = self.class.post('/sessions', {
+      body: {
+        login: username,
+        password: password
+      }.to_json,
+      headers: { 'Content-Type' => 'application/json' }
+    })
     
-    def __init__(self, client_id: str, client_secret: str):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.access_token: Optional[str] = None
-        self.refresh_token: Optional[str] = None
-    
-    def authenticate(self, username: str, password: str) -> Dict:
-        """Authenticate and obtain access token"""
-        response = requests.post(
-            f"{self.BASE_URL}/sessions",
-            json={
-                "login": username,
-                "password": password
-            }
-        )
-        
-        if response.status_code == 201:
-            data = response.json()
-            self.access_token = data["data"]["session-token"]
-            return data
-        else:
-            raise Exception(f"Authentication failed: {response.text}")
+    if response.code == 201
+      data = response.parsed_response
+      @access_token = data.dig('data', 'session-token')
+      Rails.cache.write("tastytrade_token", @access_token, expires_in: 24.hours)
+      data
+    else
+      raise StandardError, "Authentication failed: #{response.body}"
+    end
+  end
+  
+  def authenticated_headers
+    token = @access_token || Rails.cache.read("tastytrade_token")
+    { 'Authorization' => "Bearer #{token}" }
+  end
+  
+  private
+  
+  attr_reader :client_id, :client_secret, :access_token, :refresh_token
+end
 ```
 
 ### Session Management
 
 - Access tokens expire after 24 hours
-- Implement automatic token refresh
-- Store tokens securely (never in code)
+- Use Rails.cache for token storage with TTL
+- Store credentials with Rails encrypted credentials
+- Implement automatic token refresh in service
 
 ## Core API Endpoints
 
 ### Account Management
 
 #### Get Account Info
-```python
-GET /accounts/{account_id}
-Headers: 
-  Authorization: Bearer {access_token}
+```ruby
+# app/services/tastytrade_api_service.rb
+class TastytradeApiService
+  include HTTParty
+  base_uri 'https://api.tastyworks.com'
+  
+  def initialize
+    @auth_service = TastytradeAuthService.new(
+      client_id: Rails.application.credentials.tastytrade[:client_id],
+      client_secret: Rails.application.credentials.tastytrade[:client_secret]
+    )
+  end
+  
+  def get_account(account_id)
+    response = self.class.get(
+      "/accounts/#{account_id}",
+      headers: @auth_service.authenticated_headers
+    )
+    
+    handle_response(response)
+  end
+  
+  private
+  
+  def handle_response(response)
+    case response.code
+    when 200..299
+      response.parsed_response
+    when 401
+      # Token expired, re-authenticate
+      raise TokenExpiredError
+    else
+      raise APIError, "Request failed: #{response.body}"
+    end
+  end
+end
 
-Response:
-{
-  "data": {
-    "account-number": "ABC12345",
-    "buying-power": 50000.00,
-    "cash-balance": 25000.00,
-    "day-trading-buying-power": 100000.00,
-    "maintenance-requirement": 15000.00
-  }
-}
+# Usage in controller:
+# GET /accounts/{account_id}
+# Headers: Authorization: Bearer {access_token}
+# 
+# Response:
+# {
+#   "data": {
+#     "account-number": "ABC12345",
+#     "buying-power": 50000.00,
+#     "cash-balance": 25000.00,
+#     "day-trading-buying-power": 100000.00,
+#     "maintenance-requirement": 15000.00
+#   }
+# }
 ```
 
 #### Get Positions
-```python
-GET /accounts/{account_id}/positions
-Headers:
-  Authorization: Bearer {access_token}
+```ruby
+def get_positions(account_id)
+  response = self.class.get(
+    "/accounts/#{account_id}/positions",
+    headers: @auth_service.authenticated_headers
+  )
+  
+  handle_response(response)
+end
 
-Response:
-{
-  "data": {
-    "items": [
-      {
-        "symbol": "AAPL",
-        "quantity": 100,
-        "cost-basis": 15000.00,
-        "market-value": 17500.00,
-        "unrealized-pnl": 2500.00
-      }
-    ]
-  }
-}
+# Expected response format:
+# {
+#   "data": {
+#     "items": [
+#       {
+#         "symbol": "AAPL",
+#         "quantity": 100,
+#         "cost-basis": 15000.00,
+#         "market-value": 17500.00,
+#         "unrealized-pnl": 2500.00
+#       }
+#     ]
+#   }
+# }
 ```
 
 ### Market Data
@@ -331,110 +384,188 @@ def make_api_request(url: str, **kwargs):
 ```
 
 ### 3. Data Validation
-```python
-from pydantic import BaseModel, validator
-from decimal import Decimal
-from typing import Optional
+```ruby
+# app/models/order.rb
+class Order < ApplicationRecord
+  VALID_ACTIONS = %w[buy-to-open buy-to-close sell-to-open sell-to-close].freeze
+  
+  validates :symbol, presence: true, format: { with: /\A[A-Z]+\z/ }
+  validates :quantity, presence: true, numericality: { greater_than: 0 }
+  validates :action, presence: true, inclusion: { in: VALID_ACTIONS }
+  validates :order_type, presence: true
+  validates :price, numericality: { greater_than: 0 }, allow_nil: true
+  
+  before_validation :upcase_symbol
+  
+  private
+  
+  def upcase_symbol
+    self.symbol = symbol.upcase if symbol.present?
+  end
+end
 
-class Order(BaseModel):
-    symbol: str
-    quantity: int
-    action: str
-    order_type: str
-    price: Optional[Decimal] = None
-    
-    @validator('action')
-    def validate_action(cls, v):
-        valid_actions = ['buy-to-open', 'buy-to-close', 
-                        'sell-to-open', 'sell-to-close']
-        if v not in valid_actions:
-            raise ValueError(f'Invalid action: {v}')
-        return v
-    
-    @validator('quantity')
-    def validate_quantity(cls, v):
-        if v <= 0:
-            raise ValueError('Quantity must be positive')
-        return v
+# Alternative using ActiveModel for service objects
+class OrderValidator
+  include ActiveModel::Model
+  include ActiveModel::Attributes
+  include ActiveModel::Validations
+  
+  attribute :symbol, :string
+  attribute :quantity, :integer
+  attribute :action, :string
+  attribute :order_type, :string
+  attribute :price, :decimal
+  
+  validates :symbol, presence: true, format: { with: /\A[A-Z]+\z/ }
+  validates :quantity, presence: true, numericality: { greater_than: 0 }
+  validates :action, presence: true, inclusion: { in: Order::VALID_ACTIONS }
+  validates :order_type, presence: true
+  validates :price, numericality: { greater_than: 0 }, allow_nil: true
+end
 ```
 
 ### 4. Caching Strategy
-```python
-from functools import lru_cache
-import redis
-import json
-
-class MarketDataCache:
-    def __init__(self):
-        self.redis_client = redis.Redis(
-            host='localhost',
-            port=6379,
-            decode_responses=True
-        )
+```ruby
+# app/services/market_data_cache_service.rb
+class MarketDataCacheService
+  def initialize
+    @redis = Redis.new(url: ENV['REDIS_URL'])
+  end
+  
+  def get_option_chain(symbol, expiration)
+    cache_key = "option_chain:#{symbol}:#{expiration}"
     
-    def get_option_chain(self, symbol: str, expiration: str):
-        key = f"option_chain:{symbol}:{expiration}"
-        cached = self.redis_client.get(key)
-        
-        if cached:
-            return json.loads(cached)
-        
-        # Fetch from API
-        data = fetch_option_chain_from_api(symbol, expiration)
-        
-        # Cache for 5 minutes
-        self.redis_client.setex(
-            key, 
-            300,  # 5 minutes
-            json.dumps(data)
-        )
-        
-        return data
+    # Try Rails cache first (with automatic JSON handling)
+    Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
+      fetch_option_chain_from_api(symbol, expiration)
+    end
+  end
+  
+  # Alternative direct Redis usage
+  def get_option_chain_redis(symbol, expiration)
+    cache_key = "option_chain:#{symbol}:#{expiration}"
+    cached_data = @redis.get(cache_key)
+    
+    if cached_data
+      JSON.parse(cached_data)
+    else
+      data = fetch_option_chain_from_api(symbol, expiration)
+      @redis.setex(cache_key, 300, data.to_json) # 5 minutes
+      data
+    end
+  end
+  
+  private
+  
+  def fetch_option_chain_from_api(symbol, expiration)
+    api_service = TastytradeApiService.new
+    api_service.get_option_chain(symbol, expiration)
+  end
+end
+
+# Usage in Rails controller:
+class Api::V1::OptionsController < ApplicationController
+  def show
+    @option_chain = MarketDataCacheService.new.get_option_chain(
+      params[:symbol], 
+      params[:expiration]
+    )
+    render json: @option_chain
+  end
+end
 ```
 
 ## Testing
 
 ### Mock API Responses
-```python
-# tests/fixtures/api_responses.py
-MOCK_ACCOUNT_RESPONSE = {
-    "data": {
-        "account-number": "TEST123",
-        "buying-power": 100000.00,
-        "cash-balance": 50000.00
+```ruby
+# spec/fixtures/tastytrade_responses.rb
+module TastytradeResponses
+  MOCK_ACCOUNT_RESPONSE = {
+    "data" => {
+      "account-number" => "TEST123",
+      "buying-power" => 100000.00,
+      "cash-balance" => 50000.00
     }
-}
+  }.freeze
 
-MOCK_POSITION_RESPONSE = {
-    "data": {
-        "items": [
-            {
-                "symbol": "AAPL",
-                "quantity": 100,
-                "cost-basis": 15000.00
-            }
-        ]
+  MOCK_POSITION_RESPONSE = {
+    "data" => {
+      "items" => [
+        {
+          "symbol" => "AAPL",
+          "quantity" => 100,
+          "cost-basis" => 15000.00
+        }
+      ]
     }
-}
+  }.freeze
+end
 ```
 
-### Integration Tests
-```python
-import pytest
-from unittest.mock import patch, MagicMock
+### RSpec Integration Tests
+```ruby
+# spec/services/tastytrade_auth_service_spec.rb
+require 'rails_helper'
 
-class TestTastyTradeIntegration:
-    @patch('requests.post')
-    def test_authentication(self, mock_post):
-        mock_post.return_value.status_code = 201
-        mock_post.return_value.json.return_value = {
-            "data": {"session-token": "test_token"}
-        }
-        
-        client = TastyTradeAuth("client_id", "secret")
-        result = client.authenticate("user", "pass")
-        
-        assert client.access_token == "test_token"
+RSpec.describe TastytradeAuthService do
+  let(:service) do
+    described_class.new(
+      client_id: 'test_client_id',
+      client_secret: 'test_secret'
+    )
+  end
+  
+  describe '#authenticate' do
+    before do
+      stub_request(:post, "https://api.tastyworks.com/sessions")
+        .with(
+          body: { login: 'test_user', password: 'test_pass' }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 201,
+          body: { data: { 'session-token' => 'test_token' } }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+    
+    it 'returns authentication data on success' do
+      result = service.authenticate(username: 'test_user', password: 'test_pass')
+      
+      expect(result.dig('data', 'session-token')).to eq('test_token')
+      expect(Rails.cache.read('tastytrade_token')).to eq('test_token')
+    end
+  end
+end
+
+# spec/services/tastytrade_api_service_spec.rb  
+RSpec.describe TastytradeApiService do
+  let(:service) { described_class.new }
+  
+  before do
+    allow(Rails.cache).to receive(:read).with('tastytrade_token').and_return('valid_token')
+  end
+  
+  describe '#get_account' do
+    before do
+      stub_request(:get, "https://api.tastyworks.com/accounts/TEST123")
+        .with(headers: { 'Authorization' => 'Bearer valid_token' })
+        .to_return(
+          status: 200,
+          body: TastytradeResponses::MOCK_ACCOUNT_RESPONSE.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+    
+    it 'returns account information' do
+      result = service.get_account('TEST123')
+      
+      expect(result.dig('data', 'account-number')).to eq('TEST123')
+      expect(result.dig('data', 'buying-power')).to eq(100000.00)
+    end
+  end
+end
 ```
 
 ## Troubleshooting

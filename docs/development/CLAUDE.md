@@ -38,37 +38,44 @@ This document contains MANDATORY rules that Claude must follow when working on t
 - Check `.env.example` for configuration patterns
 - Never commit `.env` files
 
+### 6. Git Commit Rules
+**NEVER commit changes to Git**:
+- The user will handle all Git commits manually
+- Do not use git add, git commit, or git push commands
+- Focus only on file editing and code development
+- Inform user when changes are ready for commit
+
 ## PROJECT-SPECIFIC RULES
 
-### 6. API Integration
+### 7. API Integration
 When working with TastyTrade API:
 - Always refer to `API_INTEGRATION.md` for endpoints
 - Use existing API client patterns if available
 - Implement proper error handling for API calls
 - Add rate limiting for API requests
 
-### 7. Web Framework
+### 8. Web Framework
 For web development:
-- Check if FastAPI or Flask is already in use
+- Check if Rails is already in use
 - Follow existing routing patterns
 - Use established authentication methods
 - Implement proper CORS handling
 
-### 8. Database Operations
+### 9. Database Operations
 When working with database:
-- Use SQLAlchemy if already in the project
+- Use Active Record if already in the project
 - Follow existing model patterns
 - Never use raw SQL without parameterization
 - Always handle database errors gracefully
 
-### 9. Frontend Communication
+### 10. Frontend Communication
 For frontend integration:
 - Check existing WebSocket implementations
 - Follow established message formats
 - Use existing state management patterns
 - Implement proper error boundaries
 
-### 10. Trading Logic
+### 11. Trading Logic
 When implementing trading features:
 - Always validate order parameters
 - Implement risk checks before order submission
@@ -77,20 +84,20 @@ When implementing trading features:
 
 ## DEVELOPMENT WORKFLOW RULES
 
-### 11. Before Starting Work
+### 12. Before Starting Work
 1. Read relevant documentation files
 2. Check existing code structure
 3. Look for similar implementations
 4. Plan the approach before coding
 
-### 12. While Coding
+### 13. While Coding
 1. Follow PEP 8 style guide
 2. Add type hints to all functions
 3. Write descriptive docstrings
 4. Handle exceptions properly
 5. Add appropriate logging
 
-### 13. After Implementation
+### 14. After Implementation
 1. Run existing tests
 2. Write tests for new code
 3. Check for linting errors
@@ -98,13 +105,13 @@ When implementing trading features:
 
 ## ERROR HANDLING RULES
 
-### 14. API Errors
+### 15. API Errors
 - Always catch and handle API exceptions
 - Provide meaningful error messages
 - Log errors with appropriate context
 - Implement retry logic where appropriate
 
-### 15. User Input
+### 16. User Input
 - Validate all user inputs
 - Sanitize data before processing
 - Provide clear validation messages

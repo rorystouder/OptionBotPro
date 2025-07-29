@@ -2,7 +2,7 @@
 
 ## Overview
 
-The TastyTrades Option Trader UI is designed as a modular, scalable web application that provides real-time option trading capabilities through the TastyTrade API.
+The TastyTrades Option Trader UI is designed as a modular, scalable Ruby on Rails application that provides real-time option trading capabilities through the TastyTrade API. It leverages Rails' built-in features including Action Cable for WebSockets, Active Job with Sidekiq for background processing, and Active Record for data persistence.
 
 ## Architecture Diagram
 
@@ -10,38 +10,38 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
 ┌─────────────────────────────────────────────────────────────┐
 │                        Frontend (Web UI)                     │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │   React/    │  │   WebSocket  │  │   REST API      │  │
-│  │   Vue.js    │  │   Client     │  │   Client        │  │
+│  │  Hotwire/   │  │ Action Cable │  │   Stimulus.js   │  │
+│  │   Turbo     │  │   Client     │  │   Controllers   │  │
 │  └─────────────┘  └──────────────┘  └──────────────────┘  │
 └─────────────────────────────┬───────────────────────────────┘
                               │ HTTP/WebSocket
 ┌─────────────────────────────┴───────────────────────────────┐
-│                     Backend (Python)                         │
+│                   Backend (Ruby on Rails)                    │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │                  Web Framework Layer                  │   │
+│  │               Rails Application Layer                 │   │
 │  │  ┌────────────┐  ┌──────────────┐  ┌────────────┐  │   │
-│  │  │  FastAPI/  │  │   WebSocket  │  │   Auth     │  │   │
-│  │  │   Flask    │  │   Handler    │  │  Manager   │  │   │
+│  │  │   Rails    │  │ Action Cable │  │   Devise   │  │   │
+│  │  │Controllers │  │   Channels   │  │    Auth    │  │   │
 │  │  └────────────┘  └──────────────┘  └────────────┘  │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │                Business Logic Layer                  │   │
+│  │           Services & Background Jobs Layer           │   │
 │  │  ┌────────────┐  ┌──────────────┐  ┌────────────┐  │   │
 │  │  │  Trading   │  │   Strategy   │  │    Risk    │  │   │
-│  │  │  Engine    │  │   Manager    │  │  Manager   │  │   │
+│  │  │  Service   │  │   Service    │  │  Service   │  │   │
 │  │  └────────────┘  └──────────────┘  └────────────┘  │   │
 │  │  ┌────────────┐  ┌──────────────┐  ┌────────────┐  │   │
-│  │  │ Automated  │  │    Trade     │  │   Market   │  │   │
 │  │  │  Scanner   │  │   Executor   │  │  Analyzer  │  │   │
+│  │  │    Job     │  │     Job      │  │    Job     │  │   │
 │  │  └────────────┘  └──────────────┘  └────────────┘  │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │              Data Access Layer                       │   │
 │  │  ┌────────────┐  ┌──────────────┐  ┌────────────┐  │   │
-│  │  │    API     │  │   Database   │  │   Cache    │  │   │
-│  │  │  Client    │  │   Manager    │  │  Manager   │  │   │
+│  │  │ TastyTrade │  │Active Record │  │   Redis    │  │   │
+│  │  │API Service │  │   Models     │  │   Cache    │  │   │
 │  │  └────────────┘  └──────────────┘  └────────────┘  │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
@@ -51,9 +51,13 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
 ┌─────────────────────────────┴───────────────────────────────┐
 │                    External Services                         │
 │  ┌─────────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │   TastyTrade   │  │   Market     │  │   Database   │  │
-│  │      API       │  │   Data Feed  │  │  PostgreSQL  │  │
+│  │   TastyTrade   │  │   Market     │  │  PostgreSQL  │  │
+│  │      API       │  │   Data Feed  │  │   Database   │  │
 │  └─────────────────┘  └──────────────┘  └──────────────┘  │
+│  ┌─────────────────┐  ┌──────────────┐                     │
+│  │     Redis      │  │   Sidekiq    │                     │
+│  │     Server     │  │    Queue     │                     │
+│  └─────────────────┘  └──────────────┘                     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -62,137 +66,197 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
 ### Frontend Layer
 
 #### Web UI
-- **Technology**: React or Vue.js with TypeScript
+- **Technology**: Hotwire (Turbo + Stimulus.js) or React
 - **Responsibilities**:
-  - User interface rendering
-  - State management (Redux/Vuex)
-  - Real-time data visualization
-  - Order form validation
+  - User interface rendering with Turbo Frames/Streams
+  - Client-side interactivity with Stimulus controllers
+  - Real-time updates via Action Cable
+  - Form validation and submission
 
-#### WebSocket Client
+#### Action Cable Client
 - **Purpose**: Real-time market data and order updates
 - **Features**:
-  - Auto-reconnection logic
-  - Message queuing during disconnection
-  - Subscription management
+  - Built-in reconnection handling
+  - Channel subscriptions for market data
+  - Broadcasting trade updates
+  - Presence tracking for active users
 
 ### Backend Layer
 
-#### Web Framework Layer
+#### Rails Application Layer
 
-##### FastAPI/Flask Application
-- **Endpoints**:
-  ```
-  /api/auth/          - Authentication endpoints
-  /api/account/       - Account information
-  /api/positions/     - Position management
-  /api/orders/        - Order placement and management
-  /api/market/        - Market data
-  /api/options/       - Option chains and Greeks
-  /ws/market/         - WebSocket for market data
-  /ws/orders/         - WebSocket for order updates
+##### Rails Controllers
+- **RESTful Endpoints**:
+  ```ruby
+  namespace :api do
+    namespace :v1 do
+      resources :accounts      # Account management
+      resources :positions     # Position tracking
+      resources :orders        # Order placement
+      resources :options       # Option chains
+      resources :market_data   # Market information
+    end
+  end
   ```
 
-##### Authentication Manager
+##### Authentication (Devise)
 - **Features**:
-  - JWT token management
-  - Session handling
-  - API key encryption
-  - Rate limiting per user
+  - Session-based authentication
+  - JWT tokens for API access
+  - Encrypted credentials with Rails 7.1+
+  - Built-in rate limiting with Rack::Attack
 
-#### Business Logic Layer
+#### Services & Background Jobs Layer
 
-##### Trading Engine
-- **Core Functions**:
-  ```python
-  class TradingEngine:
-      def place_order(order: Order) -> OrderResult
-      def modify_order(order_id: str, modifications: Dict) -> OrderResult
-      def cancel_order(order_id: str) -> bool
-      def get_positions() -> List[Position]
-      def get_orders() -> List[Order]
+##### Trading Service
+- **Core Service Object**:
+  ```ruby
+  class TradingService
+    def place_order(order_params)
+      # Business logic for order placement
+    end
+    
+    def modify_order(order_id, modifications)
+      # Modify existing order
+    end
+    
+    def cancel_order(order_id)
+      # Cancel order logic
+    end
+  end
   ```
 
-##### Strategy Manager
-- **Capabilities**:
-  - Pre-built strategies (covered calls, spreads, etc.)
-  - Custom strategy builder
-  - Strategy backtesting
-  - Performance tracking
+##### Strategy Service
+- **Rails Service Pattern**:
+  - Service objects for each strategy type
+  - Strategy::CoveredCall, Strategy::IronCondor
+  - Backtesting with historical data
+  - Performance tracking in Active Record
 
-##### Risk Manager
-- **Features**:
-  - Position sizing calculator
-  - Portfolio Greeks aggregation
-  - Risk metrics (VaR, max drawdown)
-  - Alert system for risk thresholds
+##### Risk Service
+- **Risk Management**:
+  - RiskCalculator service object
+  - Greeks calculation with Ruby gems
+  - Portfolio metrics stored in Redis
+  - Action Cable alerts for thresholds
 
-##### Automated Scanner
-- **Core Functions**:
-  ```python
-  class AutomatedScanner:
-      def scan_market() -> List[TradeCandidate]
-      def apply_filters(candidates: List[TradeCandidate]) -> List[Trade]
-      def rank_trades(trades: List[Trade]) -> List[Trade]
-      def validate_against_rules(trades: List[Trade]) -> List[ValidatedTrade]
+##### Scanner Job (Sidekiq)
+- **Background Job Implementation**:
+  ```ruby
+  class MarketScannerJob < ApplicationJob
+    queue_as :critical
+    
+    def perform
+      candidates = MarketScanner.new.scan
+      filtered = TradingRules.apply(candidates)
+      ranked = TradeRanker.new(filtered).rank
+      ValidatedTrade.create_batch(ranked.first(5))
+    end
+  end
   ```
-- **Features**:
-  - Continuous market scanning
-  - Real-time data aggregation
-  - Rule-based filtering (per TRADING_RULES.md)
-  - Multi-factor ranking system
+- **Scheduled with Sidekiq-Cron**:
+  - Runs every 30 seconds
+  - Parallel data fetching with concurrent-ruby
+  - Rules engine using Ruby DSL
+  - Database-backed trade validation
 
-##### Trade Executor
-- **Automated Execution**:
-  ```python
-  class TradeExecutor:
-      def execute_trade(trade: ValidatedTrade) -> ExecutionResult
-      def monitor_fills(order_id: str) -> FillStatus
-      def manage_position(position: Position) -> ManagementAction
-      def close_position(position: Position) -> CloseResult
+##### Executor Job (Sidekiq)
+- **Automated Execution Job**:
+  ```ruby
+  class TradeExecutorJob < ApplicationJob
+    queue_as :urgent
+    sidekiq_options retry: 3
+    
+    def perform(validated_trade_id)
+      trade = ValidatedTrade.find(validated_trade_id)
+      result = TastyTradeAPI::OrderService.new.place_order(trade)
+      trade.update!(status: result.status, order_id: result.id)
+      MonitorFillJob.perform_later(result.id)
+    end
+  end
   ```
 - **Safety Features**:
-  - Pre-trade validation
-  - Kill switch mechanism
-  - Position limit enforcement
-  - Automated stop-loss management
+  - Database transactions for atomicity
+  - KillSwitch concern for emergency stops
+  - Rails validations for position limits
+  - Automatic retries with exponential backoff
 
-##### Market Analyzer
-- **Real-time Analysis**:
-  - Fundamental data processing
-  - Options chain analysis
-  - Alternative data integration
-  - Market regime detection
+##### Analyzer Job (Sidekiq)
+- **Market Analysis Job**:
+  - DataAggregator service for all data sources
+  - OptionsAnalyzer for Greeks calculations
+  - AlternativeData module for sentiment
+  - MarketRegime detector with ML.rb
 
 #### Data Access Layer
 
-##### API Client
-- **TastyTrade Integration**:
-  ```python
-  class TastyTradeClient:
-      def authenticate() -> Session
-      def get_account() -> Account
-      def get_positions() -> List[Position]
-      def place_order(order: Order) -> OrderResult
-      def stream_market_data(symbols: List[str]) -> AsyncIterator[MarketData]
+##### TastyTrade API Service
+- **Ruby API Client**:
+  ```ruby
+  module TastyTradeAPI
+    class Client
+      include HTTParty
+      base_uri 'https://api.tastyworks.com'
+      
+      def authenticate(username, password)
+        # OAuth 2.0 authentication
+      end
+      
+      def get_account
+        # Fetch account details
+      end
+      
+      def place_order(order_params)
+        # Submit order to API
+      end
+      
+      def stream_market_data(&block)
+        # WebSocket streaming with Faye
+      end
+    end
+  end
   ```
 
-##### Database Manager
-- **Schema Design**:
-  ```sql
-  -- Core tables
-  users (id, email, encrypted_api_key, created_at)
-  sessions (id, user_id, token, expires_at)
-  orders (id, user_id, order_data, status, created_at)
-  positions (id, user_id, symbol, quantity, cost_basis)
-  strategies (id, user_id, name, configuration, performance)
+##### Active Record Models
+- **Database Schema**:
+  ```ruby
+  # app/models/user.rb
+  class User < ApplicationRecord
+    has_secure_password
+    has_many :positions
+    has_many :orders
+    has_many :strategies
+    encrypts :api_key
+  end
+  
+  # app/models/order.rb
+  class Order < ApplicationRecord
+    belongs_to :user
+    validates :symbol, :quantity, :order_type, presence: true
+    
+    state_machine initial: :pending do
+      event :fill { transition pending: :filled }
+      event :cancel { transition pending: :cancelled }
+    end
+  end
+  
+  # Additional models: Position, Strategy, ValidatedTrade
   ```
 
-##### Cache Manager
-- **Redis Implementation**:
-  - Market data caching (TTL: 1 second)
-  - Option chain caching (TTL: 5 minutes)
-  - Account data caching (TTL: 30 seconds)
+##### Redis Cache
+- **Rails Cache Store**:
+  ```ruby
+  # config/environments/production.rb
+  config.cache_store = :redis_cache_store, {
+    url: ENV['REDIS_URL'],
+    expires_in: 1.hour,
+    namespace: 'tastytrades'
+  }
+  ```
+  - Market data: 1 second TTL
+  - Option chains: 5 minutes TTL
+  - Account data: 30 seconds TTL
+  - Fragment caching for views
 
 ## Data Flow
 
@@ -248,22 +312,41 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
 ```yaml
 version: '3.8'
 services:
-  backend:
+  web:
     build: .
+    command: bundle exec rails server -b 0.0.0.0
     ports:
-      - "8000:8000"
+      - "3000:3000"
     environment:
-      - ENV=development
+      - RAILS_ENV=development
     volumes:
-      - ./src:/app/src
+      - .:/rails
+    depends_on:
+      - postgres
+      - redis
+  
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/rails
+    environment:
+      - RAILS_ENV=development
+    depends_on:
+      - postgres
+      - redis
   
   postgres:
     image: postgres:14
     environment:
-      - POSTGRES_DB=tastytrader_dev
+      - POSTGRES_DB=tastytrades_development
+      - POSTGRES_USER=rails
+      - POSTGRES_PASSWORD=password
   
   redis:
     image: redis:7-alpine
+    ports:
+      - "6379:6379"
 ```
 
 ### Production Environment

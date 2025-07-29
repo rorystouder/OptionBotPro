@@ -1,6 +1,6 @@
 # Development Guidelines
 
-This document outlines the development standards, workflow, and rules for the TastyTrades Option Trader UI project.
+This document outlines the development standards, workflow, and rules for the TastyTrades Option Trader UI project built with Ruby on Rails.
 
 ## Development Rules for Claude AI Assistant
 
@@ -12,9 +12,10 @@ This document outlines the development standards, workflow, and rules for the Ta
    - Look for established patterns in similar files
 
 2. **ALWAYS prefer existing open-source packages** over writing code from scratch when suitable packages exist.
-   - Check PyPI for established libraries
+   - Check RubyGems.org for established gems
    - Verify license compatibility
    - Consider maintenance status and community support
+   - Use Bundler for dependency management
 
 3. **NEVER create new files** unless absolutely necessary.
    - Always prefer modifying existing files
@@ -30,38 +31,48 @@ This document outlines the development standards, workflow, and rules for the Ta
 
 ## Code Standards
 
-### Python Style Guide
-- Follow PEP 8 conventions
-- Use type hints for all function parameters and return values
-- Maximum line length: 88 characters (Black formatter standard)
-- Use descriptive variable and function names
+### Ruby Style Guide
+- Follow the Ruby Style Guide (rubocop gem)
+- Use meaningful method and variable names
+- Maximum line length: 80 characters
+- Prefer symbols over strings for hash keys
+- Use Ruby 3.2+ features appropriately
 
-### Project Structure
-```python
-# Example module structure
-src/
-├── api/
-│   ├── __init__.py
-│   ├── client.py         # TastyTrade API client
-│   ├── models.py         # API data models
-│   └── endpoints.py      # API endpoint definitions
-├── core/
-│   ├── __init__.py
-│   ├── trading.py        # Trading logic
-│   ├── strategies.py     # Trading strategies
-│   └── risk.py          # Risk management
-└── web/
-    ├── __init__.py
-    ├── app.py           # Web application
-    ├── routes.py        # API routes
-    └── websocket.py     # WebSocket handlers
+### Rails Project Structure
+```ruby
+# Rails application structure
+app/
+├── channels/         # Action Cable channels
+│   └── market_data_channel.rb
+├── controllers/      # Rails controllers
+│   ├── api/
+│   │   └── v1/
+│   │       ├── orders_controller.rb
+│   │       └── positions_controller.rb
+│   └── application_controller.rb
+├── jobs/            # Active Job classes
+│   ├── market_scanner_job.rb
+│   └── trade_executor_job.rb
+├── models/          # Active Record models
+│   ├── order.rb
+│   ├── position.rb
+│   └── user.rb
+├── services/        # Service objects
+│   ├── trading_service.rb
+│   ├── risk_calculator.rb
+│   └── tastytrade_api_client.rb
+└── views/           # Rails views
+    └── layouts/
+        └── application.html.erb
 ```
 
-### Naming Conventions
-- **Classes**: PascalCase (e.g., `OptionChain`, `TradingStrategy`)
-- **Functions/Variables**: snake_case (e.g., `get_option_chain`, `current_price`)
+### Rails Naming Conventions
+- **Classes/Modules**: PascalCase (e.g., `OptionChain`, `TradingStrategy`)
+- **Methods/Variables**: snake_case (e.g., `get_option_chain`, `current_price`)
 - **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_RETRY_ATTEMPTS`)
-- **Private methods**: Leading underscore (e.g., `_calculate_risk`)
+- **Private methods**: `private` keyword, not underscore
+- **Files**: snake_case matching class names
+- **Database tables**: plural snake_case (e.g., `trading_strategies`)
 
 ## Development Workflow
 
@@ -73,51 +84,64 @@ src/
 
 ### During Development
 1. Write clean, readable code with proper documentation
-2. Add type hints to all functions
-3. Include docstrings for classes and functions
-4. Handle errors gracefully with proper exception handling
-5. Log important events and errors
+2. Use YARD comments for method documentation
+3. Follow Rails conventions for ActiveRecord models
+4. Handle errors gracefully with Rails error handling
+5. Use Rails.logger for logging important events
 
 ### Testing Requirements
-- Write unit tests for all new functions
-- Aim for >80% code coverage
-- Use pytest for testing framework
-- Mock external API calls in tests
+- Write RSpec tests for all new functionality
+- Aim for >85% code coverage with SimpleCov
+- Use Factory Bot for test data
+- Mock external API calls with WebMock/VCR
+- Test background jobs with RSpec-Sidekiq
 
-## Recommended Open-Source Packages
+## Recommended Ruby Gems
 
-### Web Framework
-- **FastAPI**: Modern, fast web framework with automatic API documentation
-- **Flask**: Lightweight alternative if simplicity is preferred
+### Core Rails Stack
+- **Rails 7.1+**: Full-stack web framework
+- **Puma**: Application server
+- **PostgreSQL**: Primary database (pg gem)
+- **Redis**: Caching and Sidekiq backend
 
-### TastyTrade API
-- **tastytrade-api**: Official Python SDK (if available)
-- **requests**: For HTTP requests if no SDK exists
-- **websocket-client**: For real-time data streaming
+### Background Processing
+- **Sidekiq**: Background job processing
+- **sidekiq-cron**: Scheduled job execution
+- **sidekiq-web**: Web UI for monitoring jobs
+
+### API Integration
+- **httparty**: HTTP client for external APIs
+- **faraday**: HTTP client library with middleware
+- **faye-websocket**: WebSocket client for streaming
+
+### Real-time Features
+- **Action Cable**: Built-in WebSocket support
+- **turbo-rails**: Hotwire Turbo for SPA-like experience
+- **stimulus-rails**: JavaScript framework
+
+### Authentication & Security
+- **devise**: Authentication solution
+- **cancancan**: Authorization
+- **rack-attack**: Rate limiting and blocking
 
 ### Data Processing
-- **pandas**: Data manipulation and analysis
-- **numpy**: Numerical computations
-- **pydantic**: Data validation and settings management
-
-### UI/Frontend Communication
-- **python-socketio**: WebSocket implementation
-- **fastapi-websocket**: WebSocket support for FastAPI
-
-### Database
-- **SQLAlchemy**: ORM for database interactions
-- **alembic**: Database migration tool
+- **ruby-statistics**: Statistical calculations
+- **matrix**: Mathematical operations
+- **rubanok**: Data processing pipelines
 
 ### Testing
-- **pytest**: Testing framework
-- **pytest-cov**: Code coverage
-- **pytest-mock**: Mocking support
+- **rspec-rails**: Testing framework
+- **factory_bot_rails**: Test data factories
+- **webmock**: HTTP request stubbing
+- **vcr**: Record HTTP interactions
+- **simplecov**: Code coverage
 
 ### Development Tools
-- **black**: Code formatter
-- **flake8**: Linting
-- **mypy**: Static type checking
-- **pre-commit**: Git hooks for code quality
+- **rubocop**: Ruby linter and formatter
+- **rubocop-rails**: Rails-specific cops
+- **brakeman**: Security scanner
+- **bullet**: N+1 query detection
+- **pry-rails**: Enhanced debugging
 
 ## Security Guidelines
 
