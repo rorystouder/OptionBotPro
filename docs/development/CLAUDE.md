@@ -45,37 +45,45 @@ This document contains MANDATORY rules that Claude must follow when working on t
 - Focus only on file editing and code development
 - Inform user when changes are ready for commit
 
+### 7. Production-Only Development
+**NEVER use mocked or fake data**:
+- This is a production application from the start
+- Always connect to real APIs and services
+- Use real TastyTrade API endpoints
+- No placeholder data or stubbed responses
+- Test with real market data and accounts
+
 ## PROJECT-SPECIFIC RULES
 
-### 7. API Integration
+### 8. API Integration
 When working with TastyTrade API:
 - Always refer to `API_INTEGRATION.md` for endpoints
 - Use existing API client patterns if available
 - Implement proper error handling for API calls
 - Add rate limiting for API requests
 
-### 8. Web Framework
+### 9. Web Framework
 For web development:
 - Check if Rails is already in use
 - Follow existing routing patterns
 - Use established authentication methods
 - Implement proper CORS handling
 
-### 9. Database Operations
+### 10. Database Operations
 When working with database:
 - Use Active Record if already in the project
 - Follow existing model patterns
 - Never use raw SQL without parameterization
 - Always handle database errors gracefully
 
-### 10. Frontend Communication
+### 11. Frontend Communication
 For frontend integration:
 - Check existing WebSocket implementations
 - Follow established message formats
 - Use existing state management patterns
 - Implement proper error boundaries
 
-### 11. Trading Logic
+### 12. Trading Logic
 When implementing trading features:
 - Always validate order parameters
 - Implement risk checks before order submission
@@ -84,20 +92,20 @@ When implementing trading features:
 
 ## DEVELOPMENT WORKFLOW RULES
 
-### 12. Before Starting Work
+### 13. Before Starting Work
 1. Read relevant documentation files
 2. Check existing code structure
 3. Look for similar implementations
 4. Plan the approach before coding
 
-### 13. While Coding
+### 14. While Coding
 1. Follow PEP 8 style guide
 2. Add type hints to all functions
 3. Write descriptive docstrings
 4. Handle exceptions properly
 5. Add appropriate logging
 
-### 14. After Implementation
+### 15. After Implementation
 1. Run existing tests
 2. Write tests for new code
 3. Check for linting errors
@@ -105,13 +113,13 @@ When implementing trading features:
 
 ## ERROR HANDLING RULES
 
-### 15. API Errors
+### 16. API Errors
 - Always catch and handle API exceptions
 - Provide meaningful error messages
 - Log errors with appropriate context
 - Implement retry logic where appropriate
 
-### 16. User Input
+### 17. User Input
 - Validate all user inputs
 - Sanitize data before processing
 - Provide clear validation messages
@@ -119,13 +127,13 @@ When implementing trading features:
 
 ## PERFORMANCE RULES
 
-### 16. Optimization
+### 18. Optimization
 - Use async/await for I/O operations
 - Implement caching where appropriate
 - Avoid N+1 query problems
 - Profile before optimizing
 
-### 17. Resource Management
+### 19. Resource Management
 - Close connections properly
 - Use context managers for resources
 - Implement connection pooling
@@ -133,13 +141,13 @@ When implementing trading features:
 
 ## DOCUMENTATION RULES
 
-### 18. Code Documentation
+### 20. Code Documentation
 - Add docstrings to all classes and functions
 - Include parameter descriptions
 - Document return types
 - Add usage examples for complex functions
 
-### 19. Update Project Docs
+### 21. Update Project Docs
 - Update README.md for new features
 - Keep API documentation current
 - Document configuration changes
@@ -147,34 +155,33 @@ When implementing trading features:
 
 ## PACKAGE PREFERENCES
 
-### 20. Recommended Packages to Check First
+### 22. Recommended Gems to Check First
 
 **Web Framework:**
-- FastAPI (preferred for new APIs)
-- Flask (if simplicity needed)
+- Rails 7.1+ (main framework)
+- Puma (application server)
 
 **API Client:**
-- httpx (async HTTP client)
-- requests (sync HTTP client)
-- websocket-client (WebSocket support)
+- HTTParty (HTTP client)
+- Faraday (HTTP client with middleware)
+- faye-websocket (WebSocket support)
 
 **Data Validation:**
-- pydantic (data validation)
-- marshmallow (serialization)
+- ActiveModel validations (built-in)
+- dry-validation (advanced validation)
 
 **Database:**
-- SQLAlchemy (ORM)
-- alembic (migrations)
+- Active Record (ORM)
+- pg (PostgreSQL adapter)
 
 **Testing:**
-- pytest (testing framework)
-- pytest-asyncio (async tests)
-- pytest-mock (mocking)
+- RSpec (testing framework)
+- Factory Bot (test data)
+- WebMock (HTTP stubbing) - Note: Only for tests, not production
 
-**Utils:**
-- python-dotenv (environment variables)
-- click (CLI framework)
-- loguru (enhanced logging)
+**Background Jobs:**
+- Sidekiq (job processing)
+- sidekiq-cron (scheduled jobs)
 
 ## FORBIDDEN ACTIONS
 
@@ -187,10 +194,13 @@ When implementing trading features:
 - ❌ Implement features without checking for existing code
 - ❌ Use deprecated packages
 - ❌ Ignore security warnings
+- ❌ Use mocked or fake data in production code
+- ❌ Create placeholder implementations
+- ❌ Use git commit/push commands
 
 ## CHECKLIST BEFORE COMMITTING
 
-### 22. Pre-Commit Checklist
+### 24. Pre-Commit Checklist
 - [ ] Reviewed existing code first
 - [ ] Used existing packages where possible
 - [ ] All tests pass
@@ -199,6 +209,8 @@ When implementing trading features:
 - [ ] Code follows project style
 - [ ] Documentation updated
 - [ ] Security best practices followed
+- [ ] No mocked data - using real APIs only
+- [ ] Ready for production deployment
 
 ## REMEMBER
 
