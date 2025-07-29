@@ -1,19 +1,28 @@
 # TastyTrades Option Trader UI
 
-A Python-based stock option trading application with a local web interface that integrates with the TastyTrade API.
+A Python-based automated stock option trading application with a local web interface that integrates with the TastyTrade API. The system features autonomous trading capabilities that scan markets and execute trades based on predefined rules without user intervention.
 
 ## Project Overview
 
-This application provides a user-friendly web interface for trading stock options through TastyTrade's API. Built with Python and modern web technologies, it offers real-time option chain data, trading capabilities, and portfolio management features.
+This application provides both manual and automated trading capabilities for stock options through TastyTrade's API. Built with Python and modern web technologies, it offers real-time option chain data, automated trade scanning and execution, portfolio management, and comprehensive risk controls.
 
 ### Key Features (Planned)
+
+#### Manual Trading
 - Real-time option chain visualization
 - Order placement and management
 - Portfolio tracking and P&L analysis
 - Risk analysis tools
-- Strategy builder and backtesting
-- Automated trading capabilities
 - Market data streaming
+
+#### Automated Trading
+- **Autonomous market scanning** - Continuously monitors markets for opportunities
+- **Rule-based trade selection** - Applies filters from TRADING_RULES.md
+- **Automatic trade execution** - Places orders without user intervention
+- **Portfolio constraints enforcement** - Maintains delta/vega limits
+- **Risk management** - Automated stop-loss and profit targets
+- **Kill switch mechanism** - Emergency stop capabilities
+- **Performance tracking** - Real-time metrics and reporting
 
 ## Technology Stack
 
@@ -73,10 +82,26 @@ cp config/example.env .env
 # Edit .env with your TastyTrade API credentials
 ```
 
-5. Run the application:
+5. Configure automated trading (optional):
+```bash
+# Enable automated trading in .env
+AUTO_TRADING_ENABLED=true
+PAPER_TRADING=true  # Start with paper trading
+```
+
+6. Run the application:
 ```bash
 python src/main.py
 ```
+
+### Automated Trading Setup
+
+To enable automated trading:
+1. Review [TRADING_RULES.md](docs/guides/TRADING_RULES.md) for selection criteria
+2. Configure risk limits in `.env` file
+3. Start with `PAPER_TRADING=true` for testing
+4. Monitor via the web dashboard
+5. Review [AUTOMATED_TRADING.md](docs/guides/AUTOMATED_TRADING.md) for details
 
 ## Documentation
 
@@ -85,6 +110,7 @@ python src/main.py
 - [API Integration](docs/api/API_INTEGRATION.md) - TastyTrade API usage guide
 - [Claude Rules](docs/development/CLAUDE.md) - AI assistant guidelines
 - [Trading Rules](docs/guides/TRADING_RULES.md) - Stock option picking and trading criteria
+- [Automated Trading](docs/guides/AUTOMATED_TRADING.md) - Autonomous trading system documentation
 
 ## Contributing
 

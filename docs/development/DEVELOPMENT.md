@@ -207,6 +207,65 @@ def get_option_chain(symbol: str) -> Optional[Dict[str, Any]]:
    - Handle connection drops gracefully
    - Manage subscription limits
 
+## Automated Trading Development
+
+### Safety-First Development
+When developing automated trading features:
+
+1. **Always Implement Kill Switch First**
+   ```python
+   class AutomatedTrader:
+       def __init__(self):
+           self.kill_switch = KillSwitch()
+           self.kill_switch.register_triggers({
+               'max_daily_loss': -1000,
+               'max_position_loss': -500,
+               'connection_errors': 5
+           })
+   ```
+
+2. **Mandatory Testing Requirements**
+   - All automated trading code MUST have comprehensive tests
+   - Test all edge cases and failure scenarios
+   - Include integration tests with mock API
+   - Require 95%+ code coverage for trading logic
+
+3. **Paper Trading Validation**
+   - New strategies must run in paper trading for minimum 5 days
+   - Compare paper results with backtesting
+   - Document any discrepancies
+
+4. **Code Review Requirements**
+   - Automated trading code requires 2 reviewers
+   - Must include risk management review
+   - Performance impact assessment required
+
+### Automated Trading Guidelines
+
+1. **Scanner Development**
+   - Use async/await for all I/O operations
+   - Implement circuit breakers for data sources
+   - Cache data appropriately to reduce API calls
+   - Log all trading decisions with rationale
+
+2. **Executor Development**
+   - Never use market orders in automated systems
+   - Always validate orders before submission
+   - Implement retry logic with exponential backoff
+   - Track all order states in database
+
+3. **Risk Controls**
+   - Hard-code maximum position sizes
+   - Implement portfolio-level Greeks limits
+   - Monitor correlation between positions
+   - Daily loss limits must be enforced
+
+4. **Monitoring Requirements**
+   - Real-time dashboard for automated trades
+   - Alert on any anomalies or errors
+   - Track execution quality metrics
+   - Log all state transitions
+
 ## Monitoring and Logging
 
 1. **Logging Levels**
@@ -229,3 +288,5 @@ def get_option_chain(symbol: str) -> Optional[Dict[str, Any]]:
    - Order execution latency
    - WebSocket connection stability
    - Error rates by endpoint
+   - Automated trading performance metrics
+   - Scanner efficiency and hit rate

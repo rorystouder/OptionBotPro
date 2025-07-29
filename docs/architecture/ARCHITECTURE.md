@@ -31,6 +31,10 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
 │  │  │  Trading   │  │   Strategy   │  │    Risk    │  │   │
 │  │  │  Engine    │  │   Manager    │  │  Manager   │  │   │
 │  │  └────────────┘  └──────────────┘  └────────────┘  │   │
+│  │  ┌────────────┐  ┌──────────────┐  ┌────────────┐  │   │
+│  │  │ Automated  │  │    Trade     │  │   Market   │  │   │
+│  │  │  Scanner   │  │   Executor   │  │  Analyzer  │  │   │
+│  │  └────────────┘  └──────────────┘  └────────────┘  │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
@@ -123,6 +127,43 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
   - Risk metrics (VaR, max drawdown)
   - Alert system for risk thresholds
 
+##### Automated Scanner
+- **Core Functions**:
+  ```python
+  class AutomatedScanner:
+      def scan_market() -> List[TradeCandidate]
+      def apply_filters(candidates: List[TradeCandidate]) -> List[Trade]
+      def rank_trades(trades: List[Trade]) -> List[Trade]
+      def validate_against_rules(trades: List[Trade]) -> List[ValidatedTrade]
+  ```
+- **Features**:
+  - Continuous market scanning
+  - Real-time data aggregation
+  - Rule-based filtering (per TRADING_RULES.md)
+  - Multi-factor ranking system
+
+##### Trade Executor
+- **Automated Execution**:
+  ```python
+  class TradeExecutor:
+      def execute_trade(trade: ValidatedTrade) -> ExecutionResult
+      def monitor_fills(order_id: str) -> FillStatus
+      def manage_position(position: Position) -> ManagementAction
+      def close_position(position: Position) -> CloseResult
+  ```
+- **Safety Features**:
+  - Pre-trade validation
+  - Kill switch mechanism
+  - Position limit enforcement
+  - Automated stop-loss management
+
+##### Market Analyzer
+- **Real-time Analysis**:
+  - Fundamental data processing
+  - Options chain analysis
+  - Alternative data integration
+  - Market regime detection
+
 #### Data Access Layer
 
 ##### API Client
@@ -164,6 +205,18 @@ The TastyTrades Option Trader UI is designed as a modular, scalable web applicat
 5. Order confirmation stored in database
 6. WebSocket notification sent to UI
 7. UI updates with order status
+```
+
+### Automated Trading Flow
+```
+1. Scanner continuously monitors market data
+2. Identifies trades matching TRADING_RULES.md criteria
+3. Validates trades against portfolio constraints
+4. Ranks and selects top 5 trades
+5. Executor places orders automatically
+6. Monitor fills and update positions
+7. Log all activities for audit trail
+8. Send notifications to UI dashboard
 ```
 
 ### Market Data Flow
