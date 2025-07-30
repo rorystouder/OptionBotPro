@@ -1,0 +1,221 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4">Trading Dashboard 
+        <span class="badge bg-<%= @tastytrade_authenticated ? 'success' : 'warning' %> fs-6">
+          <%= @tastytrade_authenticated ? 'TastyTrade Connected' : 'TastyTrade Not Connected' %>
+        </span>
+      </h1>
+    </div>
+  </div>
+
+  <!-- Risk Management Status -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h5 class="alert-heading mb-1">🛡️ Portfolio Protection Active</h5>
+            <p class="mb-0">25% cash reserve requirement is enforced. You cannot trade with your last 25% of available funds.</p>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <% if @user && @user.has_active_emergency_stops? %>
+              <span class="badge bg-danger fs-6">⚠️ EMERGENCY STOP ACTIVE</span>
+            <% else %>
+              <span class="badge bg-success fs-6">✅ Trading Allowed</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portfolio Summary -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Total Positions</h5>
+          <h2 class="text-primary"><%= @portfolio_summary[:total_positions] || 0 %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Market Value</h5>
+          <h2 class="text-success">$<%= number_with_precision(@portfolio_summary[:total_market_value] || 0, precision: 2) %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Unrealized P&L</h5>
+          <h2 class="<%= (@portfolio_summary[:total_unrealized_pnl] || 0) >= 0 ? 'text-success' : 'text-danger' %>">
+            $<%= number_with_precision(@portfolio_summary[:total_unrealized_pnl] || 0, precision: 2) %>
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Options/Stocks</h5>
+          <h2 class="text-info">
+            <%= @portfolio_summary[:options_count] || 0 %>/<%= @portfolio_summary[:stocks_count] || 0 %>
+          </h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Recent Orders -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Recent Orders</h5>
+        </div>
+        <div class="card-body">
+          <% if @recent_orders && @recent_orders.any? %>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @recent_orders.each do |order| %>
+                    <tr>
+                      <td><strong><%= order.symbol %></strong></td>
+                      <td><%= order.action %></td>
+                      <td><%= order.quantity %></td>
+                      <td>$<%= order.price || 'Market' %></td>
+                      <td>
+                        <span class="badge bg-<%= order.filled? ? 'success' : 'primary' %>">
+                          <%= order.status.humanize %>
+                        </span>
+                      </td>
+                      <td><%= order.created_at.strftime("%m/%d %H:%M") %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <p class="text-muted text-center py-3">No recent orders</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Positions -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Current Positions</h5>
+        </div>
+        <div class="card-body">
+          <% if @positions && @positions.any? %>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>Avg Price</th>
+                    <th>Current</th>
+                    <th>P&L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @positions.each do |position| %>
+                    <tr>
+                      <td><strong><%= position.symbol %></strong></td>
+                      <td><%= position.quantity %></td>
+                      <td>$<%= number_with_precision(position.average_price, precision: 2) %></td>
+                      <td>$<%= number_with_precision(position.current_price || 0, precision: 2) %></td>
+                      <td class="<%= (position.unrealized_pnl || 0) >= 0 ? 'text-success' : 'text-danger' %>">
+                        <strong>$<%= number_with_precision(position.unrealized_pnl || 0, precision: 2) %></strong>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <p class="text-muted text-center py-3">No current positions</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3 mb-2">
+              <button class="btn btn-primary w-100" onclick="alert('Use the API to place orders. Check /docs/api/API_INTEGRATION.md')">
+                Place Order
+              </button>
+            </div>
+            <div class="col-md-3 mb-2">
+              <button class="btn btn-info w-100" onclick="alert('Use the API to sync positions. Endpoint: GET /api/v1/positions?account_id=YOUR_ID')">
+                Refresh Positions
+              </button>
+            </div>
+            <div class="col-md-3 mb-2">
+              <button class="btn btn-warning w-100" onclick="alert('Risk status available at: GET /api/v1/portfolio_protections/status')">
+                Check Risk Status
+              </button>
+            </div>
+            <div class="col-md-3 mb-2">
+              <% unless @tastytrade_authenticated %>
+                <%= link_to "Connect TastyTrade", login_path, class: "btn btn-success w-100" %>
+              <% else %>
+                <button class="btn btn-outline-success w-100" disabled>
+                  ✅ TastyTrade Connected
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Information -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">API Quick Reference</h5>
+        </div>
+        <div class="card-body">
+          <p>Use these API endpoints to interact with your trading system:</p>
+          <ul>
+            <li><code>GET /api/v1/accounts</code> - List accounts</li>
+            <li><code>GET /api/v1/positions</code> - View positions</li>
+            <li><code>POST /api/v1/orders</code> - Place orders</li>
+            <li><code>GET /api/v1/portfolio_protections/status</code> - Check risk status</li>
+            <li><code>POST /api/v1/portfolio_protections/validate_trade</code> - Pre-validate trades</li>
+          </ul>
+          <p class="mb-0">See <code>/docs/api/API_INTEGRATION.md</code> for complete documentation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

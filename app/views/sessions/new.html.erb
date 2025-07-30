@@ -1,0 +1,59 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Login to TastyTrades UI</h3>
+        </div>
+        <div class="card-body">
+          <% if flash[:alert] %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <%= flash[:alert] %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
+
+          <%= form_with url: login_path, local: true do |form| %>
+            <div class="mb-3">
+              <%= form.label :email, class: "form-label" %>
+              <%= form.email_field :email, class: "form-control", required: true, autofocus: true %>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :password, class: "form-label" %>
+              <%= form.password_field :password, class: "form-control", required: true %>
+            </div>
+
+            <hr class="my-4">
+            
+            <h5 class="text-muted">TastyTrade API Connection (Optional)</h5>
+            <p class="small text-muted">Connect to your TastyTrade account for live trading</p>
+
+            <div class="mb-3">
+              <%= form.label :tastytrade_username, "TastyTrade Username", class: "form-label" %>
+              <%= form.text_field :tastytrade_username, class: "form-control" %>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :tastytrade_password, "TastyTrade Password", class: "form-label" %>
+              <%= form.password_field :tastytrade_password, class: "form-control" %>
+            </div>
+
+            <div class="d-grid">
+              <%= form.submit "Login", class: "btn btn-primary btn-lg" %>
+            </div>
+          <% end %>
+
+          <div class="text-center mt-3">
+            <p class="mb-0">Don't have an account? <%= link_to "Sign up", signup_path %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info mt-3">
+        <h5 class="alert-heading">🛡️ Risk Management Active</h5>
+        <p class="mb-0">This system enforces a 25% cash reserve requirement to protect your capital. You can never trade with your last 25% of available funds.</p>
+      </div>
+    </div>
+  </div>
+</div>

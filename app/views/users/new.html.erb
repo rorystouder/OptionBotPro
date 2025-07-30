@@ -1,0 +1,76 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">
+          <h3 class="mb-0">Create Your TastyTrades Account</h3>
+        </div>
+        <div class="card-body">
+          <% if @user && @user.errors.any? %>
+            <div class="alert alert-danger">
+              <h5>Please fix these errors:</h5>
+              <ul class="mb-0">
+                <% @user.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <%= form_with model: @user, url: signup_path, local: true do |form| %>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <%= form.label :first_name, class: "form-label" %>
+                <%= form.text_field :first_name, class: "form-control", required: true %>
+              </div>
+              <div class="col-md-6 mb-3">
+                <%= form.label :last_name, class: "form-label" %>
+                <%= form.text_field :last_name, class: "form-control", required: true %>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :email, class: "form-label" %>
+              <%= form.email_field :email, class: "form-control", required: true %>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :password, class: "form-label" %>
+              <%= form.password_field :password, class: "form-control", required: true, minlength: 6 %>
+              <div class="form-text">Minimum 6 characters</div>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :password_confirmation, class: "form-label" %>
+              <%= form.password_field :password_confirmation, class: "form-control", required: true %>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :tastytrade_customer_id, "TastyTrade Customer ID", class: "form-label" %>
+              <%= form.text_field :tastytrade_customer_id, class: "form-control", required: true %>
+              <div class="form-text">Your TastyTrade customer ID (required for trading)</div>
+            </div>
+
+            <div class="d-grid">
+              <%= form.submit "Create Account", class: "btn btn-success btn-lg" %>
+            </div>
+          <% end %>
+
+          <div class="text-center mt-3">
+            <p class="mb-0">Already have an account? <%= link_to "Login", login_path %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-warning mt-3">
+        <h5 class="alert-heading">⚠️ Important Safety Features</h5>
+        <ul class="mb-0">
+          <li><strong>25% Cash Reserve</strong>: Always maintains 25% of your funds as untouchable reserve</li>
+          <li><strong>5% Daily Loss Limit</strong>: Automatic trading halt if daily losses exceed 5%</li>
+          <li><strong>10% Position Limit</strong>: No single trade can exceed 10% of your portfolio</li>
+          <li><strong>Emergency Stop</strong>: Manual halt capability for immediate trading suspension</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

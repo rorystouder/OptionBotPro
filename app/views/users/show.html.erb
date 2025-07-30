@@ -1,0 +1,105 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">User Profile</h3>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-3">Name:</dt>
+            <dd class="col-sm-9"><%= @user.full_name %></dd>
+
+            <dt class="col-sm-3">Email:</dt>
+            <dd class="col-sm-9"><%= @user.email %></dd>
+
+            <dt class="col-sm-3">TastyTrade Customer ID:</dt>
+            <dd class="col-sm-9"><%= @user.tastytrade_customer_id || "Not provided" %></dd>
+
+            <dt class="col-sm-3">Account Status:</dt>
+            <dd class="col-sm-9">
+              <span class="badge bg-<%= @user.active? ? 'success' : 'secondary' %>">
+                <%= @user.active? ? 'Active' : 'Inactive' %>
+              </span>
+            </dd>
+
+            <dt class="col-sm-3">TastyTrade Connection:</dt>
+            <dd class="col-sm-9">
+              <span class="badge bg-<%= @user.tastytrade_authenticated? ? 'success' : 'warning' %>">
+                <%= @user.tastytrade_authenticated? ? 'Connected' : 'Not Connected' %>
+              </span>
+            </dd>
+
+            <dt class="col-sm-3">Emergency Stops:</dt>
+            <dd class="col-sm-9">
+              <span class="badge bg-<%= @user.has_active_emergency_stops? ? 'danger' : 'success' %>">
+                <%= @user.has_active_emergency_stops? ? 'ACTIVE - Trading Halted' : 'None Active' %>
+              </span>
+            </dd>
+          </dl>
+
+          <div class="mt-4">
+            <%= link_to "Edit Profile", edit_user_path, class: "btn btn-primary" %>
+            <%= link_to "Back to Dashboard", dashboard_path, class: "btn btn-secondary" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Risk Management Settings</h5>
+        </div>
+        <div class="card-body">
+          <% protection = @user.portfolio_protections.first %>
+          <% if protection %>
+            <dl class="row">
+              <dt class="col-7">Cash Reserve:</dt>
+              <dd class="col-5"><strong><%= protection.cash_reserve_percentage %>%</strong></dd>
+
+              <dt class="col-7">Daily Loss Limit:</dt>
+              <dd class="col-5"><strong><%= protection.max_daily_loss_percentage %>%</strong></dd>
+
+              <dt class="col-7">Max Trade Size:</dt>
+              <dd class="col-5"><strong><%= protection.max_single_trade_percentage %>%</strong></dd>
+
+              <dt class="col-7">Max Exposure:</dt>
+              <dd class="col-5"><strong><%= protection.max_portfolio_exposure_percentage %>%</strong></dd>
+
+              <dt class="col-7">Protection Status:</dt>
+              <dd class="col-5">
+                <span class="badge bg-<%= protection.active? ? 'success' : 'danger' %>">
+                  <%= protection.active? ? 'Active' : 'Inactive' %>
+                </span>
+              </dd>
+            </dl>
+          <% else %>
+            <p class="text-muted">No risk management settings configured yet.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5 class="mb-0">Account Statistics</h5>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-6">Total Orders:</dt>
+            <dd class="col-6"><%= @user.orders.count %></dd>
+
+            <dt class="col-6">Active Orders:</dt>
+            <dd class="col-6"><%= @user.orders.active.count %></dd>
+
+            <dt class="col-6">Total Positions:</dt>
+            <dd class="col-6"><%= @user.positions.count %></dd>
+
+            <dt class="col-6">Member Since:</dt>
+            <dd class="col-6"><%= @user.created_at.strftime("%B %Y") %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
