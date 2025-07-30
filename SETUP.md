@@ -19,7 +19,8 @@ Follow these setup files in order:
 4. [Database Migration](./docs/setup/04-database-migration.md) - Create database schema
 5. [TastyTrade API Setup](./docs/setup/05-tastytrade-setup.md) - Configure API credentials
 6. [Testing Setup](./docs/setup/06-testing-setup.md) - Verify everything works
-7. [Optional: Views Setup](./docs/setup/07-views-setup.md) - Create basic web interface
+7. [Risk Management Setup](./docs/setup/08-risk-management-setup.md) - Configure portfolio protection
+8. [Optional: Views Setup](./docs/setup/07-views-setup.md) - Create basic web interface
 
 ## Directory Structure
 

@@ -4,6 +4,9 @@ class Order < ApplicationRecord
   belongs_to :user
   has_many :legs, dependent: :destroy, class_name: 'OrderLeg'
   
+  # Risk management validation
+  validate :validate_risk_management, on: :create
+  
   VALID_ORDER_TYPES = %w[market limit stop stop_limit].freeze
   VALID_ACTIONS = %w[buy-to-open buy-to-close sell-to-open sell-to-close].freeze
   VALID_TIME_IN_FORCE = %w[day gtc ioc fok].freeze
@@ -88,5 +91,43 @@ class Order < ApplicationRecord
   
   def normalize_symbol
     self.symbol = symbol.upcase if symbol.present?
+  end
+  
+  def validate_risk_management
+    return unless tastytrade_account_id.present?
+    
+    # Skip risk validation for closing positions (reduces risk)
+    return if action.include?('close')
+    
+    begin
+      risk_service = RiskManagementService.new(user, tastytrade_account_id)
+      
+      # Check if emergency stop is active
+      if risk_service.emergency_stop_active?
+        errors.add(:base, "Trading halted due to emergency stop - manual intervention required")
+        return
+      end
+      
+      # Validate trade against risk management rules
+      order_params = {
+        symbol: symbol,
+        quantity: quantity,
+        order_type: order_type,
+        action: action,
+        price: price,
+        stop_price: stop_price
+      }
+      
+      unless risk_service.can_place_trade?(order_params)
+        validation_result = risk_service.validate_trade(order_params)
+        validation_result[:violations].each do |violation|
+          errors.add(:base, "Risk Management: #{violation}")
+        end
+      end
+      
+    rescue => e
+      Rails.logger.error "Risk validation error for order: #{e.message}"
+      errors.add(:base, "Risk management system error - order blocked for safety")
+    end
   end
 end
