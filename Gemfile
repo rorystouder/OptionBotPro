@@ -41,7 +41,7 @@ gem "redis", "~> 5.0"
 gem "pg", "~> 1.5"
 
 # Environment variables
-gem "dotenv-rails", "~> 2.8"
+gem "dotenv-rails", "~> 3.1"
 
 # State machines
 gem "aasm", "~> 5.5"
