@@ -172,7 +172,7 @@ When implementing trading features:
 
 **Database:**
 - Active Record (ORM)
-- pg (PostgreSQL adapter)
+- SQLite3 (for development - always use SQLite, never PostgreSQL)
 
 **Testing:**
 - RSpec (testing framework)

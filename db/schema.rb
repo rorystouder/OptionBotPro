@@ -1,0 +1,123 @@
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
+#
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
+# be faster and is potentially less error prone than running all of your
+# migrations from scratch. Old migrations may fail to apply correctly if those
+# migrations use external dependencies or application code.
+#
+# It's strongly recommended that you check this file into your version control system.
+
+ActiveRecord::Schema[8.0].define(version: 2025_07_29_000005) do
+  create_table "order_legs", force: :cascade do |t|
+    t.integer "order_id", null: false
+    t.string "symbol", null: false
+    t.integer "quantity", null: false
+    t.string "action", null: false
+    t.decimal "price", precision: 10, scale: 4
+    t.integer "leg_number", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id", "leg_number"], name: "index_order_legs_on_order_id_and_leg_number", unique: true
+    t.index ["order_id"], name: "index_order_legs_on_order_id"
+    t.index ["symbol"], name: "index_order_legs_on_symbol"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "symbol", null: false
+    t.integer "quantity", null: false
+    t.string "order_type", null: false
+    t.string "action", null: false
+    t.decimal "price", precision: 10, scale: 4
+    t.decimal "stop_price", precision: 10, scale: 4
+    t.string "time_in_force", default: "day", null: false
+    t.string "status", default: "pending", null: false
+    t.string "tastytrade_order_id"
+    t.string "tastytrade_account_id"
+    t.integer "filled_quantity", default: 0
+    t.decimal "average_fill_price", precision: 10, scale: 4
+    t.text "rejection_reason"
+    t.datetime "submitted_at"
+    t.datetime "filled_at"
+    t.datetime "cancelled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_orders_on_created_at"
+    t.index ["status"], name: "index_orders_on_status"
+    t.index ["symbol"], name: "index_orders_on_symbol"
+    t.index ["tastytrade_order_id"], name: "index_orders_on_tastytrade_order_id", unique: true
+    t.index ["user_id", "status"], name: "index_orders_on_user_id_and_status"
+    t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "portfolio_protections", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "account_id", null: false
+    t.decimal "cash_reserve_percentage", precision: 5, scale: 2, default: "25.0", null: false
+    t.decimal "max_daily_loss_percentage", precision: 5, scale: 2, default: "5.0", null: false
+    t.decimal "max_single_trade_percentage", precision: 5, scale: 2, default: "10.0", null: false
+    t.decimal "max_portfolio_exposure_percentage", precision: 5, scale: 2, default: "75.0", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "emergency_stop_triggered_at"
+    t.string "emergency_stop_reason"
+    t.string "emergency_stop_triggered_by"
+    t.datetime "emergency_stop_cleared_at"
+    t.string "emergency_stop_cleared_by"
+    t.decimal "max_position_concentration_percentage", precision: 5, scale: 2, default: "20.0"
+    t.integer "max_daily_trades", default: 50
+    t.decimal "trailing_stop_percentage", precision: 5, scale: 2, default: "2.0"
+    t.boolean "email_alerts_enabled", default: true
+    t.boolean "sms_alerts_enabled", default: false
+    t.string "alert_phone_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_portfolio_protections_on_account_id"
+    t.index ["active"], name: "index_portfolio_protections_on_active"
+    t.index ["emergency_stop_triggered_at"], name: "index_portfolio_protections_on_emergency_stop_triggered_at"
+    t.index ["user_id", "account_id"], name: "index_portfolio_protections_on_user_id_and_account_id", unique: true
+    t.index ["user_id"], name: "index_portfolio_protections_on_user_id"
+    t.check_constraint "cash_reserve_percentage >= 20.0 AND cash_reserve_percentage <= 50.0", name: "cash_reserve_range_check"
+    t.check_constraint "max_daily_loss_percentage > 0 AND max_daily_loss_percentage <= 15.0", name: "daily_loss_range_check"
+    t.check_constraint "max_portfolio_exposure_percentage >= 50.0 AND max_portfolio_exposure_percentage <= 85.0", name: "exposure_range_check"
+    t.check_constraint "max_single_trade_percentage > 0 AND max_single_trade_percentage <= 20.0", name: "single_trade_range_check"
+  end
+
+  create_table "positions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "symbol", null: false
+    t.integer "quantity", null: false
+    t.decimal "average_price", precision: 10, scale: 4, null: false
+    t.decimal "current_price", precision: 10, scale: 4
+    t.string "tastytrade_account_id", null: false
+    t.datetime "last_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["last_updated_at"], name: "index_positions_on_last_updated_at"
+    t.index ["symbol"], name: "index_positions_on_symbol"
+    t.index ["tastytrade_account_id"], name: "index_positions_on_tastytrade_account_id"
+    t.index ["user_id", "symbol"], name: "index_positions_on_user_id_and_symbol", unique: true
+    t.index ["user_id"], name: "index_positions_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.string "tastytrade_customer_id"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_users_on_active"
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["tastytrade_customer_id"], name: "index_users_on_tastytrade_customer_id"
+  end
+
+  add_foreign_key "order_legs", "orders"
+  add_foreign_key "orders", "users"
+  add_foreign_key "portfolio_protections", "users"
+  add_foreign_key "positions", "users"
+end

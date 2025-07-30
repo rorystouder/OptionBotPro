@@ -99,9 +99,9 @@ app/
 ## Recommended Ruby Gems
 
 ### Core Rails Stack
-- **Rails 7.1+**: Full-stack web framework
+- **Rails 8.0+**: Full-stack web framework
 - **Puma**: Application server
-- **PostgreSQL**: Primary database (pg gem)
+- **SQLite3**: Development database (always use SQLite for development)
 - **Redis**: Caching and Sidekiq backend
 
 ### Background Processing
