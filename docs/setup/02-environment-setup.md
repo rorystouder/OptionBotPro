@@ -1,6 +1,6 @@
 # Environment Variables Setup
 
-This guide helps you configure the environment variables needed for the TastyTrades UI application.
+This guide helps you configure the environment variables needed for the OptionBotPro application.
 
 ## Step 1: Create Environment File
 

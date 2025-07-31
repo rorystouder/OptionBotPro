@@ -1,6 +1,6 @@
 # TastyTrade API Setup
 
-This guide helps you configure and test the TastyTrade API integration for the TastyTrades UI application.
+This guide helps you configure and test the TastyTrade API integration for the OptionBotPro application.
 
 ## Step 1: Obtain TastyTrade API Credentials
 

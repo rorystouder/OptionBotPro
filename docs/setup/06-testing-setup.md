@@ -1,6 +1,6 @@
 # Testing Setup
 
-This guide helps you verify that all components of the TastyTrades UI application are working correctly.
+This guide helps you verify that all components of the OptionBotPro application are working correctly.
 
 ## Step 1: Basic Rails Application Test
 

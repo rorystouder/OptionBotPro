@@ -198,7 +198,7 @@ These limitations don't affect core trading functionality testing.
 ## Example Test Output
 
 ```
-🧪 TastyTrades UI Sandbox Test Runner
+🧪 OptionBotPro Sandbox Test Runner
 ==================================================
 Environment: sandbox
 API URL: https://api.cert.tastyworks.com

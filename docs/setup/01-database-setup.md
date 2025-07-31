@@ -1,6 +1,6 @@
 # Database Setup
 
-This guide helps you set up PostgreSQL database for the TastyTrades UI application.
+This guide helps you set up PostgreSQL database for the OptionBotPro application.
 
 ## Step 1: Install PostgreSQL (if not already installed)
 

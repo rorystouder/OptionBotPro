@@ -1,4 +1,4 @@
-# TastyTrades UI Project Summary
+# OptionBotPro Project Summary
 
 ## Project Overview
 A Ruby on Rails automated trading system for TastyTrade with a critical **25% cash reserve protection** requirement. The system automatically scans for option trading opportunities and can execute trades while ensuring the last 25% of available funds are never used.
@@ -108,7 +108,7 @@ TASTYTRADE_API_URL=https://api.tastyworks.com
 
 ### 1. Environment Setup
 ```bash
-cd /home/rorystouder/projects/tastytradesUI
+cd /home/rorystouder/projects/OptionBotPro
 
 # Install dependencies if needed
 bundle install
