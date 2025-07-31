@@ -12,10 +12,13 @@ admin_user = User.find_or_create_by(email: admin_email) do |user|
   user.password_confirmation = admin_password
   user.admin = true
   user.active = true
-  
-  # Set dummy TastyTrade credentials for admin (not used for trading)
-  user.tastytrade_username = admin_email
-  user.tastytrade_password = "dummy_password"
+end
+
+# Set dummy TastyTrade credentials for admin after user is saved (needed for encryption key)
+if admin_user.persisted? && (admin_user.tastytrade_username.nil? rescue true)
+  admin_user.tastytrade_username = admin_email
+  admin_user.tastytrade_password = "dummy_password"
+  admin_user.save!
 end
 
 # Ensure admin status is set

@@ -116,7 +116,14 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
     - Professional branding throughout application
     - Updated signup process to clarify app vs. brokerage account
 
-14. **Documentation**
+14. **Database Compatibility & Error Handling**
+    - **SQLite compatibility fixes** - Removed PostgreSQL-specific syntax
+    - Fixed Position model `options` scope (removed `~` regex operator)
+    - Fixed Admin user search (changed `ILIKE` to `LIKE`)
+    - **Enhanced encryption error handling** - Graceful degradation for credential decryption failures
+    - Improved admin user seeding with proper credential encryption
+
+15. **Documentation**
     - Complete setup guides in /docs
     - API integration documentation
     - Trading rules and architecture docs

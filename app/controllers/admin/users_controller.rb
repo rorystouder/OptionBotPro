@@ -4,7 +4,7 @@ class Admin::UsersController < Admin::BaseController
   def index
     @users = User.includes(:subscription_tier)
                  .order(created_at: :desc)
-    @users = @users.where('email ILIKE ?', "%#{params[:search]}%") if params[:search].present?
+    @users = @users.where('email LIKE ?', "%#{params[:search]}%") if params[:search].present?
     @users = @users.where(subscription_status: params[:status]) if params[:status].present?
   end
 
