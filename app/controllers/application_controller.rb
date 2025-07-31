@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   include ActionView::Helpers::NumberHelper
   
   before_action :authenticate_user
+  before_action :require_mfa_verification
   before_action :set_current_user
   
   private
@@ -23,6 +24,28 @@ class ApplicationController < ActionController::Base
     !!current_user
   end
   
+  def require_mfa_verification
+    return unless logged_in? && current_user.mfa_enabled?
+    
+    # Skip MFA check for certain controllers/actions
+    return if skip_mfa_verification?
+    
+    unless session[:mfa_verified]
+      session[:pending_redirect] = request.fullpath
+      redirect_to mfa_verify_path, alert: 'Please complete MFA verification to continue.'
+    end
+  end
+  
+  def skip_mfa_verification?
+    # Skip MFA for these controllers/actions
+    mfa_exempt_controllers = %w[sessions mfa users password_resets]
+    mfa_exempt_actions = %w[new create verify verify_form setup enable disable]
+    
+    controller_name.in?(mfa_exempt_controllers) || 
+    action_name.in?(mfa_exempt_actions) ||
+    (controller_name == 'users' && action_name.in?(%w[new create change_password update_password]))
+  end
+
   def set_current_user
     Current.user = current_user
   end

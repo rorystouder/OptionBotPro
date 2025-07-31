@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_31_154154) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_31_164007) do
   create_table "order_legs", force: :cascade do |t|
     t.integer "order_id", null: false
     t.string "symbol", null: false
@@ -173,10 +173,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_154154) do
     t.string "stripe_subscription_id"
     t.datetime "trial_ends_at"
     t.boolean "admin", default: false, null: false
+    t.boolean "password_reset_required", default: false
+    t.string "password_reset_token"
+    t.datetime "password_reset_sent_at"
+    t.boolean "mfa_enabled", default: false
+    t.string "mfa_secret"
+    t.text "mfa_backup_codes"
     t.index ["active"], name: "index_users_on_active"
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["encrypted_tastytrade_username"], name: "index_users_on_encrypted_tastytrade_username"
+    t.index ["mfa_enabled"], name: "index_users_on_mfa_enabled"
+    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
     t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
     t.index ["stripe_subscription_id"], name: "index_users_on_stripe_subscription_id"
     t.index ["subscription_status"], name: "index_users_on_subscription_status"

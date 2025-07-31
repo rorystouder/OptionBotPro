@@ -22,12 +22,28 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
    - SubscriptionTier model for monetization
    - Database migrations all applied
 
-3. **Security & Authentication**
+3. **Security & Authentication** - Enterprise-Grade Security for Trading Applications
    - **IMPORTANT**: Uses session-based auth (username/password), NOT OAuth
    - **Per-user encrypted credential storage** with AES-256-CBC encryption
    - Secure credential management using Rails secret key base
    - Admin authentication and role-based access control
    - User password authentication with bcrypt
+   - **Multi-Factor Authentication (MFA)**:
+     - TOTP-based authentication using ROTP gem
+     - QR code generation for authenticator app setup
+     - 8 backup codes per user for account recovery
+     - Automatic MFA enforcement for all users
+     - Admin MFA management and monitoring
+   - **Advanced Password Security**:
+     - Admin-initiated password resets with email notifications
+     - Secure temporary password generation (12+ characters)
+     - Forced password changes with expiring temp passwords
+     - Password complexity requirements and validation
+   - **Email Security System**:
+     - SendGrid integration for transactional emails
+     - Password reset notifications with security warnings
+     - MFA status change alerts and security notifications
+     - Professional HTML email templates with security best practices
 
 4. **TastyTrade API Integration**
    - Complete API service with all trading endpoints
@@ -182,8 +198,12 @@ TASTYTRADE_API_URL=https://api.tastyworks.com
 - `/app/views/admin/settings/show.html.erb` - **Admin settings and security interface**
 - `/app/controllers/admin/database_controller.rb` - **SQLite database management interface**
 - `/app/views/admin/database/` - **Database browser, query tool, and schema views**
+- `/app/controllers/mfa_controller.rb` - **Multi-Factor Authentication management**
+- `/app/mailers/user_mailer.rb` - **Email notifications for security events**
+- `/app/views/user_mailer/` - **Professional HTML email templates**
 - `/lib/tasks/admin.rake` - **Command-line admin management tasks**
 - `/docs/database/DATABASE_MANAGEMENT.md` - **Comprehensive database management guide**
+- `/docs/setup/SENDGRID_SETUP.md` - **Email system setup and configuration guide**
 - `/docs/guides/TRADING_RULES.md` - **Professional trading strategy rules and risk limits**
 - `/docs/business/MONETIZATION_STRATEGY.md` - Business model and pricing
 - `/docs/development/CLAUDE.md` - AI assistant development rules
@@ -231,9 +251,11 @@ http://localhost:3000/dashboard      # Main dashboard
 http://localhost:3000/scanner      # Scanner interface
 http://localhost:3000/sandbox      # Testing interface
 http://localhost:3000/pricing      # Subscription pricing page
-http://localhost:3000/admin          # Admin panel (admin users only)
-http://localhost:3000/admin/settings # Admin password/settings management
-http://localhost:3000/admin/database # SQLite database management interface
+http://localhost:3000/admin            # Admin panel (admin users only)
+http://localhost:3000/admin/settings   # Admin password/settings management
+http://localhost:3000/admin/database   # SQLite database management interface
+http://localhost:3000/mfa/setup        # Multi-Factor Authentication setup
+http://localhost:3000/mfa/status       # MFA management and backup codes
 ```
 
 ## Important Reminders
