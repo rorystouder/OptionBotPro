@@ -11,8 +11,8 @@ class Position < ApplicationRecord
   scope :long_positions, -> { where('quantity > 0') }
   scope :short_positions, -> { where('quantity < 0') }
   scope :by_symbol, ->(symbol) { where(symbol: symbol.upcase) if symbol.present? }
-  scope :options, -> { where('symbol ~ ?', '\d+[CP]\d+') }
-  scope :stocks, -> { where.not('symbol ~ ?', '\d+[CP]\d+') }
+  scope :options, -> { where('symbol LIKE ?', '%C%').or(where('symbol LIKE ?', '%P%')) }
+  scope :stocks, -> { where.not('symbol LIKE ?', '%C%').where.not('symbol LIKE ?', '%P%') }
   
   def long?
     quantity > 0

@@ -25,7 +25,9 @@ class User < ApplicationRecord
   end
   
   def tastytrade_authenticated?
-    Rails.cache.exist?("tastytrade_token_#{tastytrade_username}")
+    username = tastytrade_username
+    return false if username.nil?
+    Rails.cache.exist?("tastytrade_token_#{username}")
   end
   
   # Get or create portfolio protection for an account
@@ -77,13 +79,18 @@ class User < ApplicationRecord
   def tastytrade_username
     return nil if encrypted_tastytrade_username.blank? || tastytrade_credentials_iv.blank?
     
-    cipher = OpenSSL::Cipher.new('AES-256-CBC')
-    cipher.decrypt
-    cipher.key = encryption_key
-    cipher.iv = Base64.decode64(tastytrade_credentials_iv)
-    
-    decrypted = cipher.update(Base64.decode64(encrypted_tastytrade_username)) + cipher.final
-    decrypted
+    begin
+      cipher = OpenSSL::Cipher.new('AES-256-CBC')
+      cipher.decrypt
+      cipher.key = encryption_key
+      cipher.iv = Base64.decode64(tastytrade_credentials_iv)
+      
+      decrypted = cipher.update(Base64.decode64(encrypted_tastytrade_username)) + cipher.final
+      decrypted
+    rescue OpenSSL::Cipher::CipherError => e
+      Rails.logger.error "Failed to decrypt TastyTrade username for user #{id}: #{e.message}"
+      nil
+    end
   end
   
   def tastytrade_password=(password)
@@ -102,13 +109,18 @@ class User < ApplicationRecord
   def tastytrade_password
     return nil if encrypted_tastytrade_password.blank? || tastytrade_credentials_iv.blank?
     
-    cipher = OpenSSL::Cipher.new('AES-256-CBC')
-    cipher.decrypt
-    cipher.key = encryption_key
-    cipher.iv = Base64.decode64(tastytrade_credentials_iv)
-    
-    decrypted = cipher.update(Base64.decode64(encrypted_tastytrade_password)) + cipher.final
-    decrypted
+    begin
+      cipher = OpenSSL::Cipher.new('AES-256-CBC')
+      cipher.decrypt
+      cipher.key = encryption_key
+      cipher.iv = Base64.decode64(tastytrade_credentials_iv)
+      
+      decrypted = cipher.update(Base64.decode64(encrypted_tastytrade_password)) + cipher.final
+      decrypted
+    rescue OpenSSL::Cipher::CipherError => e
+      Rails.logger.error "Failed to decrypt TastyTrade password for user #{id}: #{e.message}"
+      nil
+    end
   end
   
   def tastytrade_account_id
