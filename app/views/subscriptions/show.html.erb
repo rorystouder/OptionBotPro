@@ -1,0 +1,150 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <h1 class="mb-4">Subscription Management</h1>
+      
+      <% if @user.on_trial? %>
+        <div class="alert alert-info">
+          <h5 class="alert-heading">🎉 Free Trial Active</h5>
+          <p class="mb-2">You have <strong><%= pluralize(@user.days_until_trial_ends, 'day') %></strong> remaining in your free trial.</p>
+          <p class="mb-0">
+            <strong>Trial ends:</strong> <%= @user.trial_ends_at.strftime("%B %d, %Y at %l:%M %p") %>
+          </p>
+        </div>
+      <% end %>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Current Plan</h5>
+        </div>
+        <div class="card-body">
+          <% if @current_tier %>
+            <div class="row">
+              <div class="col-md-8">
+                <h4><%= @current_tier.name %></h4>
+                <p class="text-muted"><%= @current_tier.description %></p>
+                <p class="mb-0">
+                  <strong>Price:</strong> $<%= @current_tier.price_monthly %>/month<br>
+                  <strong>Status:</strong> 
+                  <span class="badge bg-<%= @user.subscription_active? ? 'success' : 'warning' %>">
+                    <%= @subscription_status.humanize %>
+                  </span>
+                </p>
+              </div>
+              <div class="col-md-4 text-end">
+                <%= link_to "View All Plans", pricing_path, class: "btn btn-outline-primary" %>
+              </div>
+            </div>
+            
+            <hr>
+            
+            <h6>Plan Features:</h6>
+            <ul class="list-unstyled">
+              <% @current_tier.features_list.each do |feature| %>
+                <li class="mb-1">
+                  <i class="bi bi-check-circle-fill text-success me-2"></i>
+                  <%= feature %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <div class="text-center py-4">
+              <h4>No Active Subscription</h4>
+              <p class="text-muted mb-4">Choose a plan to start automated trading with OptionBotPro</p>
+              <%= link_to "View Plans", pricing_path, class: "btn btn-success btn-lg" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Usage & Limits</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Daily Trading Limits</h6>
+              <% if @current_tier&.unlimited_trades? %>
+                <p class="text-success">
+                  <i class="bi bi-infinity"></i> Unlimited trades per day
+                </p>
+              <% else %>
+                <div class="progress mb-2" style="height: 25px;">
+                  <% 
+                    max_trades = @current_tier&.max_daily_trades || 0
+                    remaining = @user.daily_trades_remaining
+                    used = max_trades - remaining
+                    percentage = max_trades > 0 ? (used.to_f / max_trades * 100).round(1) : 0
+                  %>
+                  <div class="progress-bar" role="progressbar" style="width: <%= percentage %>%">
+                    <%= used %>/<%= max_trades %> trades used today
+                  </div>
+                </div>
+                <small class="text-muted">
+                  <strong><%= remaining %></strong> trades remaining today
+                </small>
+              <% end %>
+            </div>
+            
+            <div class="col-md-6">
+              <h6>Account Limits</h6>
+              <p>
+                <strong>Max Accounts:</strong> <%= @current_tier&.max_accounts || 'None' %><br>
+                <% if @current_tier&.unlimited_capital? %>
+                  <strong>Trading Capital:</strong> <span class="text-success">Unlimited</span>
+                <% else %>
+                  <strong>Max Capital:</strong> $<%= number_with_delimiter(@current_tier&.max_trading_capital || 0) %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% unless @user.on_trial? %>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Billing & Payment</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <h6 class="alert-heading">🚧 Payment Integration Coming Soon</h6>
+              <p class="mb-0">We're working on integrating Stripe for seamless billing. In the meantime, your trial continues!</p>
+            </div>
+            
+            <% if @current_tier %>
+              <p class="mb-2">
+                <strong>Next billing:</strong> 
+                <% if @user.subscription_ends_at %>
+                  <%= @user.subscription_ends_at.strftime("%B %d, %Y") %>
+                <% else %>
+                  To be determined
+                <% end %>
+              </p>
+              <p class="mb-3">
+                <strong>Amount:</strong> $<%= @current_tier.price_monthly %>/month
+              </p>
+            <% end %>
+            
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-primary" disabled>
+                Update Payment Method
+              </button>
+              <button type="button" class="btn btn-outline-secondary" disabled>
+                Download Invoices
+              </button>
+              <button type="button" class="btn btn-outline-danger" disabled>
+                Cancel Subscription
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <div class="text-center mt-4">
+        <%= link_to "← Back to Dashboard", dashboard_path, class: "btn btn-outline-secondary" %>
+      </div>
+    </div>
+  </div>
+</div>

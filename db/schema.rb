@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_31_151245) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_31_152642) do
   create_table "order_legs", force: :cascade do |t|
     t.integer "order_id", null: false
     t.string "symbol", null: false
@@ -125,6 +125,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_151245) do
     t.index ["user_id"], name: "index_sandbox_test_results_on_user_id"
   end
 
+  create_table "subscription_tiers", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.decimal "price_monthly", precision: 8, scale: 2, null: false
+    t.integer "max_daily_trades"
+    t.decimal "max_trading_capital", precision: 12, scale: 2
+    t.integer "max_accounts", default: 1
+    t.text "features"
+    t.text "description"
+    t.boolean "active", default: true
+    t.integer "sort_order", default: 0
+    t.string "stripe_price_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_subscription_tiers_on_active"
+    t.index ["slug"], name: "index_subscription_tiers_on_slug", unique: true
+    t.index ["sort_order"], name: "index_subscription_tiers_on_sort_order"
+  end
+
   create_table "trade_scan_results", force: :cascade do |t|
     t.integer "user_id", null: false
     t.datetime "scan_timestamp"
@@ -146,9 +165,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_151245) do
     t.string "encrypted_tastytrade_username"
     t.string "encrypted_tastytrade_password"
     t.string "tastytrade_credentials_iv"
+    t.integer "subscription_tier_id"
+    t.string "subscription_status", default: "trial"
+    t.datetime "subscription_started_at"
+    t.datetime "subscription_ends_at"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.datetime "trial_ends_at"
     t.index ["active"], name: "index_users_on_active"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["encrypted_tastytrade_username"], name: "index_users_on_encrypted_tastytrade_username"
+    t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
+    t.index ["stripe_subscription_id"], name: "index_users_on_stripe_subscription_id"
+    t.index ["subscription_status"], name: "index_users_on_subscription_status"
+    t.index ["subscription_tier_id"], name: "index_users_on_subscription_tier_id"
   end
 
   add_foreign_key "order_legs", "orders"
@@ -157,4 +187,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_151245) do
   add_foreign_key "positions", "users"
   add_foreign_key "sandbox_test_results", "users"
   add_foreign_key "trade_scan_results", "users"
+  add_foreign_key "users", "subscription_tiers"
 end
