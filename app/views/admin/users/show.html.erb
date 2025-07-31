@@ -1,2 +1,294 @@
-<h1>Admin::Users#show</h1>
-<p>Find me in app/views/admin/users/show.html.erb</p>
+<% content_for :title, "User: #{@user.email}" %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+          <i class="bi bi-person-circle"></i> User Details
+        </h1>
+        <div class="btn-group">
+          <%= link_to admin_users_path, class: "btn btn-outline-secondary" do %>
+            <i class="bi bi-arrow-left"></i> Back to Users
+          <% end %>
+          <%= link_to edit_admin_user_path(@user), class: "btn btn-outline-primary" do %>
+            <i class="bi bi-pencil"></i> Edit User
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- User Information -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-info-circle"></i> User Information
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Name:</strong></div>
+            <div class="col-sm-8"><%= @user.full_name %></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Email:</strong></div>
+            <div class="col-sm-8"><%= @user.email %></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Status:</strong></div>
+            <div class="col-sm-8">
+              <% if @user.active? %>
+                <span class="badge bg-success">Active</span>
+              <% else %>
+                <span class="badge bg-danger">Inactive</span>
+              <% end %>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Role:</strong></div>
+            <div class="col-sm-8">
+              <% if @user.admin? %>
+                <span class="badge bg-warning">Administrator</span>
+              <% else %>
+                <span class="badge bg-secondary">User</span>
+              <% end %>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Created:</strong></div>
+            <div class="col-sm-8"><%= @user.created_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4"><strong>Last Updated:</strong></div>
+            <div class="col-sm-8"><%= @user.updated_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Information -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-shield-check"></i> Security Settings
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-6"><strong>MFA Status:</strong></div>
+            <div class="col-sm-6">
+              <% if @user.mfa_enabled? %>
+                <span class="badge bg-success">Enabled</span>
+              <% else %>
+                <span class="badge bg-warning">Disabled</span>
+              <% end %>
+            </div>
+          </div>
+          <% if @user.mfa_enabled? %>
+            <div class="row mb-3">
+              <div class="col-sm-6"><strong>Backup Codes:</strong></div>
+              <div class="col-sm-6">
+                <span class="badge bg-info"><%= @user.remaining_backup_codes %> remaining</span>
+              </div>
+            </div>
+          <% end %>
+          <div class="row mb-3">
+            <div class="col-sm-6"><strong>Password Reset:</strong></div>
+            <div class="col-sm-6">
+              <% if @user.password_reset_required? %>
+                <span class="badge bg-danger">Required</span>
+              <% else %>
+                <span class="badge bg-success">Not Required</span>
+              <% end %>
+            </div>
+          </div>
+          <% if @user.password_reset_sent_at %>
+            <div class="row mb-3">
+              <div class="col-sm-6"><strong>Last Reset:</strong></div>
+              <div class="col-sm-6">
+                <%= time_ago_in_words(@user.password_reset_sent_at) %> ago
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Security Actions -->
+          <div class="mt-4">
+            <h6>Security Actions:</h6>
+            <div class="d-grid gap-2">
+              <%= button_to "Reset Password", reset_password_admin_user_path(@user), 
+                            method: :post,
+                            class: "btn btn-warning btn-sm",
+                            data: { 
+                              confirm: "This will generate a new temporary password and email it to #{@user.email}. Continue?" 
+                            } do %>
+                <i class="bi bi-key"></i> Reset Password
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription Information -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-credit-card"></i> Subscription Details
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <strong>Current Tier:</strong><br>
+              <% if @user.subscription_tier %>
+                <span class="badge bg-primary"><%= @user.subscription_tier.name %></span>
+                <br><small class="text-muted">$<%= @user.subscription_tier.monthly_price %>/month</small>
+              <% else %>
+                <span class="badge bg-secondary">No Subscription</span>
+              <% end %>
+            </div>
+            <div class="col-md-3">
+              <strong>Status:</strong><br>
+              <% case @user.subscription_status %>
+              <% when 'trial' %>
+                <span class="badge bg-info">Trial</span>
+              <% when 'active' %>
+                <span class="badge bg-success">Active</span>
+              <% when 'past_due' %>
+                <span class="badge bg-warning">Past Due</span>
+              <% when 'canceled' %>
+                <span class="badge bg-danger">Canceled</span>
+              <% when 'suspended' %>
+                <span class="badge bg-secondary">Suspended</span>
+              <% else %>
+                <span class="badge bg-secondary"><%= @user.subscription_status.humanize %></span>
+              <% end %>
+            </div>
+            <div class="col-md-3">
+              <strong>Trial Status:</strong><br>
+              <% if @user.on_trial? %>
+                <span class="badge bg-info">Active Trial</span>
+                <br><small class="text-muted">Ends <%= @user.trial_ends_at.strftime("%m/%d/%Y") %></small>
+              <% elsif @user.trial_expired? %>
+                <span class="badge bg-warning">Expired</span>
+              <% else %>
+                <span class="badge bg-secondary">No Trial</span>
+              <% end %>
+            </div>
+            <div class="col-md-3">
+              <strong>Trading Access:</strong><br>
+              <% if @user.can_trade? %>
+                <span class="badge bg-success">Enabled</span>
+              <% else %>
+                <span class="badge bg-danger">Disabled</span>
+              <% end %>
+              <% unless @user.subscription_active? %>
+                <br><small class="text-muted">Subscription inactive</small>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-list-ul"></i> Recent Orders (<%= @orders.count %>)
+          </h5>
+        </div>
+        <div class="card-body">
+          <% if @orders.any? %>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @orders.limit(5).each do |order| %>
+                    <tr>
+                      <td><code><%= order.symbol %></code></td>
+                      <td><%= order.quantity %></td>
+                      <td>
+                        <span class="badge bg-<%= order.status == 'filled' ? 'success' : 'warning' %>">
+                          <%= order.status.humanize %>
+                        </span>
+                      </td>
+                      <td><%= order.created_at.strftime("%m/%d %I:%M%p") %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <p class="text-muted text-center py-3">No orders found</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-graph-up"></i> Positions (<%= @positions.count %>)
+          </h5>
+        </div>
+        <div class="card-body">
+          <% if @positions.any? %>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Quantity</th>
+                    <th>Avg Price</th>
+                    <th>Current</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @positions.limit(5).each do |position| %>
+                    <tr>
+                      <td><code><%= position.symbol %></code></td>
+                      <td>
+                        <span class="<%= position.quantity > 0 ? 'text-success' : 'text-danger' %>">
+                          <%= position.quantity %>
+                        </span>
+                      </td>
+                      <td>$<%= number_with_precision(position.average_price, precision: 2) %></td>
+                      <td>
+                        <% if position.current_price %>
+                          $<%= number_with_precision(position.current_price, precision: 2) %>
+                        <% else %>
+                          <span class="text-muted">-</span>
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <p class="text-muted text-center py-3">No positions found</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

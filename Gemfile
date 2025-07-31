@@ -23,6 +23,10 @@ gem "bcrypt", "~> 3.1.7"
 # Authentication
 gem "devise", "~> 4.9"
 
+# Multi-Factor Authentication
+gem "rqrcode", "~> 2.0"
+gem "rotp", "~> 6.0"
+
 # HTTP requests
 gem "httparty", "~> 0.21"
 gem "faraday", "~> 2.0"

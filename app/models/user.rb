@@ -14,6 +14,7 @@ class User < ApplicationRecord
   validates :first_name, :last_name, presence: true
   validates :encrypted_tastytrade_username, :encrypted_tastytrade_password, presence: true
   validates :subscription_status, inclusion: { in: %w[trial active past_due canceled suspended] }
+  validates :password_reset_token, uniqueness: true, allow_nil: true
   
   scope :active, -> { where(active: true) }
   scope :admins, -> { where(admin: true) }
@@ -188,6 +189,86 @@ class User < ApplicationRecord
     
     self.trial_ends_at = 14.days.from_now
     self.subscription_status = 'trial'
+    save!
+  end
+
+  # MFA (Multi-Factor Authentication) methods
+  def enable_mfa!
+    self.mfa_secret = ROTP::Base32.random
+    self.mfa_backup_codes = generate_backup_codes
+    self.mfa_enabled = true
+    save!
+  end
+
+  def disable_mfa!
+    self.mfa_enabled = false
+    self.mfa_secret = nil
+    self.mfa_backup_codes = nil
+    save!
+  end
+
+  def mfa_qr_code
+    return nil unless mfa_secret
+    
+    totp = ROTP::TOTP.new(mfa_secret, issuer: "OptionBotPro")
+    provisioning_uri = totp.provisioning_uri(email)
+    
+    RQRCode::QRCode.new(provisioning_uri)
+  end
+
+  def verify_mfa_code(code)
+    return false unless mfa_enabled? && mfa_secret
+    
+    # Check TOTP code
+    totp = ROTP::TOTP.new(mfa_secret)
+    return true if totp.verify(code, drift_behind: 30, drift_ahead: 30)
+    
+    # Check backup codes
+    return verify_backup_code(code)
+  end
+
+  def verify_backup_code(code)
+    return false unless mfa_backup_codes.present?
+    
+    codes = JSON.parse(mfa_backup_codes)
+    if codes.include?(code.to_s.downcase)
+      # Remove used backup code
+      codes.delete(code.to_s.downcase)
+      self.mfa_backup_codes = codes.to_json
+      save!
+      return true
+    end
+    
+    false
+  end
+
+  def generate_backup_codes
+    codes = []
+    8.times do
+      codes << SecureRandom.hex(4).downcase
+    end
+    codes.to_json
+  end
+
+  def backup_codes_array
+    return [] unless mfa_backup_codes.present?
+    JSON.parse(mfa_backup_codes)
+  end
+
+  def remaining_backup_codes
+    backup_codes_array.count
+  end
+
+  # Password reset methods
+  def password_reset_expired?
+    return true unless password_reset_sent_at
+    password_reset_sent_at < 2.hours.ago
+  end
+
+  def clear_password_reset!
+    self.password_reset_token = nil
+    self.password_reset_sent_at = nil
+    self.password_reset_required = false
     save!
   end
   

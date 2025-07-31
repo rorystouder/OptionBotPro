@@ -11,7 +11,22 @@ class SessionsController < ApplicationController
     user = User.find_by(email: params[:email])
     
     if user && user.authenticate(params[:password])
+      # Check if password reset is required
+      if user.password_reset_required?
+        session[:pending_user_id] = user.id
+        redirect_to change_password_path, alert: 'You must change your password before continuing.'
+        return
+      end
+      
       session[:user_id] = user.id
+      
+      # Check if MFA is enabled
+      if user.mfa_enabled?
+        session[:mfa_verified] = false
+        session[:pending_redirect] = dashboard_path
+        redirect_to mfa_verify_path, notice: 'Please enter your MFA code to complete login.'
+        return
+      end
       
       # Authenticate with TastyTrade API using stored credentials
       begin
