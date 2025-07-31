@@ -64,6 +64,65 @@ module Tastytrade
       make_request(:put, "/accounts/#{account_id}/orders/#{order_id}", nil, body)
     end
     
+    # Transaction History
+    def get_transactions(account_id, params = {})
+      make_request(:get, "/accounts/#{account_id}/transactions", params)
+    end
+    
+    # Watchlist Methods
+    def get_watchlists
+      make_request(:get, "/watchlists")
+    end
+    
+    def create_watchlist(name, symbols)
+      body = { name: name, symbols: symbols }
+      make_request(:post, "/watchlists", nil, body)
+    end
+    
+    def get_watchlist(watchlist_id)
+      make_request(:get, "/watchlists/#{watchlist_id}")
+    end
+    
+    def update_watchlist(watchlist_id, symbols)
+      body = { symbols: symbols }
+      make_request(:put, "/watchlists/#{watchlist_id}", nil, body)
+    end
+    
+    def delete_watchlist(watchlist_id)
+      make_request(:delete, "/watchlists/#{watchlist_id}")
+    end
+    
+    # Market Information
+    def get_market_hours(date = Date.current)
+      make_request(:get, "/market-calendar/#{date.to_s}")
+    end
+    
+    def get_option_expirations(symbol)
+      make_request(:get, "/option-chains/#{symbol}/expirations")
+    end
+    
+    # Greeks and Analytics
+    def get_option_analytics(symbol, expiration)
+      make_request(:get, "/option-analytics/#{symbol}/#{expiration}")
+    end
+    
+    # Account History
+    def get_account_history(account_id, params = {})
+      make_request(:get, "/accounts/#{account_id}/history", params)
+    end
+    
+    # Batch Operations
+    def place_orders_batch(account_id, orders)
+      body = { orders: orders.map { |order| build_order_body(order) } }
+      make_request(:post, "/accounts/#{account_id}/orders/batch", nil, body)
+    end
+    
+    def get_quotes_batch(symbols, fields = nil)
+      params = { symbols: symbols.join(',') }
+      params[:fields] = fields.join(',') if fields
+      make_request(:get, "/marketdata/quotes", params)
+    end
+    
     private
     
     def make_request(method, path, params = nil, body = nil)
@@ -91,10 +150,33 @@ module Tastytrade
         response.parsed_response
       when 401
         raise TokenExpiredError, "Authentication token expired"
+      when 403
+        error_message = response.parsed_response&.dig('error', 'message') || response.body
+        if error_message.include?('insufficient funds')
+          raise InsufficientFundsError, error_message
+        elsif error_message.include?('market closed')
+          raise MarketClosedError, error_message
+        else
+          raise ApiError, "Forbidden: #{error_message}"
+        end
+      when 404
+        error_message = response.parsed_response&.dig('error', 'message') || response.body
+        if error_message.include?('symbol')
+          raise SymbolNotFoundError, "Symbol not found: #{error_message}"
+        else
+          raise ApiError, "Not found: #{error_message}"
+        end
       when 422
-        raise ValidationError, parse_validation_errors(response)
+        error_message = parse_validation_errors(response)
+        if error_message.include?('order')
+          raise InvalidOrderError, error_message
+        else
+          raise ValidationError, error_message
+        end
       when 429
         raise RateLimitError, "Rate limit exceeded. Please try again later."
+      when 503
+        raise MaintenanceError, "TastyTrade API is currently under maintenance"
       else
         raise ApiError, "Request failed (#{response.code}): #{response.body}"
       end
@@ -127,8 +209,13 @@ module Tastytrade
     end
     
     class ApiError < StandardError; end
-    class TokenExpiredError < StandardError; end
-    class ValidationError < StandardError; end
-    class RateLimitError < StandardError; end
+    class TokenExpiredError < ApiError; end
+    class ValidationError < ApiError; end
+    class RateLimitError < ApiError; end
+    class InsufficientFundsError < ApiError; end
+    class SymbolNotFoundError < ApiError; end
+    class InvalidOrderError < ApiError; end
+    class MaintenanceError < ApiError; end
+    class MarketClosedError < ApiError; end
   end
 end

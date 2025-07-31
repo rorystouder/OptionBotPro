@@ -35,6 +35,10 @@
         <div class="navbar-nav ms-auto">
           <% if defined?(logged_in?) && logged_in? %>
             <%= link_to "Dashboard", dashboard_path, class: "nav-link" %>
+            <%= link_to "Scanner", scanner_path, class: "nav-link" %>
+            <% unless Rails.env.production? %>
+              <%= link_to "Sandbox", sandbox_path, class: "nav-link text-warning" %>
+            <% end %>
             <%= link_to "Profile", user_path, class: "nav-link" %>
             <%= button_to "Logout", logout_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
           <% else %>

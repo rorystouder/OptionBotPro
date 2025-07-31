@@ -1,0 +1,198 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>🧪 Sandbox Testing</h1>
+        <div>
+          <%= link_to "Environment Info", sandbox_environment_check_path, class: "btn btn-info me-2", remote: true %>
+          <%= link_to "Run Full Test Suite", sandbox_run_tests_path, method: :post, class: "btn btn-primary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Environment Status -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Environment Configuration</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <strong>Environment:</strong><br>
+              <span class="badge bg-<%= @environment_info[:rails_env] == 'sandbox' ? 'success' : 'warning' %> fs-6">
+                <%= @environment_info[:rails_env].upcase %>
+              </span>
+            </div>
+            <div class="col-md-3">
+              <strong>API Endpoint:</strong><br>
+              <code class="text-<%= @environment_info[:api_url]&.include?('cert') ? 'success' : 'warning' %>">
+                <%= @environment_info[:api_url] %>
+              </code>
+            </div>
+            <div class="col-md-3">
+              <strong>Sandbox Mode:</strong><br>
+              <span class="badge bg-<%= @environment_info[:sandbox_mode] ? 'success' : 'danger' %>">
+                <%= @environment_info[:sandbox_mode] ? 'Enabled' : 'Disabled' %>
+              </span>
+            </div>
+            <div class="col-md-3">
+              <strong>Mock Data:</strong><br>
+              <span class="badge bg-<%= @environment_info[:mock_data] ? 'info' : 'secondary' %>">
+                <%= @environment_info[:mock_data] ? 'Enabled' : 'Disabled' %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sandbox Order Behavior Info -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">📋 Sandbox Order Behavior</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="alert alert-info">
+                <h6>🎯 Market Orders</h6>
+                <p class="mb-0">Always fill at <strong>$1.00</strong></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-success">
+                <h6>✅ Limit Orders ≤ $3</h6>
+                <p class="mb-0">Fill <strong>immediately</strong></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-warning">
+                <h6>⏳ Limit Orders > $3</h6>
+                <p class="mb-0">Remain <strong>live</strong>, never fill</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Test Results -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Recent Test Results</h5>
+        </div>
+        <div class="card-body">
+          <% if @recent_tests.any? %>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>User</th>
+                    <th>Tests</th>
+                    <th>Success Rate</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @recent_tests.each do |test| %>
+                    <tr>
+                      <td><%= test.test_timestamp.strftime("%m/%d/%Y %I:%M %p") %></td>
+                      <td><%= test.user.full_name %></td>
+                      <td>
+                        <span class="badge bg-success"><%= test.passed_tests %></span>
+                        <span class="badge bg-danger"><%= test.failed_tests %></span>
+                        <small class="text-muted">/ <%= test.total_tests %></small>
+                      </td>
+                      <td>
+                        <div class="progress" style="width: 100px; height: 20px;">
+                          <div class="progress-bar bg-<%= test.success_rate >= 80 ? 'success' : test.success_rate >= 60 ? 'warning' : 'danger' %>" 
+                               role="progressbar" style="width: <%= test.success_rate %>%">
+                            <%= test.success_rate.round(1) %>%
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <% if test.success_rate == 100 %>
+                          <span class="badge bg-success">✅ ALL PASS</span>
+                        <% elsif test.success_rate >= 80 %>
+                          <span class="badge bg-warning">⚠️ MOSTLY PASS</span>
+                        <% else %>
+                          <span class="badge bg-danger">❌ FAILURES</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <%= link_to "View Details", sandbox_path(test), class: "btn btn-sm btn-outline-primary" %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="alert alert-info text-center">
+              <h6>No test results yet</h6>
+              <p class="mb-0">Click "Run Full Test Suite" to start testing the system in sandbox mode.</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Categories -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">🔬 Test Categories</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Core System Tests</h6>
+              <ul class="list-unstyled">
+                <li>🔐 <strong>API Authentication</strong> - TastyTrade login verification</li>
+                <li>📊 <strong>Market Data</strong> - Quote and options chain retrieval</li>
+                <li>🔍 <strong>Scanner Functionality</strong> - Trade opportunity identification</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Trading System Tests</h6>
+              <ul class="list-unstyled">
+                <li>🛡️ <strong>Risk Management</strong> - 25% reserve protection</li>
+                <li>📋 <strong>Order Placement</strong> - Sandbox order behavior</li>
+                <li>⚡ <strong>Execution Pipeline</strong> - End-to-end trade flow</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Important Notes -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="alert alert-warning">
+        <h6>⚠️ Important Sandbox Notes</h6>
+        <ul class="mb-0">
+          <li><strong>Sandbox Environment:</strong> All orders remain within sandbox - no real market impact</li>
+          <li><strong>Limited Services:</strong> Symbol search, NLV history, and market metrics not available in sandbox</li>
+          <li><strong>Order Fills:</strong> Follow predetermined logic based on order type and price</li>
+          <li><strong>Data Lag:</strong> Sandbox instrumentation may occasionally lag behind live system</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

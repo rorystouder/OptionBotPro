@@ -5,6 +5,8 @@ class User < ApplicationRecord
   has_many :positions, dependent: :destroy
   has_many :strategies, dependent: :destroy
   has_many :portfolio_protections, dependent: :destroy
+  has_many :trade_scan_results, dependent: :destroy
+  has_many :sandbox_test_results, dependent: :destroy
   
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :first_name, :last_name, presence: true
@@ -40,5 +42,22 @@ class User < ApplicationRecord
   # Get all active portfolio protections
   def active_portfolio_protections
     portfolio_protections.active
+  end
+  
+  # Scanner and trading preferences
+  def wants_trade_notifications?
+    # TODO: Add user preference field
+    false
+  end
+  
+  def auto_trading_enabled?
+    # TODO: Add user preference field
+    false
+  end
+  
+  def tastytrade_account_id
+    # For now, use customer ID as account ID
+    # TODO: Handle multiple accounts per user
+    tastytrade_customer_id
   end
 end

@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+# Quick script to run sandbox tests
+require_relative '../config/environment'
+
+puts "🧪 TastyTrades UI Sandbox Test Runner"
+puts "=" * 50
+
+# Check environment
+puts "Environment: #{Rails.env}"
+puts "API URL: #{ENV['TASTYTRADE_API_URL']}"
+puts "Database: #{Rails.configuration.database_configuration[Rails.env]&.dig('database')}"
+puts
+
+# Create or find test user
+user = User.find_or_create_by(email: 'sandbox.test@example.com') do |u|
+  u.first_name = 'Sandbox'
+  u.last_name = 'Tester'
+  u.password = 'sandbox123'
+  u.tastytrade_customer_id = 'sandbox-customer-123'
+  u.active = true
+end
+
+puts "Test User: #{user.full_name} (ID: #{user.id})"
+puts
+
+# Run the tests
+puts "🚀 Starting sandbox test suite..."
+test_service = SandboxTestService.new(user: user)
+
+begin
+  results = test_service.run_full_test_suite
+  
+  puts
+  puts "📊 TEST RESULTS"
+  puts "=" * 30
+  puts "Total Tests: #{results[:summary][:total_tests]}"
+  puts "Passed: #{results[:summary][:passed_tests]}"
+  puts "Failed: #{results[:summary][:failed_tests]}"
+  puts "Success Rate: #{results[:summary][:success_rate]}%"
+  puts "Overall Status: #{results[:summary][:overall_status]}"
+  puts
+  
+  # Show individual test results
+  results[:tests].each do |test_name, test_result|
+    status_emoji = test_result[:status] == 'PASS' ? '✅' : '❌'
+    puts "#{status_emoji} #{test_name.to_s.humanize}: #{test_result[:message]}"
+  end
+  
+  # Store results
+  test_result = SandboxTestResult.create!(
+    user: user,
+    test_timestamp: results[:timestamp],
+    total_tests: results[:summary][:total_tests],
+    passed_tests: results[:summary][:passed_tests],
+    failed_tests: results[:summary][:failed_tests],
+    success_rate: results[:summary][:success_rate],
+    test_data: results.to_json
+  )
+  
+  puts
+  puts "💾 Results saved as SandboxTestResult ##{test_result.id}"
+  puts "🌐 View in browser: http://localhost:3000/sandbox/#{test_result.id}"
+  
+rescue => e
+  puts "❌ Test suite failed: #{e.message}"
+  puts e.backtrace.first(5).join("\n")
+  exit 1
+end
+
+puts
+puts "✅ Sandbox testing complete!"
