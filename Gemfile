@@ -32,7 +32,7 @@ gem "faye-websocket", "~> 0.11"
 
 # Background processing
 gem "sidekiq", "~> 8.0"
-gem "sidekiq-cron", "~> 1.12"
+gem "sidekiq-cron", "~> 2.3"
 
 # Redis for caching and Sidekiq
 gem "redis", "~> 5.0"
