@@ -47,9 +47,15 @@
             </div>
 
             <div class="mb-3">
-              <%= form.label :tastytrade_customer_id, "TastyTrade Customer ID", class: "form-label" %>
-              <%= form.text_field :tastytrade_customer_id, class: "form-control", required: true %>
-              <div class="form-text">Enter your existing TastyTrade customer ID to enable automated trading</div>
+              <%= form.label :tastytrade_username, "TastyTrade Username (Email)", class: "form-label" %>
+              <%= form.email_field :tastytrade_username, class: "form-control", required: true %>
+              <div class="form-text">Enter your TastyTrade account email address</div>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :tastytrade_password, "TastyTrade Password", class: "form-label" %>
+              <%= form.password_field :tastytrade_password, class: "form-control", required: true %>
+              <div class="form-text">Enter your TastyTrade account password (encrypted and stored securely)</div>
             </div>
 
             <div class="d-grid">

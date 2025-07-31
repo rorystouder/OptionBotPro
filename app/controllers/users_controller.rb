@@ -41,6 +41,6 @@ class UsersController < ApplicationController
   private
   
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :first_name, :last_name, :tastytrade_customer_id)
+    params.require(:user).permit(:email, :password, :password_confirmation, :first_name, :last_name, :tastytrade_username, :tastytrade_password)
   end
 end

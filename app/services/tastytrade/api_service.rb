@@ -14,7 +14,7 @@ module Tastytrade
     end
     
     def get_accounts
-      make_request(:get, "/customers/#{@user.tastytrade_customer_id}/accounts")
+      make_request(:get, "/customers/#{@user.tastytrade_username}/accounts")
     end
     
     def get_positions(account_id)
@@ -127,7 +127,7 @@ module Tastytrade
     
     def make_request(method, path, params = nil, body = nil)
       options = {
-        headers: @auth_service.authenticated_headers(@user.email).merge({
+        headers: @auth_service.authenticated_headers(@user.tastytrade_username).merge({
           'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         })
@@ -140,7 +140,7 @@ module Tastytrade
       
       handle_response(response)
     rescue Tastytrade::AuthService::TokenExpiredError => e
-      Rails.logger.warn "Token expired for user #{@user.email}: #{e.message}"
+      Rails.logger.warn "Token expired for user #{@user.tastytrade_username}: #{e.message}"
       raise TokenExpiredError, "Please re-authenticate"
     end
     

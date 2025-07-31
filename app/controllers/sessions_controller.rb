@@ -13,19 +13,20 @@ class SessionsController < ApplicationController
     if user && user.authenticate(params[:password])
       session[:user_id] = user.id
       
-      # Authenticate with TastyTrade API
-      if params[:tastytrade_username].present? && params[:tastytrade_password].present?
-        begin
-          auth_service = Tastytrade::AuthService.new
-          auth_service.authenticate(
-            username: params[:tastytrade_username],
-            password: params[:tastytrade_password]
-          )
-          
-          flash[:notice] = 'Successfully logged in and authenticated with TastyTrade'
-        rescue Tastytrade::AuthService::AuthenticationError => e
-          flash[:alert] = "TastyTrade authentication failed: #{e.message}"
-        end
+      # Authenticate with TastyTrade API using stored credentials
+      begin
+        auth_service = Tastytrade::AuthService.new
+        auth_service.authenticate(
+          username: user.tastytrade_username,
+          password: user.tastytrade_password
+        )
+        
+        flash[:notice] = 'Successfully logged in and authenticated with TastyTrade'
+      rescue Tastytrade::AuthService::AuthenticationError => e
+        flash[:alert] = "TastyTrade authentication failed: #{e.message}"
+      rescue => e
+        Rails.logger.error "Unexpected TastyTrade auth error: #{e.message}"
+        flash[:alert] = "TastyTrade authentication failed"
       end
       
       redirect_to dashboard_path
@@ -40,7 +41,7 @@ class SessionsController < ApplicationController
       # Logout from TastyTrade API
       begin
         auth_service = Tastytrade::AuthService.new
-        auth_service.logout(current_user.email)
+        auth_service.logout(current_user.tastytrade_username)
       rescue => e
         Rails.logger.warn "Failed to logout from TastyTrade: #{e.message}"
       end
