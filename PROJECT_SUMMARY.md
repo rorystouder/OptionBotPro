@@ -102,6 +102,11 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
       - Monitor user trading activity and limits
     - **Subscription tier management**
     - **Business analytics** and reporting
+    - **Admin settings and security**:
+      - In-app password change functionality
+      - Admin profile management
+      - Security best practices guide
+      - System information display
     - Protected admin routes with middleware authentication
 
 12. **Comprehensive Testing**
@@ -167,6 +172,9 @@ TASTYTRADE_API_URL=https://api.tastyworks.com
 - `/app/models/user.rb` - User authentication and subscription logic
 - `/app/models/subscription_tier.rb` - Subscription tier management
 - `/app/controllers/admin/` - Admin panel controllers
+- `/app/controllers/admin/settings_controller.rb` - **In-app admin password management**
+- `/app/views/admin/settings/show.html.erb` - **Admin settings and security interface**
+- `/lib/tasks/admin.rake` - **Command-line admin management tasks**
 - `/docs/guides/TRADING_RULES.md` - **Professional trading strategy rules and risk limits**
 - `/docs/business/MONETIZATION_STRATEGY.md` - Business model and pricing
 - `/docs/development/CLAUDE.md` - AI assistant development rules
@@ -210,11 +218,12 @@ rails console
 MarketScannerJob.perform_now(User.first.id)
 
 # Access web interfaces
-http://localhost:3000/dashboard  # Main dashboard
-http://localhost:3000/scanner    # Scanner interface
-http://localhost:3000/sandbox    # Testing interface
-http://localhost:3000/pricing    # Subscription pricing page
-http://localhost:3000/admin      # Admin panel (admin users only)
+http://localhost:3000/dashboard      # Main dashboard
+http://localhost:3000/scanner      # Scanner interface
+http://localhost:3000/sandbox      # Testing interface
+http://localhost:3000/pricing      # Subscription pricing page
+http://localhost:3000/admin        # Admin panel (admin users only)
+http://localhost:3000/admin/settings # Admin password/settings management
 ```
 
 ## Important Reminders
@@ -262,7 +271,9 @@ http://localhost:3000/admin      # Admin panel (admin users only)
 - **User management**: Search, edit, manage subscriptions
 - **Business metrics**: Revenue, user counts, activity tracking
 - **Subscription management**: Modify tiers, extend trials, billing
+- **Admin settings**: In-app password change, profile management, security tips
 - **Role-based access**: Admin privileges required for access
+- **Command-line tools**: Rails tasks for secure admin management (`rails admin:update_password`)
 
 ## Next Development Steps
 
