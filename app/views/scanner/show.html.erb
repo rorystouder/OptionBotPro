@@ -1,0 +1,132 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Scan Results - <%= @scan.scan_timestamp.strftime("%m/%d/%Y at %I:%M %p") %></h1>
+        <%= link_to "← Back to Scanner", scanner_path, class: "btn btn-secondary" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Trades Found</h5>
+          <h2 class="text-primary"><%= @scan.trades_found %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Scan Duration</h5>
+          <h4 class="text-info">~30 seconds</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Symbols Analyzed</h5>
+          <h4 class="text-success">22</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @scan_data.any? %>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Trade Opportunities</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Symbol</th>
+                    <th>Strategy</th>
+                    <th>Legs</th>
+                    <th>Expiration</th>
+                    <th>Credit</th>
+                    <th>Max Loss</th>
+                    <th>POP</th>
+                    <th>Risk/Reward</th>
+                    <th>Model Score</th>
+                    <th>Momentum Z</th>
+                    <th>Flow Z</th>
+                    <th>Thesis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @scan_data.each_with_index do |trade, index| %>
+                    <tr>
+                      <td>
+                        <span class="badge bg-<%= index < 3 ? 'success' : 'primary' %>">
+                          #<%= index + 1 %>
+                        </span>
+                      </td>
+                      <td><strong><%= trade['symbol'] %></strong></td>
+                      <td><%= trade['strategy'] %></td>
+                      <td><code><%= trade['legs'] %></code></td>
+                      <td><%= Date.parse(trade['expiration']).strftime('%m/%d') if trade['expiration'] %></td>
+                      <td class="text-success">
+                        <strong>$<%= number_with_precision(trade['credit'], precision: 2) %></strong>
+                      </td>
+                      <td class="text-danger">
+                        $<%= number_with_precision(trade['max_loss'], precision: 2) %>
+                      </td>
+                      <td>
+                        <span class="badge bg-success">
+                          <%= number_to_percentage(trade['pop'] * 100, precision: 1) %>
+                        </span>
+                      </td>
+                      <td><%= number_with_precision(trade['risk_reward'], precision: 2) %></td>
+                      <td>
+                        <div class="progress" style="width: 60px; height: 20px;">
+                          <div class="progress-bar bg-info" role="progressbar" 
+                               style="width: <%= [(trade['model_score'] * 100).to_i, 100].min %>%">
+                            <%= number_with_precision(trade['model_score'], precision: 2) %>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="<%= trade['momentum_z'].to_f > 0 ? 'text-success' : 'text-danger' %>">
+                        <%= sprintf('%+.2f', trade['momentum_z']) %>
+                      </td>
+                      <td class="<%= trade['flow_z'].to_f > 0 ? 'text-success' : 'text-danger' %>">
+                        <%= sprintf('%+.2f', trade['flow_z']) %>
+                      </td>
+                      <td class="text-muted">
+                        <small><%= trade['thesis'] %></small>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="row">
+      <div class="col-12">
+        <div class="alert alert-info text-center">
+          <h4>No Trades Found</h4>
+          <p>This scan didn't find any trades meeting all the criteria:</p>
+          <ul class="list-unstyled">
+            <li>• Minimum 65% probability of profit</li>
+            <li>• Risk/reward ratio of at least 0.33</li>
+            <li>• Maximum loss within risk limits</li>
+            <li>• Fresh market data (< 10 minutes old)</li>
+          </ul>
+          <p class="mb-0">Try running another scan or check market conditions.</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -28,15 +28,46 @@
             
             <h5 class="text-muted">TastyTrade API Connection (Optional)</h5>
             <p class="small text-muted">Connect to your TastyTrade account for live trading</p>
+            
+            <% if Rails.env.sandbox? %>
+              <div class="alert alert-warning">
+                <strong>🧪 Sandbox Mode Active</strong><br>
+                <small>
+                  • Use sandbox credentials from <a href="https://developer.tastytrade.com/" target="_blank">developer.tastytrade.com</a><br>
+                  • These are NOT your live trading credentials<br>
+                  • Connecting to: <%= ENV['TASTYTRADE_API_URL'] %>
+                </small>
+              </div>
+            <% elsif Rails.env.production? %>
+              <div class="alert alert-danger">
+                <strong>⚠️ Live Trading Mode</strong><br>
+                <small>
+                  • Use your real TastyTrade credentials<br>
+                  • Real money trades will be executed<br>
+                  • Connecting to: <%= ENV['TASTYTRADE_API_URL'] %>
+                </small>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <strong>🔧 Development Mode</strong><br>
+                <small>
+                  • Use sandbox or test credentials<br>
+                  • Connecting to: <%= ENV['TASTYTRADE_API_URL'] %>
+                </small>
+              </div>
+            <% end %>
 
             <div class="mb-3">
-              <%= form.label :tastytrade_username, "TastyTrade Username", class: "form-label" %>
-              <%= form.text_field :tastytrade_username, class: "form-control" %>
+              <%= form.label :tastytrade_username, "TastyTrade Username/Email", class: "form-label" %>
+              <%= form.text_field :tastytrade_username, class: "form-control", 
+                  placeholder: Rails.env.sandbox? ? "sandbox-username" : "your.email@example.com" %>
+              <div class="form-text">Your TastyTrade login email or username</div>
             </div>
 
             <div class="mb-3">
               <%= form.label :tastytrade_password, "TastyTrade Password", class: "form-label" %>
               <%= form.password_field :tastytrade_password, class: "form-control" %>
+              <div class="form-text">Your TastyTrade account password</div>
             </div>
 
             <div class="d-grid">

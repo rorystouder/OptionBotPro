@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_29_000005) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_30_105143) do
   create_table "order_legs", force: :cascade do |t|
     t.integer "order_id", null: false
     t.string "symbol", null: false
@@ -45,6 +45,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_000005) do
     t.datetime "cancelled_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "strategy"
+    t.string "legs"
+    t.date "expiration"
+    t.decimal "expected_credit"
+    t.decimal "max_loss"
+    t.decimal "pop"
+    t.text "thesis"
+    t.decimal "model_score"
+    t.decimal "momentum_z"
+    t.decimal "flow_z"
     t.index ["created_at"], name: "index_orders_on_created_at"
     t.index ["status"], name: "index_orders_on_status"
     t.index ["symbol"], name: "index_orders_on_symbol"
@@ -102,6 +112,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_000005) do
     t.index ["user_id"], name: "index_positions_on_user_id"
   end
 
+  create_table "sandbox_test_results", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.datetime "test_timestamp"
+    t.integer "total_tests"
+    t.integer "passed_tests"
+    t.integer "failed_tests"
+    t.decimal "success_rate"
+    t.text "test_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sandbox_test_results_on_user_id"
+  end
+
+  create_table "trade_scan_results", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.datetime "scan_timestamp"
+    t.integer "trades_found"
+    t.text "scan_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_trade_scan_results_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "password_digest", null: false
@@ -120,4 +153,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_000005) do
   add_foreign_key "orders", "users"
   add_foreign_key "portfolio_protections", "users"
   add_foreign_key "positions", "users"
+  add_foreign_key "sandbox_test_results", "users"
+  add_foreign_key "trade_scan_results", "users"
 end

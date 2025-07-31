@@ -1,0 +1,112 @@
+#!/usr/bin/env ruby
+
+# Test TastyTrade authentication
+require_relative '../config/environment'
+require 'io/console'
+
+puts "🔐 TastyTrade Authentication Test"
+puts "=" * 50
+puts
+
+# Check environment
+puts "Environment: #{Rails.env}"
+puts "API URL: #{ENV['TASTYTRADE_API_URL']}"
+puts
+
+# Get credentials
+if ENV['TASTYTRADE_USERNAME'].present? && ENV['TASTYTRADE_PASSWORD'].present?
+  puts "Using credentials from environment variables..."
+  username = ENV['TASTYTRADE_USERNAME']
+  password = ENV['TASTYTRADE_PASSWORD']
+else
+  print "Enter TastyTrade username/email: "
+  username = gets.chomp
+  
+  print "Enter TastyTrade password: "
+  password = STDIN.noecho(&:gets).chomp
+  puts
+end
+
+puts
+puts "Testing authentication..."
+
+begin
+  auth_service = Tastytrade::AuthService.new
+  result = auth_service.authenticate(
+    username: username,
+    password: password
+  )
+  
+  puts "✅ Authentication successful!"
+  puts
+  
+  if result['data']
+    puts "Account Information:"
+    puts "-" * 30
+    
+    if result['data']['user']
+      user_data = result['data']['user']
+      puts "User: #{user_data['email'] || user_data['username']}"
+    end
+    
+    if result['data']['customer']
+      customer_data = result['data']['customer']
+      puts "Customer ID: #{customer_data['id']}"
+      puts "Account Status: #{customer_data['status']}"
+    end
+    
+    if result['data']['session-token']
+      puts "Session Token: #{result['data']['session-token'][0..20]}..."
+      puts "Token stored in cache for 24 hours"
+    end
+  end
+  
+  # Test token validation
+  puts
+  puts "Testing token validation..."
+  if auth_service.validate_token(username)
+    puts "✅ Token is valid and working"
+  else
+    puts "❌ Token validation failed"
+  end
+  
+  # Test API access
+  puts
+  puts "Testing API access..."
+  api_service = Tastytrade::ApiService.new(
+    User.new(email: username, tastytrade_customer_id: result.dig('data', 'customer', 'id'))
+  )
+  
+  begin
+    if result.dig('data', 'customer', 'id')
+      accounts = api_service.get_accounts
+      puts "✅ API access confirmed - Found #{accounts&.size || 0} accounts"
+    else
+      puts "⚠️  No customer ID found - may need to check account setup"
+    end
+  rescue => e
+    puts "❌ API access failed: #{e.message}"
+  end
+  
+rescue Tastytrade::AuthService::AuthenticationError => e
+  puts "❌ Authentication failed: #{e.message}"
+  puts
+  puts "Possible reasons:"
+  puts "- Incorrect username/password"
+  puts "- Using production credentials on sandbox (or vice versa)"
+  puts "- Account locked or suspended"
+  puts "- API endpoint mismatch"
+rescue => e
+  puts "❌ Unexpected error: #{e.message}"
+  puts e.backtrace.first(5).join("\n")
+end
+
+puts
+puts "Test complete!"
+puts
+puts "Next steps:"
+puts "1. If sandbox: Get sandbox credentials at https://developer.tastytrade.com/"
+puts "2. If production: Use your regular TastyTrade login credentials"
+puts "3. Make sure API URL matches your environment:"
+puts "   - Sandbox: https://api.cert.tastyworks.com"
+puts "   - Production: https://api.tastyworks.com"
