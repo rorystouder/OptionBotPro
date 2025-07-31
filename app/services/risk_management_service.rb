@@ -3,10 +3,14 @@ class RiskManagementService
   include ActiveModel::Attributes
   
   # Risk Management Constants - NEVER CHANGE THESE WITHOUT CAREFUL CONSIDERATION
+  # Updated to follow TRADING_RULES.md and industry best practices
   MINIMUM_CASH_RESERVE_PERCENTAGE = 25.0  # Must keep 25% of buying power in reserve
-  MAX_SINGLE_TRADE_PERCENTAGE = 10.0      # No single trade can exceed 10% of portfolio
-  MAX_DAILY_LOSS_PERCENTAGE = 5.0         # Stop all trading if daily loss exceeds 5%
+  MAX_SINGLE_TRADE_PERCENTAGE = 0.5       # No single trade can exceed 0.5% of NAV (TRADING_RULES.md)
+  MAX_DAILY_LOSS_PERCENTAGE = 3.0         # Stop all trading if daily loss exceeds 3% (industry standard)
   MAX_TOTAL_EXPOSURE_PERCENTAGE = 75.0    # Maximum portfolio exposure (inverse of reserve)
+  MAX_CONCURRENT_POSITIONS = 20           # Maximum 20 concurrent positions (TRADING_RULES.md)
+  MAX_DRAWDOWN_PERCENTAGE = 10.0          # Maximum drawdown limit (TRADING_RULES.md)
+  VAR_DAILY_LIMIT_PERCENTAGE = 2.0        # 1-day VaR ≤ 2% of NAV (TRADING_RULES.md)
   
   def initialize(user, account_id)
     @user = user
@@ -53,6 +57,9 @@ class RiskManagementService
       check_daily_loss_limit(result, account_data)
       check_position_concentration(result, order_params, account_data)
       check_maximum_exposure(result, trade_cost)
+      check_maximum_positions(result, account_data)
+      check_maximum_drawdown(result, account_data)
+      check_var_limit(result, account_data, trade_cost)
       check_account_restrictions(result, account_data)
       
       # Trade is allowed only if no violations
@@ -224,6 +231,49 @@ class RiskManagementService
     end
   end
   
+  def check_maximum_positions(result, account_data)
+    current_positions = account_data[:positions]
+    active_positions = current_positions.count { |pos| pos['market-value'].to_f.abs > 0 }
+    
+    if active_positions >= MAX_CONCURRENT_POSITIONS
+      result[:violations] << "Maximum concurrent positions limit reached (#{MAX_CONCURRENT_POSITIONS})"
+      result[:violations] << "Current positions: #{active_positions}"
+    end
+  end
+
+  def check_maximum_drawdown(result, account_data)
+    # Calculate trailing drawdown - would need historical high water mark
+    # For now, check current daily PnL as proxy for drawdown risk
+    daily_pnl_percentage = calculate_daily_pnl_percentage(account_data)
+    
+    if daily_pnl_percentage <= -MAX_DRAWDOWN_PERCENTAGE
+      result[:violations] << "Maximum drawdown limit exceeded (#{MAX_DRAWDOWN_PERCENTAGE}%)"
+      result[:violations] << "Current drawdown: #{daily_pnl_percentage.round(2)}%"
+      
+      # Trigger emergency stop for severe drawdown
+      emergency_stop!("Maximum drawdown exceeded: #{daily_pnl_percentage.round(2)}%")
+    end
+  end
+
+  def check_var_limit(result, account_data, trade_cost)
+    # Simplified VaR calculation - in production would use historical simulation
+    # or Monte Carlo methods with options pricing models
+    portfolio_value = account_data[:total_portfolio_value]
+    var_limit = portfolio_value * (VAR_DAILY_LIMIT_PERCENTAGE / 100.0)
+    
+    # Estimate potential loss from trade based on options Greeks if available
+    # For now, use conservative estimate of 50% of trade cost as potential daily loss
+    estimated_daily_risk = trade_cost * 0.5
+    
+    current_portfolio_risk = calculate_current_portfolio_risk(account_data)
+    total_risk = current_portfolio_risk + estimated_daily_risk
+    
+    if total_risk > var_limit
+      result[:violations] << "Trade would exceed 1-day VaR limit (#{VAR_DAILY_LIMIT_PERCENTAGE}% of NAV)"
+      result[:violations] << "VaR limit: $#{var_limit.round(2)}, Estimated risk: $#{total_risk.round(2)}"
+    end
+  end
+
   def check_account_restrictions(result, account_data)
     # Check for pattern day trader restrictions
     if account_data[:buying_power] < 25000 && account_data[:day_trading_buying_power] <= 0
@@ -259,13 +309,34 @@ class RiskManagementService
     daily_pnl_pct = calculate_daily_pnl_percentage(account_data)
     exposure_pct = calculate_exposure_percentage(account_data)
     
-    if daily_pnl_pct <= -3.0 || exposure_pct >= 90.0
+    # Updated thresholds to align with new risk limits
+    if daily_pnl_pct <= -2.5 || exposure_pct >= 90.0
       'high_risk'
-    elsif daily_pnl_pct <= -1.0 || exposure_pct >= 80.0
+    elsif daily_pnl_pct <= -1.5 || exposure_pct >= 80.0
       'medium_risk'
     else
       'low_risk'
     end
+  end
+
+  def calculate_current_portfolio_risk(account_data)
+    # Simplified portfolio risk calculation
+    # In production, would use Greeks and volatility data
+    positions = account_data[:positions]
+    
+    # Estimate risk as percentage of total position value based on asset type
+    total_risk = positions.sum do |pos|
+      market_value = pos['market-value'].to_f.abs
+      
+      # Higher risk multiplier for options vs stocks
+      if pos['symbol'].to_s.include?('/') # Options typically have / in symbol
+        market_value * 0.3 # 30% daily risk for options positions
+      else
+        market_value * 0.1 # 10% daily risk for stock positions
+      end
+    end
+    
+    total_risk
   end
   
   def cancel_all_pending_orders

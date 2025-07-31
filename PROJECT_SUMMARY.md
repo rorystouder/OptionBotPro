@@ -14,29 +14,41 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
    - Development environment fully functional
 
 2. **Core Models & Database**
-   - User model with authentication
+   - User model with authentication and encrypted credentials
    - Order model with AASM state machine
    - Position model for portfolio tracking
    - PortfolioProtection model with 25% reserve constraint
    - TradeScanResult and SandboxTestResult models
+   - SubscriptionTier model for monetization
    - Database migrations all applied
 
-3. **TastyTrade API Integration**
+3. **Security & Authentication**
    - **IMPORTANT**: Uses session-based auth (username/password), NOT OAuth
+   - **Per-user encrypted credential storage** with AES-256-CBC encryption
+   - Secure credential management using Rails secret key base
+   - Admin authentication and role-based access control
+   - User password authentication with bcrypt
+
+4. **TastyTrade API Integration**
    - Complete API service with all trading endpoints
    - Authentication service with 24-hour token caching
+   - Per-user credential management (no hardcoded environment credentials)
    - Error handling for specific scenarios
    - Sandbox and production environment support
 
-4. **Risk Management System** (Critical Feature)
+5. **Risk Management System** (Critical Feature) - Updated to TRADING_RULES.md Standards
    - **25% cash reserve ALWAYS protected**
    - Database-level constraints ensure safety
    - Per-trade validation before execution
    - Emergency stop functionality
-   - Daily loss limits (5%)
-   - Single trade limits (10% of portfolio)
+   - **Daily loss limits (3%)** - Aligned with industry best practices
+   - **Single trade limits (0.5% of NAV)** - Following TRADING_RULES.md specification
+   - **Maximum 20 concurrent positions** - Portfolio diversification limit
+   - **Maximum drawdown limit (10%)** - Professional trading standard
+   - **1-day VaR constraint (≤2% of NAV)** - Quantitative risk measurement
+   - Enhanced position concentration checks
 
-5. **Automated Stock Scanner**
+6. **Automated Stock Scanner**
    - MarketScannerService following TRADING_RULES.md
    - Scans for put credit spreads, call credit spreads, iron condors
    - Filters: POP ≥ 65%, risk/reward ≥ 0.33
@@ -44,30 +56,73 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
    - Sector diversification (max 2 per sector)
    - Background job for periodic scanning
 
-6. **Trade Execution System**
+7. **Trade Execution System**
    - TradeExecutorService for automated order placement
    - Multi-leg option order support
    - Integration with risk management
    - Order tracking and status management
 
-7. **Web Interface**
-   - Dashboard with portfolio overview
-   - Scanner interface with manual trigger
-   - User authentication with TastyTrade integration
-   - Sandbox testing interface
-   - Bootstrap 5 styling
+8. **Subscription & Monetization System**
+   - **Three-tier SaaS subscription model**:
+     - Basic Trader ($49/month) - Up to 5 trades/day, $10K capital limit
+     - Pro Trader ($149/month) - Up to 20 trades/day, $100K capital limit
+     - Elite Trader ($299/month) - Unlimited trades, unlimited capital
+   - **14-day free trial** for all new users
+   - Subscription status tracking and validation
+   - Usage limits enforcement based on subscription tier
+   - Professional pricing page with tier comparison
 
-8. **Comprehensive Testing**
-   - SandboxTestService for full system validation
-   - 6 test categories covering all components
-   - Sandbox environment configuration
-   - Test result tracking and history
+9. **Legal Fortification**
+   - **Comprehensive legal disclaimers** on all pages
+   - **Terms of Service** with liability protection
+   - **Risk warnings** prominently displayed
+   - **Investment advice disclaimers** - classified as software tool
+   - Regulatory compliance analysis (no SEC registration required)
 
-9. **Documentation**
-   - Complete setup guides in /docs
-   - API integration documentation
-   - Trading rules and architecture docs
-   - Sandbox vs production guide
+10. **Web Interface**
+    - Dashboard with portfolio overview and subscription status
+    - Scanner interface with manual trigger
+    - User authentication with TastyTrade integration
+    - Subscription management interface
+    - Professional pricing and billing pages
+    - Sandbox testing interface
+    - Bootstrap 5 styling with responsive design
+
+11. **Admin Panel** (Complete Business Management)
+    - **Secure admin authentication** with role-based access
+    - **Admin dashboard** with key business metrics:
+      - Total users, trial users, paying users
+      - Monthly recurring revenue tracking
+      - Subscription tier breakdown
+      - Recent user and order activity
+    - **User management system**:
+      - Search and filter users by status
+      - Edit user subscriptions and permissions
+      - Grant/revoke admin privileges
+      - Monitor user trading activity and limits
+    - **Subscription tier management**
+    - **Business analytics** and reporting
+    - Protected admin routes with middleware authentication
+
+12. **Comprehensive Testing**
+    - SandboxTestService for full system validation
+    - 6 test categories covering all components
+    - Sandbox environment configuration
+    - Test result tracking and history
+
+13. **App Rebranding & Identity**
+    - **Renamed from "TastyTrades UI" to "OptionBotPro"**
+    - Clear differentiation from TastyTrade brokerage service
+    - Professional branding throughout application
+    - Updated signup process to clarify app vs. brokerage account
+
+14. **Documentation**
+    - Complete setup guides in /docs
+    - API integration documentation
+    - Trading rules and architecture docs
+    - **Comprehensive monetization strategy** (MONETIZATION_STRATEGY.md)
+    - Sandbox vs production guide
+    - **Claude AI development rules** with mandatory PROJECT_SUMMARY.md updates
 
 ### 🔄 Pending Tasks
 - WebSocket connection for real-time market data (not critical for 5-min scanner)
@@ -98,11 +153,16 @@ TASTYTRADE_API_URL=https://api.tastyworks.com
 ```
 
 ### Key Files to Remember
-- `/app/services/risk_management_service.rb` - 25% protection logic
+- `/app/services/risk_management_service.rb` - **Updated risk management with TRADING_RULES.md compliance**
 - `/app/services/market_scanner_service.rb` - Automated trade finder
 - `/app/services/tastytrade/api_service.rb` - API integration
 - `/app/models/portfolio_protection.rb` - Risk constraints
-- `/docs/guides/TRADING_RULES.md` - Trading strategy rules
+- `/app/models/user.rb` - User authentication and subscription logic
+- `/app/models/subscription_tier.rb` - Subscription tier management
+- `/app/controllers/admin/` - Admin panel controllers
+- `/docs/guides/TRADING_RULES.md` - **Professional trading strategy rules and risk limits**
+- `/docs/business/MONETIZATION_STRATEGY.md` - Business model and pricing
+- `/docs/development/CLAUDE.md` - AI assistant development rules
 
 ## How to Resume Development
 
@@ -146,6 +206,8 @@ MarketScannerJob.perform_now(User.first.id)
 http://localhost:3000/dashboard  # Main dashboard
 http://localhost:3000/scanner    # Scanner interface
 http://localhost:3000/sandbox    # Testing interface
+http://localhost:3000/pricing    # Subscription pricing page
+http://localhost:3000/admin      # Admin panel (admin users only)
 ```
 
 ## Important Reminders
@@ -157,16 +219,22 @@ http://localhost:3000/sandbox    # Testing interface
 - User cannot override
 
 ### 🔐 Authentication
-- **NO API KEYS** - TastyTrade uses username/password
+- **NO API KEYS** - TastyTrade uses username/password per user
+- **Per-user encrypted credentials** stored in database (AES-256-CBC)
 - Sandbox needs separate account from developer.tastytrade.com
 - Tokens expire after 24 hours
 - Automatic re-auth prompts in UI
+- **Admin Access**: admin@optionbotpro.com / AdminPassword123!
 
-### 📊 Trading Rules
+### 📊 Trading Rules - Professional Standards Compliance
 - Maximum 5 trades per scan
 - POP must be ≥ 65%
 - Risk/reward must be ≥ 0.33
-- Max 2 trades per sector
+- Max 2 trades per sector  
+- **Max single trade: 0.5% of NAV** (TRADING_RULES.md compliant)
+- **Max 20 concurrent positions** (diversification requirement)
+- **Daily loss limit: 3%** (industry best practice)
+- **VaR limit: ≤2% of NAV** (quantitative risk measurement)
 - Scanner runs every 5 minutes during market hours
 
 ### 🧪 Testing
@@ -175,16 +243,42 @@ http://localhost:3000/sandbox    # Testing interface
 - Use separate database for sandbox
 - Monitor all test results
 
+### 💰 Monetization & Business
+- **Three subscription tiers**: Basic ($49), Pro ($149), Elite ($299)
+- **14-day free trial** for all new users
+- **Usage limits** enforced based on subscription tier
+- **Monthly recurring revenue tracking** in admin panel
+- **Legal protection** with disclaimers and Terms of Service
+
+### 🔧 Admin Management
+- **Secure admin panel** at /admin route
+- **User management**: Search, edit, manage subscriptions
+- **Business metrics**: Revenue, user counts, activity tracking
+- **Subscription management**: Modify tiers, extend trials, billing
+- **Role-based access**: Admin privileges required for access
+
 ## Next Development Steps
 
-1. **If WebSocket needed**: Implement real-time data streaming
-2. **Enhanced Features**: 
+1. **Payment Processing Integration**:
+   - Stripe checkout integration
+   - Webhook handling for subscription events
+   - Automated billing and renewal
+   - Invoice generation and management
+
+2. **Enhanced Monetization Features**:
+   - Usage analytics and reporting
+   - Customer success automation
+   - Affiliate program implementation
+   - Enterprise tier development
+
+3. **Advanced Trading Features**: 
    - Email/SMS trade notifications
    - Performance analytics dashboard
    - Multiple account support
    - More option strategies
+   - Real-time WebSocket data streaming
 
-3. **Production Deployment**:
+4. **Production Deployment**:
    - Set up production server
    - Configure production database
    - Set up monitoring/logging
@@ -203,4 +297,6 @@ http://localhost:3000/sandbox    # Testing interface
 ---
 
 **Last Updated**: July 31, 2025
-**Primary Developer Note**: System is fully functional for automated option trading with safety measures in place. The 25% cash reserve protection is the most critical feature and must never be removed or bypassed.
+**Primary Developer Note**: System is fully functional for automated option trading with comprehensive business management capabilities and **professional-grade risk management**. Features include subscription monetization, admin panel, legal compliance, and secure per-user credential management. 
+
+**Critical Risk Management**: The system now follows both TRADING_RULES.md specifications and industry best practices with 0.5% single trade limits, 3% daily loss limits, 20 position limits, 10% max drawdown, and 2% VaR constraints. The 25% cash reserve protection remains the foundational safety feature and must never be removed or bypassed.

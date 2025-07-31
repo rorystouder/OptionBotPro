@@ -152,6 +152,7 @@ When implementing trading features:
 - Keep API documentation current
 - Document configuration changes
 - Add troubleshooting guides
+- **ALWAYS update PROJECT_SUMMARY.md when adding new features**
 
 ## PACKAGE PREFERENCES
 
