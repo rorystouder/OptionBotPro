@@ -8,9 +8,12 @@ class User < ApplicationRecord
   has_many :trade_scan_results, dependent: :destroy
   has_many :sandbox_test_results, dependent: :destroy
   
+  belongs_to :subscription_tier, optional: true
+  
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :first_name, :last_name, presence: true
   validates :encrypted_tastytrade_username, :encrypted_tastytrade_password, presence: true
+  validates :subscription_status, inclusion: { in: %w[trial active past_due canceled suspended] }
   
   scope :active, -> { where(active: true) }
   
@@ -108,6 +111,69 @@ class User < ApplicationRecord
   def tastytrade_account_id
     # TastyTrade uses username as account identifier
     tastytrade_username
+  end
+  
+  # Subscription management methods
+  def on_trial?
+    subscription_status == 'trial' && trial_active?
+  end
+  
+  def trial_active?
+    trial_ends_at.present? && trial_ends_at > Time.current
+  end
+  
+  def trial_expired?
+    trial_ends_at.present? && trial_ends_at <= Time.current
+  end
+  
+  def subscription_active?
+    %w[trial active].include?(subscription_status) && !subscription_expired?
+  end
+  
+  def subscription_expired?
+    return false if on_trial?
+    subscription_ends_at.present? && subscription_ends_at <= Time.current
+  end
+  
+  def can_trade?
+    subscription_active? && !has_active_emergency_stops?
+  end
+  
+  def daily_trades_remaining
+    return Float::INFINITY if subscription_tier&.unlimited_trades?
+    
+    max_trades = subscription_tier&.max_daily_trades || 0
+    today_trades = orders.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day).count
+    [max_trades - today_trades, 0].max
+  end
+  
+  def can_place_trade?(trade_amount = 0)
+    return false unless can_trade?
+    return false if daily_trades_remaining <= 0
+    
+    # Check trading capital limits
+    if subscription_tier&.max_trading_capital.present? && trade_amount > 0
+      return false if trade_amount > subscription_tier.max_trading_capital
+    end
+    
+    true
+  end
+  
+  def subscription_tier_name
+    subscription_tier&.name || 'No Subscription'
+  end
+  
+  def days_until_trial_ends
+    return 0 unless trial_active?
+    ((trial_ends_at - Time.current) / 1.day).ceil
+  end
+  
+  def initialize_trial
+    return if trial_ends_at.present?
+    
+    self.trial_ends_at = 14.days.from_now
+    self.subscription_status = 'trial'
+    save!
   end
   
   private
