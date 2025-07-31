@@ -1,0 +1,152 @@
+<% content_for :title, "Schema: #{@table_name}" %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+          <i class="bi bi-diagram-3"></i> Schema: <code><%= @table_name %></code>
+        </h1>
+        <div class="btn-group">
+          <%= link_to admin_database_table_path(@table_name), class: "btn btn-outline-primary" do %>
+            <i class="bi bi-eye"></i> View Data
+          <% end %>
+          <%= link_to admin_database_path, class: "btn btn-outline-secondary" do %>
+            <i class="bi bi-arrow-left"></i> Back to Database
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schema Information -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-info-circle"></i> Table Schema Details
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Column ID</th>
+                  <th>Column Name</th>
+                  <th>Data Type</th>
+                  <th>Not Null</th>
+                  <th>Default Value</th>
+                  <th>Primary Key</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @schema.each do |column| %>
+                  <tr>
+                    <td><%= column['cid'] %></td>
+                    <td>
+                      <code><%= column['name'] %></code>
+                    </td>
+                    <td>
+                      <span class="badge bg-secondary"><%= column['type'] %></span>
+                    </td>
+                    <td>
+                      <% if column['notnull'] == 1 %>
+                        <span class="badge bg-danger">NOT NULL</span>
+                      <% else %>
+                        <span class="badge bg-success">NULLABLE</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if column['dflt_value'] %>
+                        <code><%= column['dflt_value'] %></code>
+                      <% else %>
+                        <span class="text-muted">None</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if column['pk'] == 1 %>
+                        <span class="badge bg-warning">PRIMARY KEY</span>
+                      <% else %>
+                        <span class="text-muted">-</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indexes -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-speedometer"></i> Table Indexes
+          </h5>
+        </div>
+        <div class="card-body">
+          <% if @indexes.any? %>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Index Name</th>
+                    <th>Unique</th>
+                    <th>Origin</th>
+                    <th>Partial</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @indexes.each do |index| %>
+                    <tr>
+                      <td><code><%= index['name'] %></code></td>
+                      <td>
+                        <% if index['unique'] == 1 %>
+                          <span class="badge bg-info">UNIQUE</span>
+                        <% else %>
+                          <span class="text-muted">Non-unique</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% case index['origin'] %>
+                        <% when 'c' %>
+                          <span class="badge bg-primary">CREATE INDEX</span>
+                        <% when 'u' %>
+                          <span class="badge bg-success">UNIQUE</span>
+                        <% when 'pk' %>
+                          <span class="badge bg-warning">PRIMARY KEY</span>
+                        <% else %>
+                          <span class="badge bg-secondary"><%= index['origin'] %></span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if index['partial'] == 1 %>
+                          <span class="badge bg-warning">PARTIAL</span>
+                        <% else %>
+                          <span class="text-muted">Full</span>
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center text-muted py-4">
+              <i class="bi bi-speedometer" style="font-size: 3rem; opacity: 0.5;"></i>
+              <p class="mt-2">No custom indexes found for this table</p>
+              <small>Only primary key and unique constraints are shown</small>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -107,6 +107,12 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
       - Admin profile management
       - Security best practices guide
       - System information display
+    - **Database management interface**:
+      - SQLite database browser and table viewer
+      - Secure SQL query tool (SELECT-only)
+      - Schema inspector with column details and indexes
+      - Database statistics and health monitoring
+      - Built-in security with admin-only access
     - Protected admin routes with middleware authentication
 
 12. **Comprehensive Testing**
@@ -174,7 +180,10 @@ TASTYTRADE_API_URL=https://api.tastyworks.com
 - `/app/controllers/admin/` - Admin panel controllers
 - `/app/controllers/admin/settings_controller.rb` - **In-app admin password management**
 - `/app/views/admin/settings/show.html.erb` - **Admin settings and security interface**
+- `/app/controllers/admin/database_controller.rb` - **SQLite database management interface**
+- `/app/views/admin/database/` - **Database browser, query tool, and schema views**
 - `/lib/tasks/admin.rake` - **Command-line admin management tasks**
+- `/docs/database/DATABASE_MANAGEMENT.md` - **Comprehensive database management guide**
 - `/docs/guides/TRADING_RULES.md` - **Professional trading strategy rules and risk limits**
 - `/docs/business/MONETIZATION_STRATEGY.md` - Business model and pricing
 - `/docs/development/CLAUDE.md` - AI assistant development rules
@@ -222,8 +231,9 @@ http://localhost:3000/dashboard      # Main dashboard
 http://localhost:3000/scanner      # Scanner interface
 http://localhost:3000/sandbox      # Testing interface
 http://localhost:3000/pricing      # Subscription pricing page
-http://localhost:3000/admin        # Admin panel (admin users only)
+http://localhost:3000/admin          # Admin panel (admin users only)
 http://localhost:3000/admin/settings # Admin password/settings management
+http://localhost:3000/admin/database # SQLite database management interface
 ```
 
 ## Important Reminders
@@ -272,8 +282,10 @@ http://localhost:3000/admin/settings # Admin password/settings management
 - **Business metrics**: Revenue, user counts, activity tracking
 - **Subscription management**: Modify tiers, extend trials, billing
 - **Admin settings**: In-app password change, profile management, security tips
+- **Database management**: Built-in SQLite browser, query tool, schema inspector
 - **Role-based access**: Admin privileges required for access
 - **Command-line tools**: Rails tasks for secure admin management (`rails admin:update_password`)
+- **External tools guide**: Comprehensive wiki for DB Browser, command line, VSCode extensions
 
 ## Next Development Steps
 
