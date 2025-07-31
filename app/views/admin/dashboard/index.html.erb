@@ -1,0 +1,191 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Admin Dashboard</h1>
+  <div class="text-muted">
+    <i class="bi bi-clock"></i> Last updated: <%= Time.current.strftime("%b %d, %Y at %l:%M %p") %>
+  </div>
+</div>
+
+<!-- Key Metrics Cards -->
+<div class="row mb-4">
+  <div class="col-md-2">
+    <div class="card text-center bg-primary text-white">
+      <div class="card-body">
+        <h2 class="card-title"><%= @stats[:total_users] %></h2>
+        <p class="card-text">Total Users</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-2">
+    <div class="card text-center bg-warning text-dark">
+      <div class="card-body">
+        <h2 class="card-title"><%= @stats[:trial_users] %></h2>
+        <p class="card-text">Trial Users</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-2">
+    <div class="card text-center bg-success text-white">
+      <div class="card-body">
+        <h2 class="card-title"><%= @stats[:paying_users] %></h2>
+        <p class="card-text">Paying Users</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-2">
+    <div class="card text-center bg-info text-white">
+      <div class="card-body">
+        <h2 class="card-title"><%= @stats[:total_orders] %></h2>
+        <p class="card-text">Total Orders</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-2">
+    <div class="card text-center bg-secondary text-white">
+      <div class="card-body">
+        <h2 class="card-title"><%= @stats[:active_users] %></h2>
+        <p class="card-text">Active Users</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-2">
+    <div class="card text-center bg-dark text-white">
+      <div class="card-body">
+        <h2 class="card-title">$<%= number_with_delimiter(@stats[:monthly_revenue], precision: 0) %></h2>
+        <p class="card-text">Monthly Revenue</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Subscription Breakdown -->
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Subscription Tier Breakdown</h5>
+      </div>
+      <div class="card-body">
+        <% if @subscription_breakdown.any? %>
+          <% @subscription_breakdown.each do |tier, count| %>
+            <div class="d-flex justify-content-between mb-2">
+              <span><%= tier %></span>
+              <span class="badge bg-primary"><%= count %></span>
+            </div>
+          <% end %>
+        <% else %>
+          <p class="text-muted">No active subscriptions yet</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Quick Actions</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <%= link_to admin_users_path, class: "btn btn-outline-primary" do %>
+            <i class="bi bi-people"></i> Manage Users
+          <% end %>
+          <%= link_to admin_subscription_tiers_path, class: "btn btn-outline-success" do %>
+            <i class="bi bi-credit-card"></i> Manage Subscription Tiers
+          <% end %>
+          <%= link_to admin_metrics_path, class: "btn btn-outline-info" do %>
+            <i class="bi bi-graph-up"></i> View Detailed Metrics
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Users</h5>
+        <%= link_to "View All", admin_users_path, class: "btn btn-sm btn-outline-primary" %>
+      </div>
+      <div class="card-body">
+        <% if @recent_users.any? %>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @recent_users.each do |user| %>
+                  <tr>
+                    <td><%= link_to user.full_name, admin_user_path(user), class: "text-decoration-none" %></td>
+                    <td><%= user.email %></td>
+                    <td>
+                      <span class="badge bg-<%= user.subscription_active? ? 'success' : 'warning' %>">
+                        <%= user.subscription_status.humanize %>
+                      </span>
+                    </td>
+                    <td><%= user.created_at.strftime("%m/%d/%y") %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p class="text-muted">No users yet</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Orders</h5>
+      </div>
+      <div class="card-body">
+        <% if @recent_orders.any? %>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Symbol</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @recent_orders.each do |order| %>
+                  <tr>
+                    <td><%= link_to order.user.full_name, admin_user_path(order.user), class: "text-decoration-none" %></td>
+                    <td><%= order.symbol %></td>
+                    <td>
+                      <span class="badge bg-<%= order.status == 'filled' ? 'success' : 'secondary' %>">
+                        <%= order.status.humanize %>
+                      </span>
+                    </td>
+                    <td><%= order.created_at.strftime("%m/%d/%y") %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p class="text-muted">No orders yet</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

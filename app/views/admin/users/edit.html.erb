@@ -1,0 +1,167 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Edit User: <%= @user.full_name %></h1>
+  <%= link_to admin_user_path(@user), class: "btn btn-outline-secondary" do %>
+    <i class="bi bi-arrow-left"></i> Back to User
+  <% end %>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">User Information</h5>
+      </div>
+      <div class="card-body">
+        <%= form_with model: [:admin, @user], local: true do |form| %>
+          <% if @user.errors.any? %>
+            <div class="alert alert-danger">
+              <h5>Please fix these errors:</h5>
+              <ul class="mb-0">
+                <% @user.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <%= form.label :first_name, class: "form-label" %>
+              <%= form.text_field :first_name, class: "form-control" %>
+            </div>
+            <div class="col-md-6 mb-3">
+              <%= form.label :last_name, class: "form-label" %>
+              <%= form.text_field :last_name, class: "form-control" %>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <%= form.label :email, class: "form-label" %>
+            <%= form.email_field :email, class: "form-control" %>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <%= form.label :subscription_tier_id, "Subscription Tier", class: "form-label" %>
+              <%= form.select :subscription_tier_id, 
+                  options_from_collection_for_select(SubscriptionTier.active.ordered, :id, :name, @user.subscription_tier_id),
+                  { include_blank: "No Subscription" }, 
+                  { class: "form-select" } %>
+            </div>
+            <div class="col-md-6 mb-3">
+              <%= form.label :subscription_status, class: "form-label" %>
+              <%= form.select :subscription_status, 
+                  options_for_select([
+                    ['Trial', 'trial'],
+                    ['Active', 'active'],
+                    ['Past Due', 'past_due'],
+                    ['Canceled', 'canceled'],
+                    ['Suspended', 'suspended']
+                  ], @user.subscription_status), 
+                  {}, { class: "form-select" } %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <%= form.label :trial_ends_at, "Trial Ends At", class: "form-label" %>
+              <%= form.datetime_local_field :trial_ends_at, 
+                  value: @user.trial_ends_at&.strftime("%Y-%m-%dT%H:%M"), 
+                  class: "form-control" %>
+            </div>
+            <div class="col-md-6 mb-3">
+              <%= form.label :subscription_ends_at, "Subscription Ends At", class: "form-label" %>
+              <%= form.datetime_local_field :subscription_ends_at, 
+                  value: @user.subscription_ends_at&.strftime("%Y-%m-%dT%H:%M"), 
+                  class: "form-control" %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="form-check">
+                <%= form.check_box :active, class: "form-check-input" %>
+                <%= form.label :active, "Account Active", class: "form-check-label" %>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="form-check">
+                <%= form.check_box :admin, class: "form-check-input" %>
+                <%= form.label :admin, "Admin User", class: "form-check-label" %>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <%= form.submit "Update User", class: "btn btn-primary" %>
+            <%= link_to "Cancel", admin_user_path(@user), class: "btn btn-outline-secondary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Current Status</h5>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-5">Status:</dt>
+          <dd class="col-sm-7">
+            <span class="badge bg-<%= @user.subscription_active? ? 'success' : 'warning' %>">
+              <%= @user.subscription_status.humanize %>
+            </span>
+          </dd>
+
+          <dt class="col-sm-5">Tier:</dt>
+          <dd class="col-sm-7">
+            <%= @user.subscription_tier&.name || 'None' %>
+          </dd>
+
+          <dt class="col-sm-5">Trial:</dt>
+          <dd class="col-sm-7">
+            <% if @user.trial_active? %>
+              <span class="text-success">Active</span>
+              <small class="text-muted d-block">(<%= pluralize(@user.days_until_trial_ends, 'day') %> left)</small>
+            <% elsif @user.trial_expired? %>
+              <span class="text-danger">Expired</span>
+            <% else %>
+              <span class="text-muted">None</span>
+            <% end %>
+          </dd>
+
+          <dt class="col-sm-5">Joined:</dt>
+          <dd class="col-sm-7"><%= @user.created_at.strftime("%B %d, %Y") %></dd>
+
+          <dt class="col-sm-5">Last Updated:</dt>
+          <dd class="col-sm-7"><%= @user.updated_at.strftime("%B %d, %Y") %></dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="mb-0">Usage Stats</h5>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-6">Orders:</dt>
+          <dd class="col-sm-6"><%= @user.orders.count %></dd>
+
+          <dt class="col-sm-6">Positions:</dt>
+          <dd class="col-sm-6"><%= @user.positions.count %></dd>
+
+          <dt class="col-sm-6">Today's Trades:</dt>
+          <dd class="col-sm-6">
+            <% max_trades = @user.subscription_tier&.max_daily_trades || 0 %>
+            <% remaining = @user.daily_trades_remaining %>
+            <% used = max_trades - remaining %>
+            <%= used %>/<%= max_trades > 0 ? max_trades : '∞' %>
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
