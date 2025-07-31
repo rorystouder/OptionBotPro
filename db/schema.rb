@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_31_152642) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_31_154154) do
   create_table "order_legs", force: :cascade do |t|
     t.integer "order_id", null: false
     t.string "symbol", null: false
@@ -172,7 +172,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_152642) do
     t.string "stripe_customer_id"
     t.string "stripe_subscription_id"
     t.datetime "trial_ends_at"
+    t.boolean "admin", default: false, null: false
     t.index ["active"], name: "index_users_on_active"
+    t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["encrypted_tastytrade_username"], name: "index_users_on_encrypted_tastytrade_username"
     t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"

@@ -16,6 +16,9 @@ class User < ApplicationRecord
   validates :subscription_status, inclusion: { in: %w[trial active past_due canceled suspended] }
   
   scope :active, -> { where(active: true) }
+  scope :admins, -> { where(admin: true) }
+  scope :trial_users, -> { where(subscription_status: 'trial') }
+  scope :paying_users, -> { where(subscription_status: 'active') }
   
   def full_name
     "#{first_name} #{last_name}"

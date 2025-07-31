@@ -4,3 +4,6 @@
 
 # Load subscription tiers
 require_relative 'seeds/subscription_tiers.rb'
+
+# Load admin user
+require_relative 'seeds/admin_user.rb'

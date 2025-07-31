@@ -40,6 +40,11 @@
               <%= link_to "Sandbox", sandbox_path, class: "nav-link text-warning" %>
             <% end %>
             <%= link_to "Subscription", subscription_path, class: "nav-link" %>
+            <% if current_user.admin? %>
+              <%= link_to admin_root_path, class: "nav-link text-info" do %>
+                <i class="bi bi-gear-fill"></i> Admin
+              <% end %>
+            <% end %>
             <%= link_to "Profile", user_path, class: "nav-link" %>
             <%= button_to "Logout", logout_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
           <% else %>
