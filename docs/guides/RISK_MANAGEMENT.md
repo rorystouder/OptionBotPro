@@ -1,6 +1,6 @@
 # Risk Management System
 
-The TastyTrades UI includes comprehensive risk management and portfolio protection features to safeguard your capital during automated trading.
+The OptionBotPro includes comprehensive risk management and portfolio protection features to safeguard your capital during automated trading.
 
 ## 🛡️ Core Protection Features
 

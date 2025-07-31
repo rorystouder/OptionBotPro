@@ -1,4 +1,4 @@
-# Quick Start Guide - TastyTrades UI
+# Quick Start Guide - OptionBotPro
 
 ## 🚀 Getting Started in 5 Minutes
 
@@ -12,7 +12,7 @@ sqlite3 --version # Any recent version
 ### 1. Initial Setup (First Time Only)
 ```bash
 # Clone and enter project
-cd /home/rorystouder/projects/tastytradesUI
+cd /home/rorystouder/projects/OptionBotPro
 
 # Install dependencies
 bundle install

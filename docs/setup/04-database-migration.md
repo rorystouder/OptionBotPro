@@ -1,6 +1,6 @@
 # Database Migration
 
-This guide helps you create the database schema for the TastyTrades UI application.
+This guide helps you create the database schema for the OptionBotPro application.
 
 ## Step 1: Verify Database Connection
 
@@ -53,35 +53,35 @@ bundle exec rails db:migrate
 You should see output showing each migration being applied:
 
 ```
-== 20250729000001 CreateUsers: migrating ======================================
+== 20250731000001 CreateUsers: migrating ======================================
 -- create_table(:users)
 -- add_index(:users, :email, {:unique=>true})
 -- add_index(:users, :tastytrade_customer_id)
 -- add_index(:users, :active)
-== 20250729000001 CreateUsers: migrated (0.0123s) ============================
+== 20250731000001 CreateUsers: migrated (0.0123s) ============================
 
-== 20250729000002 CreateOrders: migrating =====================================
+== 20250731000002 CreateOrders: migrating =====================================
 -- create_table(:orders)
 -- add_index(:orders, [:user_id, :status])
 -- add_index(:orders, :symbol)
 -- add_index(:orders, :tastytrade_order_id, {:unique=>true})
 -- add_index(:orders, :status)
 -- add_index(:orders, :created_at)
-== 20250729000002 CreateOrders: migrated (0.0234s) ===========================
+== 20250731000002 CreateOrders: migrated (0.0234s) ===========================
 
-== 20250729000003 CreateOrderLegs: migrating ==================================
+== 20250731000003 CreateOrderLegs: migrating ==================================
 -- create_table(:order_legs)
 -- add_index(:order_legs, [:order_id, :leg_number], {:unique=>true})
 -- add_index(:order_legs, :symbol)
-== 20250729000003 CreateOrderLegs: migrated (0.0145s) ========================
+== 20250731000003 CreateOrderLegs: migrated (0.0145s) ========================
 
-== 20250729000004 CreatePositions: migrating ==================================
+== 20250731000004 CreatePositions: migrating ==================================
 -- create_table(:positions)
 -- add_index(:positions, [:user_id, :symbol], {:unique=>true})
 -- add_index(:positions, :symbol)
 -- add_index(:positions, :tastytrade_account_id)
 -- add_index(:positions, :last_updated_at)
-== 20250729000004 CreatePositions: migrated (0.0156s) ========================
+== 20250731000004 CreatePositions: migrated (0.0156s) ========================
 ```
 
 ## Step 4: Verify Database Schema
@@ -262,7 +262,7 @@ bundle exec rails db:rollback
 bundle exec rails db:rollback STEP=2
 
 # Rollback to specific version
-bundle exec rails db:migrate VERSION=20250729000001
+bundle exec rails db:migrate VERSION=20250731000001
 ```
 
 ## Verification

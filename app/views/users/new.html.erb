@@ -3,7 +3,8 @@
     <div class="col-md-6">
       <div class="card shadow">
         <div class="card-header bg-success text-white">
-          <h3 class="mb-0">Create Your TastyTrades Account</h3>
+          <h3 class="mb-0">Create Your OptionBotPro Account</h3>
+          <p class="mb-0 small">Connect your existing TastyTrade account for automated trading</p>
         </div>
         <div class="card-body">
           <% if @user && @user.errors.any? %>
@@ -48,7 +49,7 @@
             <div class="mb-3">
               <%= form.label :tastytrade_customer_id, "TastyTrade Customer ID", class: "form-label" %>
               <%= form.text_field :tastytrade_customer_id, class: "form-control", required: true %>
-              <div class="form-text">Your TastyTrade customer ID (required for trading)</div>
+              <div class="form-text">Enter your existing TastyTrade customer ID to enable automated trading</div>
             </div>
 
             <div class="d-grid">

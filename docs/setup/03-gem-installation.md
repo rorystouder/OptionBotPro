@@ -1,6 +1,6 @@
 # Gem Installation
 
-This guide helps you install all Ruby gems required for the TastyTrades UI application.
+This guide helps you install all Ruby gems required for the OptionBotPro application.
 
 ## Step 1: Fix Gem Version Conflicts
 

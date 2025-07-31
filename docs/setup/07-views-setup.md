@@ -1,6 +1,6 @@
 # Views Setup (Optional)
 
-This guide helps you create basic web views for the TastyTrades UI application. This is optional if you're only using the API.
+This guide helps you create basic web views for the OptionBotPro application. This is optional if you're only using the API.
 
 ## Step 1: Create Application Layout
 
@@ -16,7 +16,7 @@ Create `app/views/layouts/application.html.erb`:
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TastyTrades UI</title>
+    <title>OptionBotPro</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -31,7 +31,7 @@ Create `app/views/layouts/application.html.erb`:
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <%= link_to "TastyTrades UI", root_path, class: "navbar-brand" %>
+        <%= link_to "OptionBotPro", root_path, class: "navbar-brand" %>
         
         <div class="navbar-nav ms-auto">
           <% if logged_in? %>
@@ -572,7 +572,7 @@ Create `app/assets/stylesheets/application.css`:
  *= require_self
  */
 
-/* Custom styles for TastyTrades UI */
+/* Custom styles for OptionBotPro */
 body {
   background-color: #f8f9fa;
 }
@@ -658,7 +658,7 @@ import "controllers"
 // Bootstrap JS components
 import "bootstrap"
 
-// Custom JavaScript for TastyTrades UI
+// Custom JavaScript for OptionBotPro
 document.addEventListener('DOMContentLoaded', function() {
   // Form validation
   const forms = document.querySelectorAll('.needs-validation');

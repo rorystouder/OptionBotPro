@@ -1,6 +1,6 @@
-# TastyTrades UI Documentation
+# OptionBotPro Documentation
 
-This directory contains all documentation for the TastyTrades UI application, organized by category for easy navigation.
+This directory contains all documentation for the OptionBotPro application, organized by category for easy navigation.
 
 ## Documentation Structure
 
@@ -117,4 +117,4 @@ If you can't find what you're looking for:
 
 ---
 
-*This documentation is maintained as part of the TastyTrades UI project. Last updated: January 2025*
+*This documentation is maintained as part of the OptionBotPro project. Last updated: January 2025*

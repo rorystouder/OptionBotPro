@@ -1,6 +1,6 @@
-# TastyTrades UI Setup Guide
+# OptionBotPro Setup Guide
 
-This guide walks you through all the manual operations needed to get the TastyTrades UI application running.
+This guide walks you through all the manual operations needed to get the OptionBotPro application running.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ Follow these setup files in order:
 After setup, your application will have:
 
 ```
-tastytradesUI/
+OptionBotPro/
 ├── app/
 │   ├── controllers/         # API and web controllers
 │   ├── models/             # User, Order, Position models
