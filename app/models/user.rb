@@ -10,7 +10,7 @@ class User < ApplicationRecord
   
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :first_name, :last_name, presence: true
-  validates :tastytrade_customer_id, presence: true
+  validates :encrypted_tastytrade_username, :encrypted_tastytrade_password, presence: true
   
   scope :active, -> { where(active: true) }
   
@@ -19,7 +19,7 @@ class User < ApplicationRecord
   end
   
   def tastytrade_authenticated?
-    Rails.cache.exist?("tastytrade_token_#{email}")
+    Rails.cache.exist?("tastytrade_token_#{tastytrade_username}")
   end
   
   # Get or create portfolio protection for an account
@@ -55,9 +55,66 @@ class User < ApplicationRecord
     false
   end
   
+  # TastyTrade credential encryption/decryption
+  def tastytrade_username=(username)
+    return if username.blank?
+    
+    cipher = OpenSSL::Cipher.new('AES-256-CBC')
+    cipher.encrypt
+    cipher.key = encryption_key
+    self.tastytrade_credentials_iv = Base64.encode64(cipher.random_iv)
+    cipher.iv = Base64.decode64(self.tastytrade_credentials_iv)
+    
+    self.encrypted_tastytrade_username = Base64.encode64(cipher.update(username) + cipher.final)
+  end
+  
+  def tastytrade_username
+    return nil if encrypted_tastytrade_username.blank? || tastytrade_credentials_iv.blank?
+    
+    cipher = OpenSSL::Cipher.new('AES-256-CBC')
+    cipher.decrypt
+    cipher.key = encryption_key
+    cipher.iv = Base64.decode64(tastytrade_credentials_iv)
+    
+    decrypted = cipher.update(Base64.decode64(encrypted_tastytrade_username)) + cipher.final
+    decrypted
+  end
+  
+  def tastytrade_password=(password)
+    return if password.blank?
+    
+    cipher = OpenSSL::Cipher.new('AES-256-CBC')
+    cipher.encrypt
+    cipher.key = encryption_key
+    # Use same IV as username for consistency
+    self.tastytrade_credentials_iv ||= Base64.encode64(cipher.random_iv)
+    cipher.iv = Base64.decode64(self.tastytrade_credentials_iv)
+    
+    self.encrypted_tastytrade_password = Base64.encode64(cipher.update(password) + cipher.final)
+  end
+  
+  def tastytrade_password
+    return nil if encrypted_tastytrade_password.blank? || tastytrade_credentials_iv.blank?
+    
+    cipher = OpenSSL::Cipher.new('AES-256-CBC')
+    cipher.decrypt
+    cipher.key = encryption_key
+    cipher.iv = Base64.decode64(tastytrade_credentials_iv)
+    
+    decrypted = cipher.update(Base64.decode64(encrypted_tastytrade_password)) + cipher.final
+    decrypted
+  end
+  
   def tastytrade_account_id
-    # For now, use customer ID as account ID
-    # TODO: Handle multiple accounts per user
-    tastytrade_customer_id
+    # TastyTrade uses username as account identifier
+    tastytrade_username
+  end
+  
+  private
+  
+  def encryption_key
+    # Use Rails' secret key base with user's ID for per-user encryption
+    key_material = "#{Rails.application.secret_key_base}-user-#{id}"
+    Digest::SHA256.digest(key_material)
   end
 end

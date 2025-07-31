@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_105143) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_31_151245) do
   create_table "order_legs", force: :cascade do |t|
     t.integer "order_id", null: false
     t.string "symbol", null: false
@@ -140,13 +140,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_105143) do
     t.string "password_digest", null: false
     t.string "first_name", null: false
     t.string "last_name", null: false
-    t.string "tastytrade_customer_id"
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "encrypted_tastytrade_username"
+    t.string "encrypted_tastytrade_password"
+    t.string "tastytrade_credentials_iv"
     t.index ["active"], name: "index_users_on_active"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["tastytrade_customer_id"], name: "index_users_on_tastytrade_customer_id"
+    t.index ["encrypted_tastytrade_username"], name: "index_users_on_encrypted_tastytrade_username"
   end
 
   add_foreign_key "order_legs", "orders"
