@@ -15,11 +15,11 @@ class OrderLeg < ApplicationRecord
   end
 
   def call_option?
-    option? && symbol.include?('C')
+    option? && symbol.include?("C")
   end
 
   def put_option?
-    option? && symbol.include?('P')
+    option? && symbol.include?("P")
   end
 
   private

@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  skip_before_action :authenticate_user, only: [:new, :create]
+  skip_before_action :authenticate_user, only: [ :new, :create ]
 
   def new
     @user = User.new
@@ -15,7 +15,7 @@ class UsersController < ApplicationController
     if @user.save
       @user.initialize_trial
       session[:user_id] = @user.id
-      redirect_to dashboard_path, notice: 'Account created successfully! Your 14-day free trial has started.'
+      redirect_to dashboard_path, notice: "Account created successfully! Your 14-day free trial has started."
     else
       render :new, status: :unprocessable_entity
     end
@@ -33,7 +33,7 @@ class UsersController < ApplicationController
     @user = current_user
 
     if @user.update(user_params)
-      redirect_to user_path, notice: 'Profile updated successfully'
+      redirect_to user_path, notice: "Profile updated successfully"
     else
       render :edit, status: :unprocessable_entity
     end

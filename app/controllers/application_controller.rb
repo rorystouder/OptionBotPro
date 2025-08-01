@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user
     unless logged_in?
-      redirect_to login_path, alert: 'Please log in to continue'
+      redirect_to login_path, alert: "Please log in to continue"
     end
   end
 
@@ -35,7 +35,7 @@ class ApplicationController < ActionController::Base
 
     unless session[:mfa_verified]
       session[:pending_redirect] = request.fullpath
-      redirect_to mfa_verify_path, alert: 'Please complete MFA verification to continue.'
+      redirect_to mfa_verify_path, alert: "Please complete MFA verification to continue."
     end
   end
 
@@ -46,7 +46,7 @@ class ApplicationController < ActionController::Base
 
     controller_name.in?(mfa_exempt_controllers) ||
     action_name.in?(mfa_exempt_actions) ||
-    (controller_name == 'users' && action_name.in?(%w[new create change_password update_password]))
+    (controller_name == "users" && action_name.in?(%w[new create change_password update_password]))
   end
 
   def set_current_user

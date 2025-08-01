@@ -1,5 +1,5 @@
 class Api::V1::OrdersController < Api::BaseController
-  before_action :set_order, only: [:show, :update, :destroy]
+  before_action :set_order, only: [ :show, :update, :destroy ]
 
   def index
     orders = current_user.orders.includes(:legs).order(created_at: :desc)
@@ -8,7 +8,7 @@ class Api::V1::OrdersController < Api::BaseController
 
     # Paginate results
     page = params[:page].to_i.positive? ? params[:page].to_i : 1
-    per_page = [params[:per_page].to_i, 100].min.positive? ? [params[:per_page].to_i, 100].min : 20
+    per_page = [ params[:per_page].to_i, 100 ].min.positive? ? [ params[:per_page].to_i, 100 ].min : 20
 
     orders = orders.limit(per_page).offset((page - 1) * per_page)
 
@@ -30,14 +30,14 @@ class Api::V1::OrdersController < Api::BaseController
     validator = OrderValidator.new(order_params)
 
     unless validator.valid?
-      render_error('Invalid order parameters', :unprocessable_entity, validator.errors.full_messages)
+      render_error("Invalid order parameters", :unprocessable_entity, validator.errors.full_messages)
       return
     end
 
     # Validate account ownership
     account_id = params[:order][:account_id]
     if account_id.present? && !validate_account_ownership(account_id)
-      render_error('Invalid account ID', :forbidden)
+      render_error("Invalid account ID", :forbidden)
       return
     end
 
@@ -58,25 +58,25 @@ class Api::V1::OrdersController < Api::BaseController
       api_response = api_service.place_order(account_id, build_api_order_params(order))
 
       order.update!(
-        tastytrade_order_id: api_response.dig('data', 'order-id'),
+        tastytrade_order_id: api_response.dig("data", "order-id"),
         tastytrade_account_id: account_id,
         submitted_at: Time.current
       )
       order.submit!
 
-      render_success(order.as_json(include: :legs), 'Order submitted successfully', :created)
+      render_success(order.as_json(include: :legs), "Order submitted successfully", :created)
     end
   rescue ActiveRecord::RecordInvalid => e
-    render_error('Failed to create order', :unprocessable_entity, e.record.errors.full_messages)
+    render_error("Failed to create order", :unprocessable_entity, e.record.errors.full_messages)
   rescue => e
     render_error("Failed to submit order: #{e.message}")
   end
 
   def update
     case params[:action_type]
-    when 'cancel'
+    when "cancel"
       cancel_order
-    when 'modify'
+    when "modify"
       modify_order
     else
       render_error('Invalid action type. Use "cancel" or "modify"')
@@ -98,7 +98,7 @@ class Api::V1::OrdersController < Api::BaseController
     params.require(:order).permit(
       :symbol, :quantity, :order_type, :action, :price, :stop_price,
       :time_in_force,
-      legs: [:symbol, :quantity, :action, :price]
+      legs: [ :symbol, :quantity, :action, :price ]
     )
   end
 
@@ -108,14 +108,14 @@ class Api::V1::OrdersController < Api::BaseController
     accounts = api_service.get_accounts
 
     # Check if the provided account_id belongs to the current user
-    accounts['data']['accounts'].any? { |account| account['account-number'] == account_id }
+    accounts["data"]["accounts"].any? { |account| account["account-number"] == account_id }
   rescue => e
     Rails.logger.error "Failed to validate account ownership: #{e.message}"
     false
   end
 
   def cancel_order
-    return render_error('Order cannot be cancelled') unless @order.may_cancel?
+    return render_error("Order cannot be cancelled") unless @order.may_cancel?
 
     api_service = Tastytrade::ApiService.new(current_user)
     api_service.cancel_order(@order.tastytrade_account_id, @order.tastytrade_order_id)
@@ -123,7 +123,7 @@ class Api::V1::OrdersController < Api::BaseController
     @order.cancel!
     @order.update!(cancelled_at: Time.current)
 
-    render_success(@order, 'Order cancelled successfully')
+    render_success(@order, "Order cancelled successfully")
   rescue => e
     render_error("Failed to cancel order: #{e.message}")
   end
@@ -136,7 +136,7 @@ class Api::V1::OrdersController < Api::BaseController
 
     @order.update!(modifications)
 
-    render_success(@order, 'Order modified successfully')
+    render_success(@order, "Order modified successfully")
   rescue => e
     render_error("Failed to modify order: #{e.message}")
   end
@@ -198,14 +198,14 @@ class OrderValidator
   private
 
   def price_required_for_limit_orders
-    if order_type == 'limit' && price.blank?
-      errors.add(:price, 'is required for limit orders')
+    if order_type == "limit" && price.blank?
+      errors.add(:price, "is required for limit orders")
     end
   end
 
   def stop_price_required_for_stop_orders
-    if order_type&.include?('stop') && stop_price.blank?
-      errors.add(:stop_price, 'is required for stop orders')
+    if order_type&.include?("stop") && stop_price.blank?
+      errors.add(:stop_price, "is required for stop orders")
     end
   end
 end

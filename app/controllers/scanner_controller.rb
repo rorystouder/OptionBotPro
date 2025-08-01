@@ -8,9 +8,9 @@ class ScannerController < ApplicationController
   def scan
     if current_user.tastytrade_authenticated?
       MarketScannerJob.perform_later(current_user.id)
-      redirect_to scanner_path, notice: 'Market scan initiated. Results will appear shortly.'
+      redirect_to scanner_path, notice: "Market scan initiated. Results will appear shortly."
     else
-      redirect_to scanner_path, alert: 'Please authenticate with TastyTrade first.'
+      redirect_to scanner_path, alert: "Please authenticate with TastyTrade first."
     end
   end
 
@@ -18,6 +18,6 @@ class ScannerController < ApplicationController
     @scan = current_user.trade_scan_results.find(params[:id])
     @scan_data = JSON.parse(@scan.scan_data)
   rescue ActiveRecord::RecordNotFound
-    redirect_to scanner_path, alert: 'Scan not found.'
+    redirect_to scanner_path, alert: "Scan not found."
   end
 end

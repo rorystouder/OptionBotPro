@@ -30,7 +30,7 @@ class PortfolioProtection < ApplicationRecord
   end
 
   # Activate emergency stop
-  def activate_emergency_stop!(reason, triggered_by = 'system')
+  def activate_emergency_stop!(reason, triggered_by = "system")
     update!(
       emergency_stop_triggered_at: Time.current,
       emergency_stop_reason: reason,
@@ -60,7 +60,7 @@ class PortfolioProtection < ApplicationRecord
     return 0 if total_buying_power <= 0
 
     available = total_buying_power * ((100 - cash_reserve_percentage) / 100.0)
-    [available, 0].max
+    [ available, 0 ].max
   end
 
   # Calculate maximum trade size

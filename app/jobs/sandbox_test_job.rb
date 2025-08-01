@@ -26,7 +26,7 @@ class SandboxTestJob < ApplicationJob
 
     # Log detailed results for debugging
     results[:tests].each do |test_name, test_result|
-      status_emoji = test_result[:status] == 'PASS' ? '✅' : '❌'
+      status_emoji = test_result[:status] == "PASS" ? "✅" : "❌"
       Rails.logger.info "[SandboxTestJob] #{status_emoji} #{test_name.to_s.humanize}: #{test_result[:message]}"
     end
 

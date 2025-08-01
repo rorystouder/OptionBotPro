@@ -97,7 +97,7 @@ class RiskManagementService
     Rails.cache.write("emergency_stop_#{@user.id}", {
       triggered_at: Time.current,
       reason: reason,
-      triggered_by: 'risk_management_system'
+      triggered_by: "risk_management_system"
     })
 
     # Cancel all pending orders
@@ -127,37 +127,37 @@ class RiskManagementService
     balances = @api_service.get_balances(@account_id)
     positions = @api_service.get_positions(@account_id)
 
-    account_data = account_info.dig('data') || {}
-    balance_data = balances.dig('data') || {}
-    position_data = positions.dig('data', 'items') || []
+    account_data = account_info.dig("data") || {}
+    balance_data = balances.dig("data") || {}
+    position_data = positions.dig("data", "items") || []
 
     {
-      buying_power: balance_data['buying-power'].to_f,
-      cash_balance: balance_data['cash-balance'].to_f,
-      day_trading_buying_power: balance_data['day-trading-buying-power'].to_f,
-      maintenance_requirement: balance_data['maintenance-requirement'].to_f,
+      buying_power: balance_data["buying-power"].to_f,
+      cash_balance: balance_data["cash-balance"].to_f,
+      day_trading_buying_power: balance_data["day-trading-buying-power"].to_f,
+      maintenance_requirement: balance_data["maintenance-requirement"].to_f,
       total_portfolio_value: calculate_total_portfolio_value(balance_data, position_data),
-      daily_pnl: balance_data['daily-pnl'].to_f,
+      daily_pnl: balance_data["daily-pnl"].to_f,
       positions: position_data
     }
   end
 
   def calculate_trade_cost(order_params)
-    if order_params[:order_type] == 'market'
+    if order_params[:order_type] == "market"
       # For market orders, estimate cost based on current quote
       symbol = order_params[:symbol]
       quantity = order_params[:quantity].to_i
 
       begin
         quote = @api_service.get_quote(symbol)
-        price = order_params[:action].include?('buy') ?
-                quote.dig('data', 'ask').to_f :
-                quote.dig('data', 'bid').to_f
-        return (price * quantity).abs
+        price = order_params[:action].include?("buy") ?
+                quote.dig("data", "ask").to_f :
+                quote.dig("data", "bid").to_f
+        (price * quantity).abs
       rescue
         # If we can't get quote, use a conservative estimate
         return order_params[:price].to_f * quantity if order_params[:price]
-        return 1000.0 # Conservative fallback
+        1000.0 # Conservative fallback
       end
     else
       # For limit orders, use the specified price
@@ -209,8 +209,8 @@ class RiskManagementService
 
     # Check if this would create over-concentration in a single symbol
     current_exposure = current_positions
-      .select { |pos| pos['symbol'] == symbol }
-      .sum { |pos| pos['market-value'].to_f.abs }
+      .select { |pos| pos["symbol"] == symbol }
+      .sum { |pos| pos["market-value"].to_f.abs }
 
     trade_cost = calculate_trade_cost(order_params)
     total_exposure = current_exposure + trade_cost
@@ -233,7 +233,7 @@ class RiskManagementService
 
   def check_maximum_positions(result, account_data)
     current_positions = account_data[:positions]
-    active_positions = current_positions.count { |pos| pos['market-value'].to_f.abs > 0 }
+    active_positions = current_positions.count { |pos| pos["market-value"].to_f.abs > 0 }
 
     if active_positions >= MAX_CONCURRENT_POSITIONS
       result[:violations] << "Maximum concurrent positions limit reached (#{MAX_CONCURRENT_POSITIONS})"
@@ -287,8 +287,8 @@ class RiskManagementService
   end
 
   def calculate_total_portfolio_value(balance_data, position_data)
-    cash_value = balance_data['cash-balance'].to_f
-    position_value = position_data.sum { |pos| pos['market-value'].to_f }
+    cash_value = balance_data["cash-balance"].to_f
+    position_value = position_data.sum { |pos| pos["market-value"].to_f }
     cash_value + position_value
   end
 
@@ -311,11 +311,11 @@ class RiskManagementService
 
     # Updated thresholds to align with new risk limits
     if daily_pnl_pct <= -2.5 || exposure_pct >= 90.0
-      'high_risk'
+      "high_risk"
     elsif daily_pnl_pct <= -1.5 || exposure_pct >= 80.0
-      'medium_risk'
+      "medium_risk"
     else
-      'low_risk'
+      "low_risk"
     end
   end
 
@@ -326,10 +326,10 @@ class RiskManagementService
 
     # Estimate risk as percentage of total position value based on asset type
     total_risk = positions.sum do |pos|
-      market_value = pos['market-value'].to_f.abs
+      market_value = pos["market-value"].to_f.abs
 
       # Higher risk multiplier for options vs stocks
-      if pos['symbol'].to_s.include?('/') # Options typically have / in symbol
+      if pos["symbol"].to_s.include?("/") # Options typically have / in symbol
         market_value * 0.3 # 30% daily risk for options positions
       else
         market_value * 0.1 # 10% daily risk for stock positions
@@ -341,11 +341,11 @@ class RiskManagementService
 
   def cancel_all_pending_orders
     begin
-      orders = @api_service.get_orders(@account_id, { status: 'working' })
-      pending_orders = orders.dig('data', 'items') || []
+      orders = @api_service.get_orders(@account_id, { status: "working" })
+      pending_orders = orders.dig("data", "items") || []
 
       pending_orders.each do |order|
-        @api_service.cancel_order(@account_id, order['id'])
+        @api_service.cancel_order(@account_id, order["id"])
         Rails.logger.info "Cancelled order #{order['id']} due to emergency stop"
       end
     rescue => e
@@ -368,7 +368,7 @@ class RiskManagementService
       account_id: @account_id,
       timestamp: Time.current,
       order_params: order_params,
-      decision: result[:allowed] ? 'APPROVED' : 'REJECTED',
+      decision: result[:allowed] ? "APPROVED" : "REJECTED",
       violations: result[:violations],
       account_snapshot: result[:account_data],
       calculations: result[:calculations]

@@ -30,18 +30,18 @@ class Api::V1::PositionsController < Api::BaseController
   private
 
   def sync_positions(positions_data, account_id)
-    return unless positions_data&.dig('data', 'items')
+    return unless positions_data&.dig("data", "items")
 
-    positions_data['data']['items'].each do |position_data|
+    positions_data["data"]["items"].each do |position_data|
       position = current_user.positions.find_or_initialize_by(
-        symbol: position_data['symbol'],
+        symbol: position_data["symbol"],
         tastytrade_account_id: account_id
       )
 
       position.assign_attributes(
-        quantity: position_data['quantity'],
-        average_price: position_data['cost-basis'].to_f / position_data['quantity'].abs,
-        current_price: position_data['market-value'].to_f / position_data['quantity'].abs,
+        quantity: position_data["quantity"],
+        average_price: position_data["cost-basis"].to_f / position_data["quantity"].abs,
+        current_price: position_data["market-value"].to_f / position_data["quantity"].abs,
         last_updated_at: Time.current
       )
 
@@ -49,7 +49,7 @@ class Api::V1::PositionsController < Api::BaseController
     end
 
     # Mark positions not in the API response as closed (quantity = 0)
-    current_symbols = positions_data['data']['items'].map { |p| p['symbol'] }
+    current_symbols = positions_data["data"]["items"].map { |p| p["symbol"] }
     current_user.positions
                 .where(tastytrade_account_id: account_id)
                 .where.not(symbol: current_symbols)

@@ -19,13 +19,13 @@ class Admin::DashboardController < Admin::BaseController
   def calculate_monthly_revenue
     # Calculate based on active subscriptions
     User.joins(:subscription_tier)
-        .where(subscription_status: 'active')
-        .sum('subscription_tiers.price_monthly')
+        .where(subscription_status: "active")
+        .sum("subscription_tiers.price_monthly")
   end
 
   def subscription_tier_breakdown
     User.joins(:subscription_tier)
-        .group('subscription_tiers.name')
+        .group("subscription_tiers.name")
         .count
   end
 end

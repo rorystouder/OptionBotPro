@@ -33,7 +33,7 @@ class CreatePortfolioProtections < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :portfolio_protections, [:user_id, :account_id], unique: true
+    add_index :portfolio_protections, [ :user_id, :account_id ], unique: true
     add_index :portfolio_protections, :account_id
     add_index :portfolio_protections, :active
     add_index :portfolio_protections, :emergency_stop_triggered_at

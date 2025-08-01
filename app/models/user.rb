@@ -18,8 +18,8 @@ class User < ApplicationRecord
 
   scope :active, -> { where(active: true) }
   scope :admins, -> { where(admin: true) }
-  scope :trial_users, -> { where(subscription_status: 'trial') }
-  scope :paying_users, -> { where(subscription_status: 'active') }
+  scope :trial_users, -> { where(subscription_status: "trial") }
+  scope :paying_users, -> { where(subscription_status: "active") }
 
   def full_name
     "#{first_name} #{last_name}"
@@ -68,7 +68,7 @@ class User < ApplicationRecord
   def tastytrade_username=(username)
     return if username.blank?
 
-    cipher = OpenSSL::Cipher.new('AES-256-CBC')
+    cipher = OpenSSL::Cipher.new("AES-256-CBC")
     cipher.encrypt
     cipher.key = encryption_key
     self.tastytrade_credentials_iv = Base64.encode64(cipher.random_iv)
@@ -81,7 +81,7 @@ class User < ApplicationRecord
     return nil if encrypted_tastytrade_username.blank? || tastytrade_credentials_iv.blank?
 
     begin
-      cipher = OpenSSL::Cipher.new('AES-256-CBC')
+      cipher = OpenSSL::Cipher.new("AES-256-CBC")
       cipher.decrypt
       cipher.key = encryption_key
       cipher.iv = Base64.decode64(tastytrade_credentials_iv)
@@ -97,7 +97,7 @@ class User < ApplicationRecord
   def tastytrade_password=(password)
     return if password.blank?
 
-    cipher = OpenSSL::Cipher.new('AES-256-CBC')
+    cipher = OpenSSL::Cipher.new("AES-256-CBC")
     cipher.encrypt
     cipher.key = encryption_key
     # Use same IV as username for consistency
@@ -111,7 +111,7 @@ class User < ApplicationRecord
     return nil if encrypted_tastytrade_password.blank? || tastytrade_credentials_iv.blank?
 
     begin
-      cipher = OpenSSL::Cipher.new('AES-256-CBC')
+      cipher = OpenSSL::Cipher.new("AES-256-CBC")
       cipher.decrypt
       cipher.key = encryption_key
       cipher.iv = Base64.decode64(tastytrade_credentials_iv)
@@ -131,7 +131,7 @@ class User < ApplicationRecord
 
   # Subscription management methods
   def on_trial?
-    subscription_status == 'trial' && trial_active?
+    subscription_status == "trial" && trial_active?
   end
 
   def trial_active?
@@ -160,7 +160,7 @@ class User < ApplicationRecord
 
     max_trades = subscription_tier&.max_daily_trades || 0
     today_trades = orders.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day).count
-    [max_trades - today_trades, 0].max
+    [ max_trades - today_trades, 0 ].max
   end
 
   def can_place_trade?(trade_amount = 0)
@@ -176,7 +176,7 @@ class User < ApplicationRecord
   end
 
   def subscription_tier_name
-    subscription_tier&.name || 'No Subscription'
+    subscription_tier&.name || "No Subscription"
   end
 
   def days_until_trial_ends
@@ -188,7 +188,7 @@ class User < ApplicationRecord
     return if trial_ends_at.present?
 
     self.trial_ends_at = 14.days.from_now
-    self.subscription_status = 'trial'
+    self.subscription_status = "trial"
     save!
   end
 
@@ -224,7 +224,7 @@ class User < ApplicationRecord
     return true if totp.verify(code, drift_behind: 30, drift_ahead: 30)
 
     # Check backup codes
-    return verify_backup_code(code)
+    verify_backup_code(code)
   end
 
   def verify_backup_code(code)

@@ -1,5 +1,5 @@
 class UserMailer < ApplicationMailer
-  default from: 'OptionBotPro Support <noreply@optionbotpro.com>'
+  default from: "OptionBotPro Support <noreply@optionbotpro.com>"
 
   def password_reset(user, temporary_password)
     @user = user
@@ -8,7 +8,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: 'OptionBotPro - Password Reset - Action Required'
+      subject: "OptionBotPro - Password Reset - Action Required"
     )
   end
 
@@ -18,7 +18,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: 'OptionBotPro - Multi-Factor Authentication Enabled'
+      subject: "OptionBotPro - Multi-Factor Authentication Enabled"
     )
   end
 
@@ -28,7 +28,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: 'OptionBotPro - Multi-Factor Authentication Disabled - Security Alert'
+      subject: "OptionBotPro - Multi-Factor Authentication Disabled - Security Alert"
     )
   end
 

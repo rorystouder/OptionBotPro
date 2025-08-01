@@ -1,10 +1,10 @@
 class Admin::UsersController < Admin::BaseController
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :reset_password]
+  before_action :set_user, only: [ :show, :edit, :update, :destroy, :reset_password ]
 
   def index
     @users = User.includes(:subscription_tier)
                  .order(created_at: :desc)
-    @users = @users.where('email LIKE ?', "%#{params[:search]}%") if params[:search].present?
+    @users = @users.where("email LIKE ?", "%#{params[:search]}%") if params[:search].present?
     @users = @users.where(subscription_status: params[:status]) if params[:status].present?
   end
 
@@ -24,7 +24,7 @@ class Admin::UsersController < Admin::BaseController
       # Only allow admin flag changes by admins (already verified by authenticate_admin!)
       @user.update_column(:admin, admin_flag) if admin_flag.present?
 
-      redirect_to admin_user_path(@user), notice: 'User updated successfully.'
+      redirect_to admin_user_path(@user), notice: "User updated successfully."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -32,15 +32,15 @@ class Admin::UsersController < Admin::BaseController
 
   def destroy
     if @user.destroy
-      redirect_to admin_users_path, notice: 'User deleted successfully.'
+      redirect_to admin_users_path, notice: "User deleted successfully."
     else
-      redirect_to admin_user_path(@user), alert: 'Cannot delete user with active data.'
+      redirect_to admin_user_path(@user), alert: "Cannot delete user with active data."
     end
   end
 
   def reset_password
     # Generate secure temporary password
-    temp_password = SecureRandom.alphanumeric(12) + SecureRandom.random_number(10).to_s + ['!', '@', '#', '$'].sample
+    temp_password = SecureRandom.alphanumeric(12) + SecureRandom.random_number(10).to_s + [ "!", "@", "#", "$" ].sample
 
     @user.password = temp_password
     @user.password_confirmation = temp_password

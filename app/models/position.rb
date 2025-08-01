@@ -8,11 +8,11 @@ class Position < ApplicationRecord
 
   before_validation :normalize_symbol
 
-  scope :long_positions, -> { where('quantity > 0') }
-  scope :short_positions, -> { where('quantity < 0') }
+  scope :long_positions, -> { where("quantity > 0") }
+  scope :short_positions, -> { where("quantity < 0") }
   scope :by_symbol, ->(symbol) { where(symbol: symbol.upcase) if symbol.present? }
-  scope :options, -> { where('symbol LIKE ?', '%C%').or(where('symbol LIKE ?', '%P%')) }
-  scope :stocks, -> { where.not('symbol LIKE ?', '%C%').where.not('symbol LIKE ?', '%P%') }
+  scope :options, -> { where("symbol LIKE ?", "%C%").or(where("symbol LIKE ?", "%P%")) }
+  scope :stocks, -> { where.not("symbol LIKE ?", "%C%").where.not("symbol LIKE ?", "%P%") }
 
   def long?
     quantity > 0
@@ -27,11 +27,11 @@ class Position < ApplicationRecord
   end
 
   def call_option?
-    option? && symbol.include?('C')
+    option? && symbol.include?("C")
   end
 
   def put_option?
-    option? && symbol.include?('P')
+    option? && symbol.include?("P")
   end
 
   def stock?
