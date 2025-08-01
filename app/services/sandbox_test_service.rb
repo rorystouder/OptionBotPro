@@ -1,8 +1,8 @@
 class SandboxTestService
   include ActiveModel::Model
-  
+
   attr_accessor :user
-  
+
   def initialize(user: nil)
     @user = user || create_test_user
     @api_service = Tastytrade::ApiService.new(@user)
@@ -10,49 +10,49 @@ class SandboxTestService
     @executor_service = TradeExecutorService.new(user: @user)
     @results = {}
   end
-  
+
   def run_full_test_suite
     Rails.logger.info "[SandboxTest] Starting full test suite for user #{@user.id}"
-    
+
     @results = {
       timestamp: Time.current,
       user_id: @user.id,
       environment: Rails.env,
       tests: {}
     }
-    
+
     # Test 1: API Authentication
     test_api_authentication
-    
+
     # Test 2: Market Data Retrieval
     test_market_data_retrieval
-    
+
     # Test 3: Scanner Functionality
     test_scanner_functionality
-    
+
     # Test 4: Risk Management
     test_risk_management
-    
+
     # Test 5: Order Placement (Sandbox)
     test_order_placement
-    
+
     # Test 6: Trade Execution Pipeline
     test_trade_execution_pipeline
-    
+
     # Generate test report
     generate_test_report
-    
+
     @results
   end
-  
+
   private
-  
+
   def test_api_authentication
     Rails.logger.info "[SandboxTest] Testing API authentication"
-    
+
     begin
       accounts = @api_service.get_accounts
-      
+
       @results[:tests][:authentication] = {
         status: accounts.present? ? 'PASS' : 'FAIL',
         message: accounts.present? ? "Retrieved #{accounts.size} accounts" : "No accounts found",
@@ -66,13 +66,13 @@ class SandboxTestService
       }
     end
   end
-  
+
   def test_market_data_retrieval
     Rails.logger.info "[SandboxTest] Testing market data retrieval"
-    
+
     test_symbols = %w[SPY AAPL QQQ]
     successful_quotes = 0
-    
+
     test_symbols.each do |symbol|
       begin
         quote = @api_service.get_quote(symbol)
@@ -81,7 +81,7 @@ class SandboxTestService
         Rails.logger.warn "[SandboxTest] Failed to get quote for #{symbol}: #{e.message}"
       end
     end
-    
+
     @results[:tests][:market_data] = {
       status: successful_quotes > 0 ? 'PASS' : 'FAIL',
       message: "Retrieved quotes for #{successful_quotes}/#{test_symbols.size} symbols",
@@ -89,17 +89,17 @@ class SandboxTestService
       success_rate: (successful_quotes.to_f / test_symbols.size * 100).round(1)
     }
   end
-  
+
   def test_scanner_functionality
     Rails.logger.info "[SandboxTest] Testing scanner functionality"
-    
+
     begin
       # Use mock data for sandbox testing
-      mock_scanner_data if Rails.application.config.respond_to?(:mock_market_data) && 
+      mock_scanner_data if Rails.application.config.respond_to?(:mock_market_data) &&
                            Rails.application.config.mock_market_data
-      
+
       opportunities = @scanner_service.scan_for_opportunities
-      
+
       @results[:tests][:scanner] = {
         status: 'PASS',
         message: "Scanner found #{opportunities.size} opportunities",
@@ -115,29 +115,29 @@ class SandboxTestService
       }
     end
   end
-  
+
   def test_risk_management
     Rails.logger.info "[SandboxTest] Testing risk management"
-    
+
     risk_service = RiskManagementService.new(@user)
-    
+
     # Test normal trade
     normal_trade = {
       account_id: @user.tastytrade_account_id,
       order_cost: 100.0,  # $100 trade
       symbol: 'SPY'
     }
-    
+
     # Test excessive trade (should fail)
     excessive_trade = {
       account_id: @user.tastytrade_account_id,
       order_cost: 50000.0,  # $50K trade (should exceed limits)
       symbol: 'SPY'
     }
-    
+
     normal_result = risk_service.can_place_trade?(normal_trade)
     excessive_result = risk_service.can_place_trade?(excessive_trade)
-    
+
     @results[:tests][:risk_management] = {
       status: (normal_result && !excessive_result) ? 'PASS' : 'FAIL',
       message: "Normal trade: #{normal_result ? 'Approved' : 'Rejected'}, Excessive trade: #{excessive_result ? 'Approved' : 'Rejected'}",
@@ -146,10 +146,10 @@ class SandboxTestService
       cash_reserve_percentage: @user.portfolio_protections.first&.cash_reserve_percentage
     }
   end
-  
+
   def test_order_placement
     Rails.logger.info "[SandboxTest] Testing order placement in sandbox"
-    
+
     # Test market order (should fill at $1 in sandbox)
     market_order_params = {
       order_type: 'market',
@@ -158,7 +158,7 @@ class SandboxTestService
       action: 'buy-to-open',
       time_in_force: 'day'
     }
-    
+
     # Test limit order with price <= $3 (should fill immediately)
     limit_order_params = {
       order_type: 'limit',
@@ -168,7 +168,7 @@ class SandboxTestService
       price: 2.50,
       time_in_force: 'day'
     }
-    
+
     # Test limit order with price > $3 (should stay live)
     live_order_params = {
       order_type: 'limit',
@@ -178,9 +178,9 @@ class SandboxTestService
       price: 5.00,
       time_in_force: 'day'
     }
-    
+
     orders_placed = []
-    
+
     [
       ['market', market_order_params],
       ['limit_fill', limit_order_params],
@@ -203,17 +203,17 @@ class SandboxTestService
         }
       end
     end
-    
+
     @results[:tests][:order_placement] = {
       status: orders_placed.any? { |o| o[:status] == 'placed' } ? 'PASS' : 'FAIL',
       message: "Placed #{orders_placed.count { |o| o[:status] == 'placed' }}/3 test orders",
       orders: orders_placed
     }
   end
-  
+
   def test_trade_execution_pipeline
     Rails.logger.info "[SandboxTest] Testing full trade execution pipeline"
-    
+
     # Create a mock trade opportunity
     mock_trade = {
       symbol: 'SPY',
@@ -229,10 +229,10 @@ class SandboxTestService
       flow_z: -0.2,
       thesis: 'Sandbox test trade with high IV and support levels'
     }
-    
+
     begin
       result = @executor_service.execute_trade(mock_trade)
-      
+
       @results[:tests][:execution_pipeline] = {
         status: result[:success] ? 'PASS' : 'FAIL',
         message: result[:message],
@@ -248,11 +248,11 @@ class SandboxTestService
       }
     end
   end
-  
+
   def mock_scanner_data
     # Mock API responses for scanner testing
     allow(@scanner_service).to receive(:get_watchlist_symbols).and_return(%w[SPY QQQ AAPL])
-    
+
     # Mock quote data
     mock_quote = {
       'last' => 450.00,
@@ -262,9 +262,9 @@ class SandboxTestService
       'avg_volume' => 800000,
       'price_change_percent' => 0.5
     }
-    
+
     allow(@api_service).to receive(:get_quote).and_return(mock_quote)
-    
+
     # Mock options chain data
     mock_chain = {
       'expirations' => [(Date.current + 30.days).to_s],
@@ -281,10 +281,10 @@ class SandboxTestService
         ]
       }
     }
-    
+
     allow(@api_service).to receive(:get_option_chain).and_return(mock_chain)
   end
-  
+
   def get_expected_behavior(test_name)
     case test_name
     when 'market'
@@ -295,7 +295,7 @@ class SandboxTestService
       'Should remain live/working (price > $3)'
     end
   end
-  
+
   def create_test_user
     User.find_or_create_by(email: 'sandbox.test@example.com') do |user|
       user.first_name = 'Sandbox'
@@ -305,13 +305,13 @@ class SandboxTestService
       user.active = true
     end
   end
-  
+
   def generate_test_report
     Rails.logger.info "[SandboxTest] Generating test report"
-    
+
     passed_tests = @results[:tests].count { |_, test| test[:status] == 'PASS' }
     total_tests = @results[:tests].size
-    
+
     @results[:summary] = {
       total_tests: total_tests,
       passed_tests: passed_tests,
@@ -319,7 +319,7 @@ class SandboxTestService
       success_rate: (passed_tests.to_f / total_tests * 100).round(1),
       overall_status: passed_tests == total_tests ? 'ALL_PASS' : 'SOME_FAILED'
     }
-    
+
     Rails.logger.info "[SandboxTest] Test Summary: #{passed_tests}/#{total_tests} passed (#{@results[:summary][:success_rate]}%)"
   end
 end

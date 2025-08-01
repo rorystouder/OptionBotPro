@@ -8,10 +8,10 @@ class CreatePositions < ActiveRecord::Migration[8.0]
       t.decimal :current_price, precision: 10, scale: 4
       t.string :tastytrade_account_id, null: false
       t.datetime :last_updated_at
-      
+
       t.timestamps
     end
-    
+
     add_index :positions, [:user_id, :symbol], unique: true
     add_index :positions, :symbol
     add_index :positions, :tastytrade_account_id

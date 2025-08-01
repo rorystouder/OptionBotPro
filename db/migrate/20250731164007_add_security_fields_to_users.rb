@@ -6,7 +6,7 @@ class AddSecurityFieldsToUsers < ActiveRecord::Migration[8.0]
     add_column :users, :mfa_enabled, :boolean, default: false
     add_column :users, :mfa_secret, :string
     add_column :users, :mfa_backup_codes, :text
-    
+
     add_index :users, :password_reset_token, unique: true
     add_index :users, :mfa_enabled
   end
