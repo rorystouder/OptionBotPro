@@ -368,4 +368,4 @@ http://localhost:3000/mfa/status       # MFA management and backup codes
   - **CI/CD Pipeline Fixes**: Resolved GitHub Actions path resolution issues by replacing bin script calls with direct bundle exec commands
   - Separated test database preparation from test execution for improved CI reliability
   - Disabled non-essential importmap audit step that was causing CI failures
-  - **Final CI Fix**: Replaced Rails commands with rake commands to avoid bin/rails path resolution issues in CI environment
+  - **Final CI Fix**: Fixed path resolution issues by explicitly setting working directory with `cd ${{ github.workspace }}` and using Rails commands directly
