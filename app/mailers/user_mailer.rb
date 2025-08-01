@@ -5,7 +5,7 @@ class UserMailer < ApplicationMailer
     @user = user
     @temporary_password = temporary_password
     @login_url = login_url
-    
+
     mail(
       to: @user.email,
       subject: 'OptionBotPro - Password Reset - Action Required'
@@ -15,7 +15,7 @@ class UserMailer < ApplicationMailer
   def mfa_enabled(user)
     @user = user
     @login_url = login_url
-    
+
     mail(
       to: @user.email,
       subject: 'OptionBotPro - Multi-Factor Authentication Enabled'
@@ -25,7 +25,7 @@ class UserMailer < ApplicationMailer
   def mfa_disabled(user)
     @user = user
     @mfa_setup_url = mfa_setup_url
-    
+
     mail(
       to: @user.email,
       subject: 'OptionBotPro - Multi-Factor Authentication Disabled - Security Alert'
@@ -38,7 +38,7 @@ class UserMailer < ApplicationMailer
     @ip_address = ip_address
     @timestamp = Time.current
     @settings_url = user_url
-    
+
     mail(
       to: @user.email,
       subject: "OptionBotPro - Security Alert: #{action}"

@@ -8,25 +8,25 @@ class SandboxController < ApplicationController
       mock_data: Rails.application.config.respond_to?(:mock_market_data) ? Rails.application.config.mock_market_data : false
     }
   end
-  
+
   def run_tests
     if Rails.env.production?
       redirect_to sandbox_path, alert: 'Sandbox testing is not available in production environment.'
       return
     end
-    
+
     # Run tests in background job
     SandboxTestJob.perform_later(current_user.id)
     redirect_to sandbox_path, notice: 'Sandbox tests initiated. Results will appear shortly.'
   end
-  
+
   def show
     @test_result = SandboxTestResult.find(params[:id])
     @test_data = JSON.parse(@test_result.test_data)
   rescue ActiveRecord::RecordNotFound
     redirect_to sandbox_path, alert: 'Test result not found.'
   end
-  
+
   def environment_check
     render json: {
       environment: Rails.env,

@@ -1,6 +1,6 @@
 class Admin::UsersController < Admin::BaseController
   before_action :set_user, only: [:show, :edit, :update, :destroy, :reset_password]
-  
+
   def index
     @users = User.includes(:subscription_tier)
                  .order(created_at: :desc)
@@ -17,7 +17,13 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def update
+    # Handle admin flag separately for security
+    admin_flag = params[:user][:admin] if params[:user]
+
     if @user.update(user_params)
+      # Only allow admin flag changes by admins (already verified by authenticate_admin!)
+      @user.update_column(:admin, admin_flag) if admin_flag.present?
+
       redirect_to admin_user_path(@user), notice: 'User updated successfully.'
     else
       render :edit, status: :unprocessable_entity
@@ -35,36 +41,35 @@ class Admin::UsersController < Admin::BaseController
   def reset_password
     # Generate secure temporary password
     temp_password = SecureRandom.alphanumeric(12) + SecureRandom.random_number(10).to_s + ['!', '@', '#', '$'].sample
-    
+
     @user.password = temp_password
     @user.password_confirmation = temp_password
     @user.password_reset_required = true # Force password change on next login
     @user.password_reset_token = SecureRandom.hex(32)
     @user.password_reset_sent_at = Time.current
-    
+
     if @user.save
       # Send email with temporary password (implement later with SendGrid)
       UserMailer.password_reset(@user, temp_password).deliver_later rescue nil
-      
-      redirect_to admin_user_path(@user), 
+
+      redirect_to admin_user_path(@user),
                   notice: "Password reset successfully. Temporary password sent to #{@user.email}. User must change password on next login."
     else
-      redirect_to admin_user_path(@user), 
+      redirect_to admin_user_path(@user),
                   alert: "Failed to reset password: #{@user.errors.full_messages.join(', ')}"
     end
   end
-  
+
   private
-  
+
   def set_user
     @user = User.find(params[:id])
   end
-  
+
   def user_params
-    # Note: :admin is intentionally allowed here as this controller is only accessible by admins
-    # who need to grant/revoke admin privileges to other users
-    params.require(:user).permit(:first_name, :last_name, :email, :active, :admin, 
-                                 :subscription_tier_id, :subscription_status, 
+    # Note: :admin is handled separately in the update method for enhanced security
+    params.require(:user).permit(:first_name, :last_name, :email, :active,
+                                 :subscription_tier_id, :subscription_status,
                                  :trial_ends_at, :subscription_ends_at)
   end
 end

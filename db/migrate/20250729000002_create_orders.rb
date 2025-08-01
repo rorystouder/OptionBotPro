@@ -18,10 +18,10 @@ class CreateOrders < ActiveRecord::Migration[8.0]
       t.datetime :submitted_at
       t.datetime :filled_at
       t.datetime :cancelled_at
-      
+
       t.timestamps
     end
-    
+
     add_index :orders, [:user_id, :status]
     add_index :orders, :symbol
     add_index :orders, :tastytrade_order_id, unique: true

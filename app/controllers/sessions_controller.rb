@@ -1,15 +1,15 @@
 class SessionsController < ApplicationController
   skip_before_action :authenticate_user, only: [:new, :create]
-  
+
   def new
     if logged_in?
       redirect_to dashboard_path
     end
   end
-  
+
   def create
     user = User.find_by(email: params[:email])
-    
+
     if user && user.authenticate(params[:password])
       # Check if password reset is required
       if user.password_reset_required?
@@ -17,9 +17,9 @@ class SessionsController < ApplicationController
         redirect_to change_password_path, alert: 'You must change your password before continuing.'
         return
       end
-      
+
       session[:user_id] = user.id
-      
+
       # Check if MFA is enabled
       if user.mfa_enabled?
         session[:mfa_verified] = false
@@ -27,7 +27,7 @@ class SessionsController < ApplicationController
         redirect_to mfa_verify_path, notice: 'Please enter your MFA code to complete login.'
         return
       end
-      
+
       # Authenticate with TastyTrade API using stored credentials
       begin
         auth_service = Tastytrade::AuthService.new
@@ -35,7 +35,7 @@ class SessionsController < ApplicationController
           username: user.tastytrade_username,
           password: user.tastytrade_password
         )
-        
+
         flash[:notice] = 'Successfully logged in and authenticated with TastyTrade'
       rescue Tastytrade::AuthService::AuthenticationError => e
         flash[:alert] = "TastyTrade authentication failed: #{e.message}"
@@ -43,14 +43,14 @@ class SessionsController < ApplicationController
         Rails.logger.error "Unexpected TastyTrade auth error: #{e.message}"
         flash[:alert] = "TastyTrade authentication failed"
       end
-      
+
       redirect_to dashboard_path
     else
       flash.now[:alert] = 'Invalid email or password'
       render :new, status: :unprocessable_entity
     end
   end
-  
+
   def destroy
     if current_user
       # Logout from TastyTrade API
@@ -61,7 +61,7 @@ class SessionsController < ApplicationController
         Rails.logger.warn "Failed to logout from TastyTrade: #{e.message}"
       end
     end
-    
+
     session[:user_id] = nil
     redirect_to login_path, notice: 'Logged out successfully'
   end

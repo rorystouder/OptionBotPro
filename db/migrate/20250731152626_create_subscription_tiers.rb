@@ -15,7 +15,7 @@ class CreateSubscriptionTiers < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :subscription_tiers, :slug, unique: true
     add_index :subscription_tiers, :active
     add_index :subscription_tiers, :sort_order

@@ -6,7 +6,7 @@ class Admin::DatabaseController < Admin::BaseController
 
   def table
     @table_name = params[:table_name]
-    
+
     # Security: Only allow actual table names
     unless @table_name.in?(get_table_list.keys)
       redirect_to admin_database_path, alert: 'Invalid table name'
@@ -20,7 +20,7 @@ class Admin::DatabaseController < Admin::BaseController
 
   def schema
     @table_name = params[:table_name]
-    
+
     unless @table_name.in?(get_table_list.keys)
       redirect_to admin_database_path, alert: 'Invalid table name'
       return
@@ -33,7 +33,7 @@ class Admin::DatabaseController < Admin::BaseController
   def query
     if request.post? && params[:sql].present?
       @sql = params[:sql].strip
-      
+
       # Security: Only allow SELECT statements for safety
       unless @sql.match?(/\A\s*SELECT\s+/i)
         @error = "Only SELECT queries are allowed for security reasons"
@@ -55,19 +55,19 @@ class Admin::DatabaseController < Admin::BaseController
 
   def get_database_info
     db_path = Rails.configuration.database_configuration[Rails.env]['database']
-    
+
     file_size = begin
       File.size(db_path)
     rescue
       0
     end
-    
+
     modified_time = begin
       File.mtime(db_path).strftime("%B %d, %Y at %I:%M %p")
     rescue
       "Unknown"
     end
-    
+
     {
       path: db_path,
       size: file_size,
@@ -78,13 +78,13 @@ class Admin::DatabaseController < Admin::BaseController
 
   def get_table_list
     tables = {}
-    
+
     ActiveRecord::Base.connection.tables.each do |table_name|
       begin
         model = table_name.classify.constantize rescue nil
         quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
         row_count = ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{quoted_table}")
-        
+
         tables[table_name] = {
           model: model,
           row_count: row_count,
@@ -98,7 +98,7 @@ class Admin::DatabaseController < Admin::BaseController
         }
       end
     end
-    
+
     tables
   end
 
@@ -119,9 +119,15 @@ class Admin::DatabaseController < Admin::BaseController
   end
 
   def get_sample_data(table_name, limit = 10)
-    quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
-    limit = limit.to_i.clamp(1, 100) # Ensure limit is safe
-    ActiveRecord::Base.connection.select_all("SELECT * FROM #{quoted_table} LIMIT #{limit}")
+    # Validate table exists first
+    return [] unless valid_table_name?(table_name)
+
+    # Use Arel for safe query building
+    limit = limit.to_i.clamp(1, 100)
+    table = Arel::Table.new(table_name)
+    query = table.project(Arel.star).take(limit)
+
+    ActiveRecord::Base.connection.select_all(query)
   end
 
   def get_row_count(table_name)
@@ -143,7 +149,7 @@ class Admin::DatabaseController < Admin::BaseController
     start_time = Time.current
     result = ActiveRecord::Base.connection.select_all(sql)
     end_time = Time.current
-    
+
     {
       data: result.rows,
       columns: result.columns,
@@ -154,12 +160,17 @@ class Admin::DatabaseController < Admin::BaseController
   def number_to_human_size(size)
     units = ['B', 'KB', 'MB', 'GB']
     unit = 0
-    
+
     while size >= 1024 && unit < units.length - 1
       size /= 1024.0
       unit += 1
     end
-    
+
     "#{size.round(1)} #{units[unit]}"
+  end
+
+  def valid_table_name?(table_name)
+    return false if table_name.blank?
+    ActiveRecord::Base.connection.tables.include?(table_name)
   end
 end
