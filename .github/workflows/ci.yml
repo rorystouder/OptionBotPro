@@ -75,12 +75,27 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Setup test environment
+        env:
+          RAILS_ENV: test
+        run: |
+          cd ${{ github.workspace }}
+          # Create a simple script to run Rails commands
+          cat > run_rails.rb << 'EOF'
+          #!/usr/bin/env ruby
+          ENV['BUNDLE_GEMFILE'] ||= File.expand_path('Gemfile', __dir__)
+          require 'bundler/setup'
+          require 'bootsnap/setup'
+          require_relative 'config/application'
+          Rails.application.load_tasks
+          EOF
+          
       - name: Prepare test database
         env:
           RAILS_ENV: test
         run: |
           cd ${{ github.workspace }}
-          bundle exec rails db:test:prepare
+          bundle exec ruby run_rails.rb -e "Rake::Task['db:test:prepare'].invoke"
         
       - name: Run tests
         env:
@@ -88,7 +103,7 @@ jobs:
           # REDIS_URL: redis://localhost:6379/0
         run: |
           cd ${{ github.workspace }}
-          bundle exec rails test || echo "No tests to run yet"
+          bundle exec ruby run_rails.rb -e "Rake::Task['test'].invoke" || echo "No tests to run yet"
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
