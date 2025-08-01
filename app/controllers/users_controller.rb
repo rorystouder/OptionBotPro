@@ -15,7 +15,8 @@ class UsersController < ApplicationController
     if @user.save
       @user.initialize_trial
       session[:user_id] = @user.id
-      redirect_to dashboard_path, notice: "Account created successfully! Your 14-day free trial has started."
+      session[:pending_redirect] = dashboard_path
+      redirect_to mfa_setup_path, notice: "Account created successfully! Please set up Multi-Factor Authentication to secure your account."
     else
       render :new, status: :unprocessable_entity
     end

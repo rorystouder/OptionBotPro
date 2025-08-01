@@ -82,5 +82,57 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Auto-logout on browser close -->
+    <% if defined?(logged_in?) && logged_in? %>
+    <script>
+      // Track if user is navigating within the application
+      let isInternalNavigation = false;
+      
+      // Mark internal navigation
+      document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && link.hostname === window.location.hostname) {
+          isInternalNavigation = true;
+          setTimeout(() => { isInternalNavigation = false; }, 100);
+        }
+      });
+      
+      // Handle form submissions (internal navigation)
+      document.addEventListener('submit', function(e) {
+        isInternalNavigation = true;
+        setTimeout(() => { isInternalNavigation = false; }, 100);
+      });
+      
+      // Handle browser close/navigation away
+      window.addEventListener('beforeunload', function(e) {
+        // Only logout if it's not internal navigation
+        if (!isInternalNavigation) {
+          // Use sendBeacon for reliable logout on browser close
+          const logoutData = new FormData();
+          navigator.sendBeacon('/logout/browser_close', logoutData);
+        }
+      });
+      
+      // Fallback for page visibility change (when tab is closed)
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden' && !isInternalNavigation) {
+          // Small delay to differentiate from tab switching
+          setTimeout(() => {
+            if (document.visibilityState === 'hidden' && !isInternalNavigation) {
+              const logoutData = new FormData();
+              navigator.sendBeacon('/logout/browser_close', logoutData);
+            }
+          }, 500);
+        }
+      });
+      
+      // Handle Turbo navigation (Rails 7+ specific)
+      document.addEventListener('turbo:visit', function() {
+        isInternalNavigation = true;
+        setTimeout(() => { isInternalNavigation = false; }, 100);
+      });
+    </script>
+    <% end %>
   </body>
 </html>

@@ -193,6 +193,10 @@ class User < ApplicationRecord
   end
 
   # MFA (Multi-Factor Authentication) methods
+  def mfa_enabled?
+    !!mfa_enabled
+  end
+
   def enable_mfa!
     self.mfa_secret = ROTP::Base32.random
     self.mfa_backup_codes = generate_backup_codes
