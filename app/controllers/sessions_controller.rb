@@ -1,5 +1,6 @@
 class SessionsController < ApplicationController
   skip_before_action :authenticate_user, only: [ :new, :create ]
+  skip_before_action :verify_authenticity_token, only: [ :browser_close_logout ]
 
   def new
     if logged_in?
@@ -25,6 +26,11 @@ class SessionsController < ApplicationController
         session[:mfa_verified] = false
         session[:pending_redirect] = dashboard_path
         redirect_to mfa_verify_path, notice: "Please enter your MFA code to complete login."
+        return
+      else
+        # Require MFA setup for all users
+        session[:pending_redirect] = dashboard_path
+        redirect_to mfa_setup_path, notice: "Please set up Multi-Factor Authentication to secure your account."
         return
       end
 
@@ -64,5 +70,25 @@ class SessionsController < ApplicationController
 
     session[:user_id] = nil
     redirect_to login_path, notice: "Logged out successfully"
+  end
+
+  def browser_close_logout
+    if current_user
+      # Logout from TastyTrade API
+      begin
+        auth_service = Tastytrade::AuthService.new
+        auth_service.logout(current_user.tastytrade_username)
+      rescue => e
+        Rails.logger.warn "Failed to logout from TastyTrade during browser close: #{e.message}"
+      end
+    end
+
+    # Clear session
+    session[:user_id] = nil
+    session[:mfa_verified] = nil
+    session[:pending_redirect] = nil
+    
+    # Return minimal response for browser close
+    head :ok
   end
 end

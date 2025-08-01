@@ -1,0 +1,53 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+          <h3 class="mb-0">🔐 Multi-Factor Authentication</h3>
+        </div>
+        <div class="card-body">
+          <% if @error %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <%= @error %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
+
+          <% if flash[:alert] %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <%= flash[:alert] %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
+
+          <p class="text-muted mb-4">Please enter your 6-digit MFA verification code from your authenticator app.</p>
+
+          <%= form_with url: mfa_verify_path, local: true do |form| %>
+            <div class="mb-3">
+              <%= form.label :mfa_code, "Verification Code", class: "form-label" %>
+              <%= form.text_field :mfa_code, 
+                  class: "form-control text-center", 
+                  required: true, 
+                  autofocus: true,
+                  maxlength: 6,
+                  pattern: "[0-9]{6}",
+                  placeholder: "000000",
+                  style: "font-size: 1.5rem; letter-spacing: 0.5rem;" %>
+              <div class="form-text">Enter the 6-digit code from your authenticator app</div>
+            </div>
+
+            <div class="d-grid">
+              <%= form.submit "Verify", class: "btn btn-warning btn-lg" %>
+            </div>
+          <% end %>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">
+              Can't access your authenticator? Contact support for assistance.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

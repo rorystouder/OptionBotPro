@@ -27,7 +27,9 @@ class MfaController < ApplicationController
       current_user.enable_mfa!
       session[:mfa_verified] = true
 
-      redirect_to mfa_status_path, notice: "MFA has been successfully enabled! Please save your backup codes."
+      # Redirect to originally requested page or dashboard
+      redirect_path = session.delete(:pending_redirect) || dashboard_path
+      redirect_to redirect_path, notice: "MFA has been successfully enabled! Your account is now secure."
     else
       redirect_to mfa_setup_path, alert: "Invalid verification code. Please try again."
     end

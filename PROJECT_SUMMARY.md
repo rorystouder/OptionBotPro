@@ -369,3 +369,21 @@ http://localhost:3000/mfa/status       # MFA management and backup codes
   - Separated test database preparation from test execution for improved CI reliability
   - Disabled non-essential importmap audit step that was causing CI failures
   - **Final CI Fix**: Simplified CI approach by bypassing bin/rails entirely - using direct Ruby execution with absolute paths and inline Rails environment loading
+
+**Critical Updates (August 1, 2025 - Afternoon)**:
+- **Fixed MFA Template Error**: Created missing verify_form.html.erb template for MFA verification
+- **Added mfa_enabled? Method**: Fixed missing User model method that was causing authentication errors
+- **Mandatory MFA Implementation**:
+  - All users (new and existing) are now required to set up MFA before accessing the application
+  - Login flow redirects to MFA setup if user doesn't have MFA enabled
+  - Signup flow redirects to MFA setup immediately after account creation
+  - Created professional MFA setup and status views with QR code generation
+  - MFA setup includes backup codes for account recovery
+- **Auto-Logout Security Enhancement**:
+  - Implemented automatic logout when browser window/tab is closed
+  - Added JavaScript detection for browser close events (beforeunload and visibilitychange)
+  - Created dedicated browser_close_logout endpoint that bypasses CSRF protection
+  - Configured session cookies to expire when browser closes (no persistent sessions)
+  - Intelligent navigation tracking prevents false logouts during normal app usage
+  - Uses navigator.sendBeacon for reliable logout even as browser closes
+  - Multiple layers of protection: JavaScript detection + session cookie expiration
