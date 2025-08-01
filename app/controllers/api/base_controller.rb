@@ -10,10 +10,10 @@ class Api::BaseController < ActionController::API
   private
 
   def authenticate_user_from_token
-    token = request.headers['Authorization']&.split(' ')&.last
+    token = request.headers["Authorization"]&.split(" ")&.last
 
     if token.blank?
-      render json: { error: 'Authorization token required' }, status: :unauthorized
+      render json: { error: "Authorization token required" }, status: :unauthorized
       return
     end
 
@@ -24,10 +24,10 @@ class Api::BaseController < ActionController::API
       @current_user = User.find(user_id) if user_id
 
       unless @current_user
-        render json: { error: 'Invalid or expired token' }, status: :unauthorized
+        render json: { error: "Invalid or expired token" }, status: :unauthorized
       end
     rescue ActiveRecord::RecordNotFound
-      render json: { error: 'User not found' }, status: :unauthorized
+      render json: { error: "User not found" }, status: :unauthorized
     end
   end
 
@@ -57,19 +57,19 @@ class Api::BaseController < ActionController::API
     Rails.logger.error "API Error: #{exception.class.name} - #{exception.message}"
     Rails.logger.error exception.backtrace.join("\n")
 
-    render_error('An unexpected error occurred', :internal_server_error)
+    render_error("An unexpected error occurred", :internal_server_error)
   end
 
   def handle_not_found(exception)
-    render_error('Resource not found', :not_found)
+    render_error("Resource not found", :not_found)
   end
 
   def handle_validation_error(exception)
-    render_error('Validation failed', :unprocessable_entity, exception.record.errors.full_messages)
+    render_error("Validation failed", :unprocessable_entity, exception.record.errors.full_messages)
   end
 
   def handle_token_expired(exception)
-    render_error('TastyTrade authentication expired. Please re-authenticate.', :unauthorized)
+    render_error("TastyTrade authentication expired. Please re-authenticate.", :unauthorized)
   end
 
   def handle_api_error(exception)

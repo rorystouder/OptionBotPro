@@ -1,7 +1,7 @@
 module Tastytrade
   class ApiService
     include HTTParty
-    base_uri ENV.fetch('TASTYTRADE_API_URL', 'https://api.tastyworks.com')
+    base_uri ENV.fetch("TASTYTRADE_API_URL", "https://api.tastyworks.com")
 
     def initialize(user)
       @user = user
@@ -38,7 +38,7 @@ module Tastytrade
     end
 
     def get_quotes(symbols)
-      make_request(:get, "/marketdata/quotes", { symbols: symbols.join(',') })
+      make_request(:get, "/marketdata/quotes", { symbols: symbols.join(",") })
     end
 
     # Order Methods
@@ -94,7 +94,7 @@ module Tastytrade
 
     # Market Information
     def get_market_hours(date = Date.current)
-      make_request(:get, "/market-calendar/#{date.to_s}")
+      make_request(:get, "/market-calendar/#{date}")
     end
 
     def get_option_expirations(symbol)
@@ -118,8 +118,8 @@ module Tastytrade
     end
 
     def get_quotes_batch(symbols, fields = nil)
-      params = { symbols: symbols.join(',') }
-      params[:fields] = fields.join(',') if fields
+      params = { symbols: symbols.join(",") }
+      params[:fields] = fields.join(",") if fields
       make_request(:get, "/marketdata/quotes", params)
     end
 
@@ -128,8 +128,8 @@ module Tastytrade
     def make_request(method, path, params = nil, body = nil)
       options = {
         headers: @auth_service.authenticated_headers(@user.tastytrade_username).merge({
-          'Content-Type' => 'application/json',
-          'Accept' => 'application/json'
+          "Content-Type" => "application/json",
+          "Accept" => "application/json"
         })
       }
 
@@ -151,24 +151,24 @@ module Tastytrade
       when 401
         raise TokenExpiredError, "Authentication token expired"
       when 403
-        error_message = response.parsed_response&.dig('error', 'message') || response.body
-        if error_message.include?('insufficient funds')
+        error_message = response.parsed_response&.dig("error", "message") || response.body
+        if error_message.include?("insufficient funds")
           raise InsufficientFundsError, error_message
-        elsif error_message.include?('market closed')
+        elsif error_message.include?("market closed")
           raise MarketClosedError, error_message
         else
           raise ApiError, "Forbidden: #{error_message}"
         end
       when 404
-        error_message = response.parsed_response&.dig('error', 'message') || response.body
-        if error_message.include?('symbol')
+        error_message = response.parsed_response&.dig("error", "message") || response.body
+        if error_message.include?("symbol")
           raise SymbolNotFoundError, "Symbol not found: #{error_message}"
         else
           raise ApiError, "Not found: #{error_message}"
         end
       when 422
         error_message = parse_validation_errors(response)
-        if error_message.include?('order')
+        if error_message.include?("order")
           raise InvalidOrderError, error_message
         else
           raise ValidationError, error_message
@@ -183,8 +183,8 @@ module Tastytrade
     end
 
     def parse_validation_errors(response)
-      errors = response.parsed_response.dig('error', 'errors') || []
-      errors.map { |e| "#{e['field']}: #{e['message']}" }.join(', ')
+      errors = response.parsed_response.dig("error", "errors") || []
+      errors.map { |e| "#{e['field']}: #{e['message']}" }.join(", ")
     end
 
     def build_order_body(params)
@@ -194,7 +194,7 @@ module Tastytrade
         quantity: params[:quantity],
         action: params[:action],
         price: params[:price],
-        'time-in-force' => params[:time_in_force] || 'day',
+        "time-in-force" => params[:time_in_force] || "day",
         legs: params[:legs] # For multi-leg orders
       }.compact
     end
@@ -204,7 +204,7 @@ module Tastytrade
         type: params[:order_type],
         price: params[:price],
         quantity: params[:quantity],
-        'time-in-force' => params[:time_in_force]
+        "time-in-force" => params[:time_in_force]
       }.compact
     end
 

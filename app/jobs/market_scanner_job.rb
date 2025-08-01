@@ -53,7 +53,7 @@ class MarketScannerJob < ApplicationJob
 
   def market_hours?
     # Simple market hours check (9:30 AM - 4:00 PM ET, Monday-Friday)
-    now = Time.current.in_time_zone('Eastern Time (US & Canada)')
+    now = Time.current.in_time_zone("Eastern Time (US & Canada)")
 
     # Check if it's a weekday
     return false unless now.wday.between?(1, 5)

@@ -12,7 +12,7 @@ class CreatePositions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :positions, [:user_id, :symbol], unique: true
+    add_index :positions, [ :user_id, :symbol ], unique: true
     add_index :positions, :symbol
     add_index :positions, :tastytrade_account_id
     add_index :positions, :last_updated_at

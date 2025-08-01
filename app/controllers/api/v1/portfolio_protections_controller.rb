@@ -1,5 +1,5 @@
 class Api::V1::PortfolioProtectionsController < Api::BaseController
-  before_action :set_protection, only: [:show, :update, :emergency_stop, :clear_emergency_stop]
+  before_action :set_protection, only: [ :show, :update, :emergency_stop, :clear_emergency_stop ]
 
   def index
     protections = current_user.portfolio_protections.includes(:user)
@@ -18,7 +18,7 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
     # Validate account ownership before creating protection
     account_id = params[:portfolio_protection][:account_id]
     if account_id.present? && !validate_account_ownership(account_id)
-      render_error('Invalid account ID', :forbidden)
+      render_error("Invalid account ID", :forbidden)
       return
     end
 
@@ -28,11 +28,11 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
     if protection.save
       render_success(
         protection.risk_status_report({}),
-        'Portfolio protection created successfully',
+        "Portfolio protection created successfully",
         :created
       )
     else
-      render_error('Failed to create portfolio protection', :unprocessable_entity, protection.errors.full_messages)
+      render_error("Failed to create portfolio protection", :unprocessable_entity, protection.errors.full_messages)
     end
   end
 
@@ -41,10 +41,10 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
       account_data = fetch_account_data(@protection.account_id)
       render_success(
         @protection.risk_status_report(account_data),
-        'Portfolio protection updated successfully'
+        "Portfolio protection updated successfully"
       )
     else
-      render_error('Failed to update portfolio protection', :unprocessable_entity, @protection.errors.full_messages)
+      render_error("Failed to update portfolio protection", :unprocessable_entity, @protection.errors.full_messages)
     end
   end
 
@@ -68,7 +68,7 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
   end
 
   def emergency_stop
-    reason = params[:reason] || 'Manual emergency stop triggered'
+    reason = params[:reason] || "Manual emergency stop triggered"
     triggered_by = params[:triggered_by] || current_user.email
 
     begin
@@ -83,7 +83,7 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
           protection: @protection.reload.risk_status_report({}),
           message: "Emergency stop activated for account #{@protection.account_id}"
         },
-        'Emergency stop activated successfully'
+        "Emergency stop activated successfully"
       )
     rescue => e
       render_error("Failed to activate emergency stop: #{e.message}")
@@ -94,8 +94,8 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
     cleared_by = params[:cleared_by] || current_user.email
 
     # Require confirmation for clearing emergency stop
-    unless params[:confirm] == 'true'
-      render_error('Emergency stop clearance requires confirmation (confirm=true)', :bad_request)
+    unless params[:confirm] == "true"
+      render_error("Emergency stop clearance requires confirmation (confirm=true)", :bad_request)
       return
     end
 
@@ -111,7 +111,7 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
           protection: @protection.reload.risk_status_report({}),
           message: "Emergency stop cleared for account #{@protection.account_id}"
         },
-        'Emergency stop cleared successfully'
+        "Emergency stop cleared successfully"
       )
     rescue => e
       render_error("Failed to clear emergency stop: #{e.message}")
@@ -120,13 +120,13 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
 
   def validate_trade
     unless params[:order].present?
-      render_error('Order parameters required for validation')
+      render_error("Order parameters required for validation")
       return
     end
 
     account_id = params[:account_id] || params.dig(:order, :account_id)
     unless account_id.present?
-      render_error('Account ID required for trade validation')
+      render_error("Account ID required for trade validation")
       return
     end
 
@@ -151,7 +151,7 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
   def set_protection
     @protection = current_user.portfolio_protections.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error('Portfolio protection not found', :not_found)
+    render_error("Portfolio protection not found", :not_found)
   end
 
   def protection_params
@@ -177,7 +177,7 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
     accounts = api_service.get_accounts
 
     # Check if the provided account_id belongs to the current user
-    accounts['data']['accounts'].any? { |account| account['account-number'] == account_id }
+    accounts["data"]["accounts"].any? { |account| account["account-number"] == account_id }
   rescue => e
     Rails.logger.error "Failed to validate account ownership: #{e.message}"
     false

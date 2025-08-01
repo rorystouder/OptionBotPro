@@ -31,20 +31,20 @@ class SubscriptionTier < ApplicationRecord
   end
 
   def basic_tier?
-    slug == 'basic'
+    slug == "basic"
   end
 
   def pro_tier?
-    slug == 'pro'
+    slug == "pro"
   end
 
   def elite_tier?
-    slug == 'elite'
+    slug == "elite"
   end
 
   private
 
   def generate_slug
-    self.slug = name.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/-+/, '-').strip('-')
+    self.slug = name.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/-+/, "-").strip("-")
   end
 end

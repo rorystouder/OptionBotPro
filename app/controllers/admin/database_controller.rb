@@ -9,7 +9,7 @@ class Admin::DatabaseController < Admin::BaseController
 
     # Security: Only allow actual table names
     unless @table_name.in?(get_table_list.keys)
-      redirect_to admin_database_path, alert: 'Invalid table name'
+      redirect_to admin_database_path, alert: "Invalid table name"
       return
     end
 
@@ -22,7 +22,7 @@ class Admin::DatabaseController < Admin::BaseController
     @table_name = params[:table_name]
 
     unless @table_name.in?(get_table_list.keys)
-      redirect_to admin_database_path, alert: 'Invalid table name'
+      redirect_to admin_database_path, alert: "Invalid table name"
       return
     end
 
@@ -54,7 +54,7 @@ class Admin::DatabaseController < Admin::BaseController
   private
 
   def get_database_info
-    db_path = Rails.configuration.database_configuration[Rails.env]['database']
+    db_path = Rails.configuration.database_configuration[Rails.env]["database"]
 
     file_size = begin
       File.size(db_path)
@@ -88,13 +88,13 @@ class Admin::DatabaseController < Admin::BaseController
         tables[table_name] = {
           model: model,
           row_count: row_count,
-          model_name: model ? model.name : 'No Model'
+          model_name: model ? model.name : "No Model"
         }
       rescue => e
         tables[table_name] = {
           model: nil,
           row_count: 0,
-          model_name: 'Error'
+          model_name: "Error"
         }
       end
     end
@@ -112,7 +112,7 @@ class Admin::DatabaseController < Admin::BaseController
           sql_type: col.sql_type,
           null: col.null,
           default: col.default,
-          primary: col.name == 'id' # Simple primary key detection
+          primary: col.name == "id" # Simple primary key detection
         }
       end
     }
@@ -158,7 +158,7 @@ class Admin::DatabaseController < Admin::BaseController
   end
 
   def number_to_human_size(size)
-    units = ['B', 'KB', 'MB', 'GB']
+    units = [ "B", "KB", "MB", "GB" ]
     unit = 0
 
     while size >= 1024 && unit < units.length - 1

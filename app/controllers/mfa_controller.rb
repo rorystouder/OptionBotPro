@@ -1,10 +1,10 @@
 class MfaController < ApplicationController
   before_action :require_login
-  before_action :require_mfa_setup, only: [:verify]
+  before_action :require_mfa_setup, only: [ :verify ]
 
   def setup
     if current_user.mfa_enabled?
-      redirect_to mfa_status_path, notice: 'MFA is already enabled for your account.'
+      redirect_to mfa_status_path, notice: "MFA is already enabled for your account."
       return
     end
 
@@ -18,7 +18,7 @@ class MfaController < ApplicationController
 
   def enable
     if current_user.mfa_enabled?
-      redirect_to mfa_status_path, alert: 'MFA is already enabled.'
+      redirect_to mfa_status_path, alert: "MFA is already enabled."
       return
     end
 
@@ -27,28 +27,28 @@ class MfaController < ApplicationController
       current_user.enable_mfa!
       session[:mfa_verified] = true
 
-      redirect_to mfa_status_path, notice: 'MFA has been successfully enabled! Please save your backup codes.'
+      redirect_to mfa_status_path, notice: "MFA has been successfully enabled! Please save your backup codes."
     else
-      redirect_to mfa_setup_path, alert: 'Invalid verification code. Please try again.'
+      redirect_to mfa_setup_path, alert: "Invalid verification code. Please try again."
     end
   end
 
   def disable
     unless current_user.mfa_enabled?
-      redirect_to mfa_status_path, alert: 'MFA is not enabled.'
+      redirect_to mfa_status_path, alert: "MFA is not enabled."
       return
     end
 
     # Require password confirmation for disabling MFA
     unless current_user.authenticate(params[:password])
-      redirect_to mfa_status_path, alert: 'Incorrect password. Cannot disable MFA.'
+      redirect_to mfa_status_path, alert: "Incorrect password. Cannot disable MFA."
       return
     end
 
     current_user.disable_mfa!
     session[:mfa_verified] = nil
 
-    redirect_to mfa_status_path, notice: 'MFA has been disabled. We recommend enabling it again for security.'
+    redirect_to mfa_status_path, notice: "MFA has been disabled. We recommend enabling it again for security."
   end
 
   def status
@@ -64,9 +64,9 @@ class MfaController < ApplicationController
 
       # Redirect to originally requested page or dashboard
       redirect_to session.delete(:pending_redirect) || dashboard_path,
-                  notice: 'MFA verification successful.'
+                  notice: "MFA verification successful."
     else
-      @error = 'Invalid verification code. Please try again.'
+      @error = "Invalid verification code. Please try again."
       render :verify_form
     end
   end
@@ -77,33 +77,33 @@ class MfaController < ApplicationController
 
   def regenerate_backup_codes
     unless current_user.mfa_enabled?
-      redirect_to mfa_status_path, alert: 'MFA must be enabled to generate backup codes.'
+      redirect_to mfa_status_path, alert: "MFA must be enabled to generate backup codes."
       return
     end
 
     # Require password confirmation
     unless current_user.authenticate(params[:password])
-      redirect_to mfa_status_path, alert: 'Incorrect password. Cannot regenerate backup codes.'
+      redirect_to mfa_status_path, alert: "Incorrect password. Cannot regenerate backup codes."
       return
     end
 
     current_user.mfa_backup_codes = current_user.generate_backup_codes
     current_user.save!
 
-    redirect_to mfa_status_path, notice: 'New backup codes generated. Please save them securely.'
+    redirect_to mfa_status_path, notice: "New backup codes generated. Please save them securely."
   end
 
   private
 
   def require_login
     unless logged_in?
-      redirect_to login_path, alert: 'Please log in to access MFA settings.'
+      redirect_to login_path, alert: "Please log in to access MFA settings."
     end
   end
 
   def require_mfa_setup
     unless current_user.mfa_enabled?
-      redirect_to mfa_setup_path, alert: 'Please set up MFA first.'
+      redirect_to mfa_setup_path, alert: "Please set up MFA first."
     end
   end
 end

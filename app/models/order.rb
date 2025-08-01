@@ -2,7 +2,7 @@ class Order < ApplicationRecord
   include AASM
 
   belongs_to :user
-  has_many :legs, dependent: :destroy, class_name: 'OrderLeg'
+  has_many :legs, dependent: :destroy, class_name: "OrderLeg"
 
   # Risk management validation
   validate :validate_risk_management, on: :create
@@ -41,7 +41,7 @@ class Order < ApplicationRecord
     end
 
     event :fill do
-      transitions from: [:working, :partially_filled], to: :filled
+      transitions from: [ :working, :partially_filled ], to: :filled
     end
 
     event :partial_fill do
@@ -49,15 +49,15 @@ class Order < ApplicationRecord
     end
 
     event :cancel do
-      transitions from: [:pending, :submitted, :working, :partially_filled], to: :cancelled
+      transitions from: [ :pending, :submitted, :working, :partially_filled ], to: :cancelled
     end
 
     event :reject do
-      transitions from: [:pending, :submitted], to: :rejected
+      transitions from: [ :pending, :submitted ], to: :rejected
     end
 
     event :expire do
-      transitions from: [:working, :partially_filled], to: :expired
+      transitions from: [ :working, :partially_filled ], to: :expired
     end
   end
 
@@ -66,15 +66,15 @@ class Order < ApplicationRecord
   scope :by_symbol, ->(symbol) { where(symbol: symbol.upcase) if symbol.present? }
 
   def market_order?
-    order_type == 'market'
+    order_type == "market"
   end
 
   def limit_order?
-    order_type == 'limit'
+    order_type == "limit"
   end
 
   def stop_order?
-    order_type.include?('stop')
+    order_type.include?("stop")
   end
 
   def multi_leg?
@@ -97,7 +97,7 @@ class Order < ApplicationRecord
     return unless tastytrade_account_id.present?
 
     # Skip risk validation for closing positions (reduces risk)
-    return if action.include?('close')
+    return if action.include?("close")
 
     begin
       risk_service = RiskManagementService.new(user, tastytrade_account_id)

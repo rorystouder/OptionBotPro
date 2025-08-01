@@ -11,7 +11,7 @@ class CreateOrderLegs < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :order_legs, [:order_id, :leg_number], unique: true
+    add_index :order_legs, [ :order_id, :leg_number ], unique: true
     add_index :order_legs, :symbol
   end
 end

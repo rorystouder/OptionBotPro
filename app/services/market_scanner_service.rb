@@ -80,30 +80,30 @@ class MarketScannerService
   end
 
   def quote_fresh?(quote)
-    return false unless quote['updated_at']
-    Time.parse(quote['updated_at']) > 10.minutes.ago
+    return false unless quote["updated_at"]
+    Time.parse(quote["updated_at"]) > 10.minutes.ago
   end
 
   def analyze_put_credit_spreads(symbol, quote, chain)
     opportunities = []
-    current_price = quote['last'].to_f
+    current_price = quote["last"].to_f
 
     # Look for 30-45 DTE options
     expiration_dates = filter_expirations(chain, 30, 45)
 
     expiration_dates.each do |expiration|
-      puts = chain['puts'][expiration] || []
+      puts = chain["puts"][expiration] || []
 
       # Find strikes around 1 standard deviation below current price
       target_short_strike = current_price * 0.84  # Approximately 1 SD
 
       puts.each_cons(2) do |short_put, long_put|
-        next unless short_put['strike'].to_f <= target_short_strike
-        next unless long_put['strike'].to_f < short_put['strike'].to_f
+        next unless short_put["strike"].to_f <= target_short_strike
+        next unless long_put["strike"].to_f < short_put["strike"].to_f
 
         # Calculate credit and POP
-        credit = short_put['bid'].to_f - long_put['ask'].to_f
-        max_loss = (short_put['strike'].to_f - long_put['strike'].to_f) * 100 - credit * 100
+        credit = short_put["bid"].to_f - long_put["ask"].to_f
+        max_loss = (short_put["strike"].to_f - long_put["strike"].to_f) * 100 - credit * 100
 
         next if credit <= 0 || max_loss <= 0
 
@@ -112,7 +112,7 @@ class MarketScannerService
 
         opportunities << {
           symbol: symbol,
-          strategy: 'Put Credit Spread',
+          strategy: "Put Credit Spread",
           legs: "#{long_put['strike']}/#{short_put['strike']}",
           expiration: expiration,
           credit: credit,
@@ -122,7 +122,7 @@ class MarketScannerService
           model_score: calculate_model_score(symbol, quote, short_put),
           momentum_z: calculate_momentum_z(symbol, quote),
           flow_z: calculate_flow_z(short_put, long_put),
-          thesis: generate_thesis(symbol, 'put_credit_spread', quote, short_put)
+          thesis: generate_thesis(symbol, "put_credit_spread", quote, short_put)
         }
       end
     end
@@ -132,13 +132,13 @@ class MarketScannerService
 
   def analyze_iron_condors(symbol, quote, chain)
     opportunities = []
-    current_price = quote['last'].to_f
+    current_price = quote["last"].to_f
 
     expiration_dates = filter_expirations(chain, 30, 45)
 
     expiration_dates.each do |expiration|
-      puts = chain['puts'][expiration] || []
-      calls = chain['calls'][expiration] || []
+      puts = chain["puts"][expiration] || []
+      calls = chain["calls"][expiration] || []
 
       next if puts.size < 4 || calls.size < 4
 
@@ -147,16 +147,16 @@ class MarketScannerService
       call_short_strike = current_price * 1.16
 
       # Find best put spread
-      put_spread = find_best_spread(puts, put_short_strike, 'put')
+      put_spread = find_best_spread(puts, put_short_strike, "put")
       next unless put_spread
 
       # Find best call spread
-      call_spread = find_best_spread(calls, call_short_strike, 'call')
+      call_spread = find_best_spread(calls, call_short_strike, "call")
       next unless call_spread
 
       # Calculate combined metrics
       total_credit = put_spread[:credit] + call_spread[:credit]
-      max_loss = [put_spread[:max_loss], call_spread[:max_loss]].max
+      max_loss = [ put_spread[:max_loss], call_spread[:max_loss] ].max
       risk_reward = total_credit / max_loss
 
       # Calculate combined POP (assuming independence)
@@ -164,7 +164,7 @@ class MarketScannerService
 
       opportunities << {
         symbol: symbol,
-        strategy: 'Iron Condor',
+        strategy: "Iron Condor",
         legs: "#{put_spread[:long_strike]}/#{put_spread[:short_strike]}/#{call_spread[:short_strike]}/#{call_spread[:long_strike]}",
         expiration: expiration,
         credit: total_credit,
@@ -174,7 +174,7 @@ class MarketScannerService
         model_score: calculate_model_score(symbol, quote, nil),
         momentum_z: calculate_momentum_z(symbol, quote),
         flow_z: (put_spread[:flow_z] + call_spread[:flow_z]) / 2,
-        thesis: generate_thesis(symbol, 'iron_condor', quote, nil)
+        thesis: generate_thesis(symbol, "iron_condor", quote, nil)
       }
     end
 
@@ -183,22 +183,22 @@ class MarketScannerService
 
   def analyze_call_credit_spreads(symbol, quote, chain)
     opportunities = []
-    current_price = quote['last'].to_f
+    current_price = quote["last"].to_f
 
     expiration_dates = filter_expirations(chain, 30, 45)
 
     expiration_dates.each do |expiration|
-      calls = chain['calls'][expiration] || []
+      calls = chain["calls"][expiration] || []
 
       # Find strikes around 1 standard deviation above current price
       target_short_strike = current_price * 1.16
 
       calls.each_cons(2) do |short_call, long_call|
-        next unless short_call['strike'].to_f >= target_short_strike
-        next unless long_call['strike'].to_f > short_call['strike'].to_f
+        next unless short_call["strike"].to_f >= target_short_strike
+        next unless long_call["strike"].to_f > short_call["strike"].to_f
 
-        credit = short_call['bid'].to_f - long_call['ask'].to_f
-        max_loss = (long_call['strike'].to_f - short_call['strike'].to_f) * 100 - credit * 100
+        credit = short_call["bid"].to_f - long_call["ask"].to_f
+        max_loss = (long_call["strike"].to_f - short_call["strike"].to_f) * 100 - credit * 100
 
         next if credit <= 0 || max_loss <= 0
 
@@ -207,7 +207,7 @@ class MarketScannerService
 
         opportunities << {
           symbol: symbol,
-          strategy: 'Call Credit Spread',
+          strategy: "Call Credit Spread",
           legs: "#{short_call['strike']}/#{long_call['strike']}",
           expiration: expiration,
           credit: credit,
@@ -217,7 +217,7 @@ class MarketScannerService
           model_score: calculate_model_score(symbol, quote, short_call),
           momentum_z: calculate_momentum_z(symbol, quote),
           flow_z: calculate_flow_z(short_call, long_call),
-          thesis: generate_thesis(symbol, 'call_credit_spread', quote, short_call)
+          thesis: generate_thesis(symbol, "call_credit_spread", quote, short_call)
         }
       end
     end
@@ -226,11 +226,11 @@ class MarketScannerService
   end
 
   def filter_expirations(chain, min_dte, max_dte)
-    return [] unless chain['expirations']
+    return [] unless chain["expirations"]
 
     today = Date.current
 
-    chain['expirations'].select do |exp_date|
+    chain["expirations"].select do |exp_date|
       exp = Date.parse(exp_date)
       dte = (exp - today).to_i
       dte >= min_dte && dte <= max_dte
@@ -242,28 +242,28 @@ class MarketScannerService
     best_credit = 0
 
     options.each_cons(2) do |short_opt, long_opt|
-      if type == 'put'
-        next unless short_opt['strike'].to_f <= target_strike
-        next unless long_opt['strike'].to_f < short_opt['strike'].to_f
+      if type == "put"
+        next unless short_opt["strike"].to_f <= target_strike
+        next unless long_opt["strike"].to_f < short_opt["strike"].to_f
       else  # call
-        next unless short_opt['strike'].to_f >= target_strike
-        next unless long_opt['strike'].to_f > short_opt['strike'].to_f
+        next unless short_opt["strike"].to_f >= target_strike
+        next unless long_opt["strike"].to_f > short_opt["strike"].to_f
       end
 
-      credit = short_opt['bid'].to_f - long_opt['ask'].to_f
+      credit = short_opt["bid"].to_f - long_opt["ask"].to_f
 
       if credit > best_credit
         best_credit = credit
-        max_loss = (long_opt['strike'].to_f - short_opt['strike'].to_f).abs * 100 - credit * 100
+        max_loss = (long_opt["strike"].to_f - short_opt["strike"].to_f).abs * 100 - credit * 100
 
         best_spread = {
-          short_strike: short_opt['strike'].to_f,
-          long_strike: long_opt['strike'].to_f,
+          short_strike: short_opt["strike"].to_f,
+          long_strike: long_opt["strike"].to_f,
           credit: credit,
           max_loss: max_loss,
-          pop: type == 'put' ?
-            calculate_pop_put_spread(short_opt, short_opt['underlying_price'].to_f) :
-            calculate_pop_call_spread(short_opt, short_opt['underlying_price'].to_f),
+          pop: type == "put" ?
+            calculate_pop_put_spread(short_opt, short_opt["underlying_price"].to_f) :
+            calculate_pop_call_spread(short_opt, short_opt["underlying_price"].to_f),
           flow_z: calculate_flow_z(short_opt, long_opt)
         }
       end
@@ -275,13 +275,13 @@ class MarketScannerService
   def calculate_pop_put_spread(option, current_price)
     # Simplified POP calculation based on delta
     # POP ≈ 1 - |delta| for OTM options
-    delta = option['delta'].to_f.abs
-    [1 - delta, 0.5].max  # Ensure minimum 50% POP
+    delta = option["delta"].to_f.abs
+    [ 1 - delta, 0.5 ].max  # Ensure minimum 50% POP
   end
 
   def calculate_pop_call_spread(option, current_price)
-    delta = option['delta'].to_f.abs
-    [1 - delta, 0.5].max
+    delta = option["delta"].to_f.abs
+    [ 1 - delta, 0.5 ].max
   end
 
   def calculate_model_score(symbol, quote, option)
@@ -289,20 +289,20 @@ class MarketScannerService
     score = 0.0
 
     # IV rank component (higher is better for selling)
-    if quote['iv_rank']
-      score += quote['iv_rank'].to_f / 100 * 0.4
+    if quote["iv_rank"]
+      score += quote["iv_rank"].to_f / 100 * 0.4
     end
 
     # Liquidity component
-    if quote['volume'] && quote['avg_volume']
-      liquidity_ratio = quote['volume'].to_f / quote['avg_volume'].to_f
-      score += [liquidity_ratio, 1.0].min * 0.3
+    if quote["volume"] && quote["avg_volume"]
+      liquidity_ratio = quote["volume"].to_f / quote["avg_volume"].to_f
+      score += [ liquidity_ratio, 1.0 ].min * 0.3
     end
 
     # Technical component (simplified)
-    if quote['price_change_percent']
+    if quote["price_change_percent"]
       # Prefer range-bound stocks
-      volatility_factor = 1 - ([quote['price_change_percent'].to_f.abs / 5, 1.0].min)
+      volatility_factor = 1 - ([ quote["price_change_percent"].to_f.abs / 5, 1.0 ].min)
       score += volatility_factor * 0.3
     end
 
@@ -311,30 +311,30 @@ class MarketScannerService
 
   def calculate_momentum_z(symbol, quote)
     # Simplified momentum z-score
-    return 0.0 unless quote['price_change_percent']
+    return 0.0 unless quote["price_change_percent"]
 
     # Normalize price change to z-score (simplified)
-    price_change = quote['price_change_percent'].to_f
+    price_change = quote["price_change_percent"].to_f
     price_change / 2.0  # Assume 2% = 1 standard deviation
   end
 
   def calculate_flow_z(short_option, long_option)
     # Simplified option flow z-score based on volume/OI ratio
-    short_flow = short_option['volume'].to_f / [short_option['open_interest'].to_f, 1].max
-    long_flow = long_option['volume'].to_f / [long_option['open_interest'].to_f, 1].max
+    short_flow = short_option["volume"].to_f / [ short_option["open_interest"].to_f, 1 ].max
+    long_flow = long_option["volume"].to_f / [ long_option["open_interest"].to_f, 1 ].max
 
     # Average flow, normalized
     avg_flow = (short_flow + long_flow) / 2
-    [avg_flow - 0.5, -2.0].max.clamp(-2.0, 2.0)  # Convert to z-score
+    [ avg_flow - 0.5, -2.0 ].max.clamp(-2.0, 2.0)  # Convert to z-score
   end
 
   def generate_thesis(symbol, strategy, quote, option)
     case strategy
-    when 'put_credit_spread'
+    when "put_credit_spread"
       "High IV rank #{(quote['iv_rank'] || 0).round}% with support near strike, bullish momentum"
-    when 'call_credit_spread'
+    when "call_credit_spread"
       "Elevated IV #{(quote['iv_rank'] || 0).round}% with resistance above, overbought conditions"
-    when 'iron_condor'
+    when "iron_condor"
       "Range-bound with high IV rank #{(quote['iv_rank'] || 0).round}%, expecting consolidation"
     else
       "Premium collection opportunity with favorable risk/reward"
@@ -378,7 +378,7 @@ class MarketScannerService
 
     # Sort all candidates by model_score, then momentum_z, then flow_z
     sorted_candidates = candidates.sort_by do |trade|
-      [-trade[:model_score], -trade[:momentum_z], -trade[:flow_z]]
+      [ -trade[:model_score], -trade[:momentum_z], -trade[:flow_z] ]
     end
 
     # Select top trades with sector diversification
@@ -408,7 +408,7 @@ class MarketScannerService
     account = @api_service.get_account(@account_id)
     return 100_000.0 unless account  # Default for testing
 
-    account['net_liquidating_value'].to_f
+    account["net_liquidating_value"].to_f
   end
 
   def group_by_sector(trades)
@@ -419,15 +419,15 @@ class MarketScannerService
     # Simplified sector mapping
     # TODO: Integrate with real sector data
     sector_map = {
-      'SPY' => 'Index', 'QQQ' => 'Index', 'IWM' => 'Index', 'DIA' => 'Index',
-      'AAPL' => 'Technology', 'MSFT' => 'Technology', 'GOOGL' => 'Technology',
-      'AMZN' => 'Consumer', 'TSLA' => 'Consumer', 'META' => 'Technology',
-      'NVDA' => 'Technology', 'JPM' => 'Financial', 'BAC' => 'Financial',
-      'XLF' => 'Financial', 'XLE' => 'Energy', 'GLD' => 'Commodity',
-      'SLV' => 'Commodity', 'VXX' => 'Volatility', 'TLT' => 'Bonds'
+      "SPY" => "Index", "QQQ" => "Index", "IWM" => "Index", "DIA" => "Index",
+      "AAPL" => "Technology", "MSFT" => "Technology", "GOOGL" => "Technology",
+      "AMZN" => "Consumer", "TSLA" => "Consumer", "META" => "Technology",
+      "NVDA" => "Technology", "JPM" => "Financial", "BAC" => "Financial",
+      "XLF" => "Financial", "XLE" => "Energy", "GLD" => "Commodity",
+      "SLV" => "Commodity", "VXX" => "Volatility", "TLT" => "Bonds"
     }
 
-    sector_map[symbol] || 'Other'
+    sector_map[symbol] || "Other"
   end
 
   def meets_portfolio_constraints?(trades)
@@ -438,13 +438,13 @@ class MarketScannerService
     trades.each do |trade|
       # Simplified Greeks calculation
       # TODO: Get actual Greeks from options data
-      if trade[:strategy] == 'Put Credit Spread'
+      if trade[:strategy] == "Put Credit Spread"
         net_delta += 0.15  # Approximate positive delta
         net_vega -= 0.02   # Negative vega from selling
-      elsif trade[:strategy] == 'Call Credit Spread'
+      elsif trade[:strategy] == "Call Credit Spread"
         net_delta -= 0.15  # Approximate negative delta
         net_vega -= 0.02
-      elsif trade[:strategy] == 'Iron Condor'
+      elsif trade[:strategy] == "Iron Condor"
         net_delta += 0.0   # Delta neutral
         net_vega -= 0.04   # Double negative vega
       end

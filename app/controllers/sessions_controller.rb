@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user, only: [:new, :create]
+  skip_before_action :authenticate_user, only: [ :new, :create ]
 
   def new
     if logged_in?
@@ -14,7 +14,7 @@ class SessionsController < ApplicationController
       # Check if password reset is required
       if user.password_reset_required?
         session[:pending_user_id] = user.id
-        redirect_to change_password_path, alert: 'You must change your password before continuing.'
+        redirect_to change_password_path, alert: "You must change your password before continuing."
         return
       end
 
@@ -24,7 +24,7 @@ class SessionsController < ApplicationController
       if user.mfa_enabled?
         session[:mfa_verified] = false
         session[:pending_redirect] = dashboard_path
-        redirect_to mfa_verify_path, notice: 'Please enter your MFA code to complete login.'
+        redirect_to mfa_verify_path, notice: "Please enter your MFA code to complete login."
         return
       end
 
@@ -36,7 +36,7 @@ class SessionsController < ApplicationController
           password: user.tastytrade_password
         )
 
-        flash[:notice] = 'Successfully logged in and authenticated with TastyTrade'
+        flash[:notice] = "Successfully logged in and authenticated with TastyTrade"
       rescue Tastytrade::AuthService::AuthenticationError => e
         flash[:alert] = "TastyTrade authentication failed: #{e.message}"
       rescue => e
@@ -46,7 +46,7 @@ class SessionsController < ApplicationController
 
       redirect_to dashboard_path
     else
-      flash.now[:alert] = 'Invalid email or password'
+      flash.now[:alert] = "Invalid email or password"
       render :new, status: :unprocessable_entity
     end
   end
@@ -63,6 +63,6 @@ class SessionsController < ApplicationController
     end
 
     session[:user_id] = nil
-    redirect_to login_path, notice: 'Logged out successfully'
+    redirect_to login_path, notice: "Logged out successfully"
   end
 end

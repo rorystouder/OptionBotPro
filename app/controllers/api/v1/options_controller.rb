@@ -20,11 +20,11 @@ class Api::V1::OptionsController < Api::BaseController
     symbols = params[:symbols]
 
     if symbols.blank?
-      render_error('Symbols parameter is required')
+      render_error("Symbols parameter is required")
       return
     end
 
-    symbols_array = symbols.is_a?(Array) ? symbols : symbols.split(',')
+    symbols_array = symbols.is_a?(Array) ? symbols : symbols.split(",")
     symbols_array.map!(&:upcase)
 
     # Use caching for quotes
