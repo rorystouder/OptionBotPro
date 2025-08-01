@@ -61,6 +61,8 @@ class Admin::UsersController < Admin::BaseController
   end
   
   def user_params
+    # Note: :admin is intentionally allowed here as this controller is only accessible by admins
+    # who need to grant/revoke admin privileges to other users
     params.require(:user).permit(:first_name, :last_name, :email, :active, :admin, 
                                  :subscription_tier_id, :subscription_status, 
                                  :trial_ends_at, :subscription_ends_at)

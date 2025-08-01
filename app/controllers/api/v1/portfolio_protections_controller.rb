@@ -15,6 +15,13 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
   end
   
   def create
+    # Validate account ownership before creating protection
+    account_id = protection_params[:account_id]
+    if account_id.present? && !validate_account_ownership(account_id)
+      render_error('Invalid account ID', :forbidden)
+      return
+    end
+    
     protection = current_user.portfolio_protections.build(protection_params)
     
     if protection.save
@@ -161,6 +168,18 @@ class Api::V1::PortfolioProtectionsController < Api::BaseController
       :alert_phone_number,
       :active
     )
+  end
+  
+  def validate_account_ownership(account_id)
+    # Fetch user's accounts from TastyTrade API and verify ownership
+    api_service = Tastytrade::ApiService.new(current_user)
+    accounts = api_service.get_accounts
+    
+    # Check if the provided account_id belongs to the current user
+    accounts['data']['accounts'].any? { |account| account['account-number'] == account_id }
+  rescue => e
+    Rails.logger.error "Failed to validate account ownership: #{e.message}"
+    false
   end
   
   def order_params
