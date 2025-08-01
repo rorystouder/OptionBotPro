@@ -348,7 +348,17 @@ http://localhost:3000/mfa/status       # MFA management and backup codes
 
 ---
 
-**Last Updated**: July 31, 2025
+**Last Updated**: August 1, 2025
 **Primary Developer Note**: System is fully functional for automated option trading with comprehensive business management capabilities and **professional-grade risk management**. Features include subscription monetization, admin panel, legal compliance, and secure per-user credential management. 
 
 **Critical Risk Management**: The system now follows both TRADING_RULES.md specifications and industry best practices with 0.5% single trade limits, 3% daily loss limits, 20 position limits, 10% max drawdown, and 2% VaR constraints. The 25% cash reserve protection remains the foundational safety feature and must never be removed or bypassed.
+
+**Recent Updates (August 1, 2025)**:
+- Updated rqrcode gem from v2.0 to v3.1 for improved QR code generation in MFA
+- Fixed critical security vulnerabilities (8 warnings resolved):
+  - Added CSRF protection to ApplicationController with protect_from_forgery
+  - Fixed parse error in admin database controller by refactoring inline rescue statements
+  - Fixed 5 SQL injection vulnerabilities by using quote_table_name for dynamic SQL queries
+  - Added account ownership validation to prevent unauthorized access to other users' accounts
+  - Secured mass assignment vulnerabilities in API controllers with proper validation
+  - Enhanced database controller security with table name validation

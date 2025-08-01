@@ -82,7 +82,8 @@ class Admin::DatabaseController < Admin::BaseController
     ActiveRecord::Base.connection.tables.each do |table_name|
       begin
         model = table_name.classify.constantize rescue nil
-        row_count = ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{table_name}")
+        quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
+        row_count = ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{quoted_table}")
         
         tables[table_name] = {
           model: model,
@@ -118,19 +119,24 @@ class Admin::DatabaseController < Admin::BaseController
   end
 
   def get_sample_data(table_name, limit = 10)
-    ActiveRecord::Base.connection.select_all("SELECT * FROM #{table_name} LIMIT #{limit}")
+    quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
+    limit = limit.to_i.clamp(1, 100) # Ensure limit is safe
+    ActiveRecord::Base.connection.select_all("SELECT * FROM #{quoted_table} LIMIT #{limit}")
   end
 
   def get_row_count(table_name)
-    ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{table_name}")
+    quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
+    ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{quoted_table}")
   end
 
   def get_table_schema(table_name)
-    ActiveRecord::Base.connection.select_all("PRAGMA table_info(#{table_name})")
+    quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
+    ActiveRecord::Base.connection.select_all("PRAGMA table_info(#{quoted_table})")
   end
 
   def get_table_indexes(table_name)
-    ActiveRecord::Base.connection.select_all("PRAGMA index_list(#{table_name})")
+    quoted_table = ActiveRecord::Base.connection.quote_table_name(table_name)
+    ActiveRecord::Base.connection.select_all("PRAGMA index_list(#{quoted_table})")
   end
 
   def execute_query(sql)
