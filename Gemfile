@@ -24,7 +24,7 @@ gem "bcrypt", "~> 3.1.7"
 gem "devise", "~> 4.9"
 
 # Multi-Factor Authentication
-gem "rqrcode", "~> 2.0"
+gem "rqrcode", "~> 3.1"
 gem "rotp", "~> 6.0"
 
 # HTTP requests
