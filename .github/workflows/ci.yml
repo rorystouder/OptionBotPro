@@ -78,14 +78,24 @@ jobs:
       - name: Setup test environment
         env:
           RAILS_ENV: test
+          BOOTSNAP_CACHE_DIR: /tmp/bootsnap
         run: |
           cd ${{ github.workspace }}
-          # Create a simple script to run Rails commands
+          mkdir -p /tmp/bootsnap
+          # Create a robust script to run Rails commands
           cat > run_rails.rb << 'EOF'
           #!/usr/bin/env ruby
           ENV['BUNDLE_GEMFILE'] ||= File.expand_path('Gemfile', __dir__)
+          ENV['BOOTSNAP_CACHE_DIR'] ||= '/tmp/bootsnap'
           require 'bundler/setup'
-          require 'bootsnap/setup'
+          
+          # Skip bootsnap in CI to avoid cache issues
+          if ENV['CI']
+            puts "Skipping bootsnap in CI environment"
+          else
+            require 'bootsnap/setup'
+          end
+          
           require_relative 'config/application'
           Rails.application.load_tasks
           EOF
@@ -93,6 +103,8 @@ jobs:
       - name: Prepare test database
         env:
           RAILS_ENV: test
+          BOOTSNAP_CACHE_DIR: /tmp/bootsnap
+          CI: true
         run: |
           cd ${{ github.workspace }}
           bundle exec ruby run_rails.rb -e "Rake::Task['db:test:prepare'].invoke"
@@ -100,6 +112,8 @@ jobs:
       - name: Run tests
         env:
           RAILS_ENV: test
+          BOOTSNAP_CACHE_DIR: /tmp/bootsnap
+          CI: true
           # REDIS_URL: redis://localhost:6379/0
         run: |
           cd ${{ github.workspace }}
