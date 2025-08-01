@@ -56,11 +56,23 @@ class Admin::DatabaseController < Admin::BaseController
   def get_database_info
     db_path = Rails.configuration.database_configuration[Rails.env]['database']
     
+    file_size = begin
+      File.size(db_path)
+    rescue
+      0
+    end
+    
+    modified_time = begin
+      File.mtime(db_path).strftime("%B %d, %Y at %I:%M %p")
+    rescue
+      "Unknown"
+    end
+    
     {
       path: db_path,
-      size: File.size(db_path) rescue 0,
-      size_human: number_to_human_size(File.size(db_path) rescue 0),
-      modified: File.mtime(db_path).strftime("%B %d, %Y at %I:%M %p") rescue "Unknown"
+      size: file_size,
+      size_human: number_to_human_size(file_size),
+      modified: modified_time
     }
   end
 

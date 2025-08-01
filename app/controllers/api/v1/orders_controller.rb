@@ -34,7 +34,14 @@ class Api::V1::OrdersController < Api::BaseController
       return
     end
     
-    order = current_user.orders.build(order_params.except(:legs))
+    # Validate account ownership
+    account_id = order_params[:account_id]
+    if account_id.present? && !validate_account_ownership(account_id)
+      render_error('Invalid account ID', :forbidden)
+      return
+    end
+    
+    order = current_user.orders.build(order_params.except(:legs, :account_id))
     
     ActiveRecord::Base.transaction do
       order.save!
@@ -48,11 +55,11 @@ class Api::V1::OrdersController < Api::BaseController
       
       # Submit order to TastyTrade API
       api_service = Tastytrade::ApiService.new(current_user)
-      api_response = api_service.place_order(order_params[:account_id], build_api_order_params(order))
+      api_response = api_service.place_order(account_id, build_api_order_params(order))
       
       order.update!(
         tastytrade_order_id: api_response.dig('data', 'order-id'),
-        tastytrade_account_id: order_params[:account_id],
+        tastytrade_account_id: account_id,
         submitted_at: Time.current
       )
       order.submit!
@@ -92,6 +99,18 @@ class Api::V1::OrdersController < Api::BaseController
       :time_in_force, :account_id,
       legs: [:symbol, :quantity, :action, :price]
     )
+  end
+  
+  def validate_account_ownership(account_id)
+    # Fetch user's accounts from TastyTrade API and verify ownership
+    api_service = Tastytrade::ApiService.new(current_user)
+    accounts = api_service.get_accounts
+    
+    # Check if the provided account_id belongs to the current user
+    accounts['data']['accounts'].any? { |account| account['account-number'] == account_id }
+  rescue => e
+    Rails.logger.error "Failed to validate account ownership: #{e.message}"
+    false
   end
   
   def cancel_order
