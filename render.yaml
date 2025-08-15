@@ -1,0 +1,57 @@
+# Render.com deployment configuration
+services:
+  # Web service
+  - type: web
+    name: optionbotpro
+    runtime: ruby
+    buildCommand: bundle install && rails assets:precompile
+    startCommand: rails db:migrate && rails server -b 0.0.0.0 -p $PORT
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: true
+      - key: RAILS_LOG_TO_STDOUT
+        value: true
+      - key: DATABASE_URL
+        value: sqlite3:///data/production.sqlite3
+      - key: RAILS_MASTER_KEY
+        sync: false  # Set in dashboard
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: RAILS_MAX_THREADS
+        value: 5
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 10
+    healthCheckPath: /health
+    autoDeploy: false  # Set to true after testing
+
+  # Background worker service
+  - type: worker
+    name: optionbotpro-worker
+    runtime: ruby
+    buildCommand: bundle install
+    startCommand: bundle exec sidekiq -C config/sidekiq.yml
+    envVars:
+      - fromGroup: shared-env-vars
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 10
+
+# Shared environment variables
+envVarGroups:
+  - name: shared-env-vars
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite3:///data/production.sqlite3
+      - key: REDIS_URL
+        value: redis://red-xxxxx.render.com:6379  # Will be provided by Render
+      - key: RAILS_MASTER_KEY
+        sync: false
