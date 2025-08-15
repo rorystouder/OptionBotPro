@@ -1,0 +1,23 @@
+# Nixpacks configuration for Railway deployment
+# This tells Railway how to build your Rails app without Docker
+
+[phases.setup]
+nixPkgs = ["...", "nodejs", "yarn", "sqlite"]
+
+[phases.install]
+cmds = ["bundle install"]
+
+[phases.build]
+cmds = [
+    "bundle exec rails assets:precompile",
+    "bundle exec rails db:create",
+    "bundle exec rails db:migrate"
+]
+
+[start]
+cmd = "bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+
+[variables]
+RAILS_ENV = "production"
+RAILS_SERVE_STATIC_FILES = "true"
+RAILS_LOG_TO_STDOUT = "true"
