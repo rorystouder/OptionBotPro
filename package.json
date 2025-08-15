@@ -1,0 +1,11 @@
+{
+  "name": "optionbotpro",
+  "version": "1.0.0",
+  "description": "OptionBotPro Rails Application",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "echo 'No build needed for Rails'"
+  }
+}
