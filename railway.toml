@@ -1,13 +1,14 @@
-# Railway configuration - simple buildpack deployment
+# Railway configuration - force buildpack deployment
 [build]
 builder = "HEROKU"
+buildCommand = "bundle install && bundle exec rails assets:precompile"
 
 [deploy]
+startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p $PORT"
 healthcheckPath = "/health"
 restartPolicyType = "ON_FAILURE"
+healthcheckTimeout = 300
+sleepBeforeRestart = 10
 
 [environments.production]
-RAILS_ENV = "production"
-RAILS_SERVE_STATIC_FILES = "true"
-RAILS_LOG_TO_STDOUT = "true"
-BUNDLE_WITHOUT = "development test"
+variables = { RAILS_ENV = "production", RAILS_SERVE_STATIC_FILES = "true", RAILS_LOG_TO_STDOUT = "true", BUNDLE_WITHOUT = "development test" }

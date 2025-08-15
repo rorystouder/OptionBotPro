@@ -1,4 +1,10 @@
 Dockerfile*
+*.dockerfile
 nixpacks.toml
 render.yaml
 fly.toml
+tmp/
+log/
+.git/
+node_modules/
+coverage/
