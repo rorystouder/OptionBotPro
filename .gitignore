@@ -61,7 +61,6 @@ Thumbs.db
 /vendor/bundle
 /vendor/ruby
 /.bundle
-/Gemfile.lock
 /config/database.yml
 /config/secrets.yml
 .byebug_history
