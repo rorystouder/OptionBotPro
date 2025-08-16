@@ -1,0 +1,157 @@
+<% content_for :title, "Risk Disclosure - OptionBotPro" %>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-lg">
+        <div class="card-header bg-danger text-white">
+          <h1 class="h3 mb-0">
+            <i class="fas fa-exclamation-triangle"></i>
+            COMPREHENSIVE RISK DISCLOSURE
+          </h1>
+          <p class="mb-0 small">Please read this disclosure carefully before using OptionBotPro</p>
+        </div>
+        
+        <div class="card-body p-5">
+          
+          <!-- Critical Warning -->
+          <div class="alert alert-danger border-danger mb-4">
+            <h4 class="alert-heading">⚠️ CRITICAL WARNING</h4>
+            <p class="mb-0">
+              <strong>Options trading involves substantial risk of loss and is not suitable for all investors. 
+              You could lose more than your initial investment. Only risk capital you can afford to lose.</strong>
+            </p>
+          </div>
+
+          <!-- Main Risk Disclosures -->
+          <div class="row">
+            <div class="col-12">
+              
+              <h3 class="text-danger mb-3">1. OPTIONS TRADING RISKS</h3>
+              <div class="mb-4">
+                <p><strong>High Risk of Loss:</strong> Options trading carries a high level of risk and may not be suitable for all investors. The risk of loss in trading options can be substantial.</p>
+                
+                <p><strong>Total Loss Possible:</strong> You may lose your entire investment in a short period of time. Options may expire worthless, resulting in 100% loss of premium paid.</p>
+                
+                <p><strong>Leveraged Positions:</strong> Options provide leverage, which can magnify both profits and losses. Small movements in the underlying security can result in large percentage gains or losses.</p>
+                
+                <p><strong>Time Decay:</strong> Options lose value as they approach expiration (time decay/theta), even if the underlying security doesn't move against you.</p>
+              </div>
+
+              <h3 class="text-danger mb-3">2. AUTOMATED TRADING RISKS</h3>
+              <div class="mb-4">
+                <p><strong>System Failures:</strong> Automated trading systems can experience technical failures, including software bugs, connectivity issues, or hardware malfunctions that may result in unexpected losses.</p>
+                
+                <p><strong>Market Volatility:</strong> Rapid market movements can cause automated systems to execute trades at unfavorable prices or fail to execute protective stops.</p>
+                
+                <p><strong>Algorithm Limitations:</strong> No trading algorithm can guarantee profits. Past performance does not indicate future results.</p>
+                
+                <p><strong>Human Oversight Required:</strong> Automated systems require regular monitoring and may need manual intervention during unusual market conditions.</p>
+              </div>
+
+              <h3 class="text-danger mb-3">3. MARKET RISKS</h3>
+              <div class="mb-4">
+                <p><strong>Volatility Risk:</strong> Sudden changes in market volatility can significantly impact option prices and trading strategies.</p>
+                
+                <p><strong>Liquidity Risk:</strong> Some options may have limited liquidity, making it difficult to execute trades at desired prices.</p>
+                
+                <p><strong>Gap Risk:</strong> Markets can gap up or down, causing significant losses that exceed planned risk parameters.</p>
+                
+                <p><strong>Assignment Risk:</strong> Short option positions may be assigned at any time, potentially resulting in substantial losses.</p>
+              </div>
+
+              <h3 class="text-danger mb-3">4. SPECIFIC STRATEGY RISKS</h3>
+              <div class="mb-4">
+                <p><strong>Credit Spreads:</strong> Maximum loss can be significant if the underlying moves against the position. Early assignment risk exists.</p>
+                
+                <p><strong>Iron Condors:</strong> Vulnerable to significant moves in either direction. Management becomes difficult in trending markets.</p>
+                
+                <p><strong>Naked Options:</strong> If applicable, naked option positions carry unlimited risk potential.</p>
+              </div>
+
+              <h3 class="text-primary mb-3">5. OPTIONBOTPRO SPECIFIC DISCLOSURES</h3>
+              <div class="mb-4">
+                <p><strong>Software Tool Only:</strong> OptionBotPro is automated trading software. We do NOT provide investment advice, financial advice, or trading recommendations.</p>
+                
+                <p><strong>No Guarantees:</strong> We make no guarantees about trading results, system uptime, profitability, or performance.</p>
+                
+                <p><strong>User Responsibility:</strong> All trading decisions are made by YOU. You are solely responsible for your trading activity and any resulting profits or losses.</p>
+                
+                <p><strong>Risk Management Features:</strong> While OptionBotPro includes risk management features (25% cash reserve, position size limits, etc.), these do not eliminate risk and may not prevent substantial losses.</p>
+                
+                <p><strong>Subscription Fees:</strong> You will incur subscription fees regardless of trading performance. Fees are non-refundable for completed billing periods.</p>
+              </div>
+
+              <h3 class="text-primary mb-3">6. REGULATORY AND TAX CONSIDERATIONS</h3>
+              <div class="mb-4">
+                <p><strong>Regulatory Compliance:</strong> You are responsible for ensuring your trading activities comply with all applicable laws and regulations in your jurisdiction.</p>
+                
+                <p><strong>Tax Implications:</strong> Options trading may have complex tax implications. Consult with a tax professional regarding your specific situation.</p>
+                
+                <p><strong>Account Requirements:</strong> Options trading requires appropriate account approval from your broker and may have minimum account value requirements.</p>
+              </div>
+
+              <h3 class="text-primary mb-3">7. BEFORE YOU BEGIN TRADING</h3>
+              <div class="mb-4">
+                <p><strong>Education:</strong> Ensure you fully understand options trading, including the specific strategies you plan to use.</p>
+                
+                <p><strong>Risk Capital Only:</strong> Only use money you can afford to lose completely.</p>
+                
+                <p><strong>Start Small:</strong> Begin with small position sizes until you understand how the system performs.</p>
+                
+                <p><strong>Paper Trading:</strong> Consider paper trading or using sandbox mode before risking real capital.</p>
+                
+                <p><strong>Professional Advice:</strong> Consider consulting with a financial advisor who understands options trading.</p>
+              </div>
+
+              <!-- Acknowledgment Section -->
+              <div class="border border-warning bg-warning bg-opacity-10 p-4 mb-4">
+                <h4 class="text-warning">
+                  <i class="fas fa-hand-paper"></i>
+                  ACKNOWLEDGMENT REQUIRED
+                </h4>
+                <p class="mb-2">By using OptionBotPro, you acknowledge that you have read and understood this risk disclosure and agree that:</p>
+                <ul class="mb-0">
+                  <li>You understand the substantial risks involved in options trading</li>
+                  <li>You are using risk capital that you can afford to lose</li>
+                  <li>You will not hold OptionBotPro liable for any trading losses</li>
+                  <li>You understand this is software, not investment advice</li>
+                  <li>You agree to our <%= link_to "Terms of Service", terms_path, class: "text-primary" %></li>
+                </ul>
+              </div>
+
+              <!-- Additional Resources -->
+              <div class="row mt-5">
+                <div class="col-md-6">
+                  <h5 class="text-primary">Educational Resources</h5>
+                  <ul class="list-unstyled">
+                    <li><a href="https://www.optionseducation.org/" target="_blank" class="text-decoration-none">Options Industry Council</a></li>
+                    <li><a href="https://www.sec.gov/investor/pubs/options.htm" target="_blank" class="text-decoration-none">SEC Options Guide</a></li>
+                    <li><a href="https://www.finra.org/investors/learn-to-invest/types-investments/options" target="_blank" class="text-decoration-none">FINRA Options Information</a></li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h5 class="text-primary">Quick Actions</h5>
+                  <div class="d-grid gap-2">
+                    <%= link_to "View Terms of Service", terms_path, class: "btn btn-outline-primary" %>
+                    <%= link_to "Contact Support", "#", class: "btn btn-outline-secondary" %>
+                    <%= link_to "Return to Home", root_path, class: "btn btn-primary" %>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-footer text-center bg-light">
+          <small class="text-muted">
+            <strong>Last Updated:</strong> August 16, 2025 | 
+            <strong>Document Version:</strong> 1.0 |
+            Questions? Contact us at legal@optionbotpro.com
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

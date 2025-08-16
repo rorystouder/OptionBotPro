@@ -498,7 +498,7 @@
         <h5 class="fw-bold">
           <i class="fas fa-robot"></i> OptionBotPro
         </h5>
-        <p class="text-muted">Automated options trading made simple and safe. Built by traders, for traders.</p>
+        <p class="text-light">Automated options trading made simple and safe. Built by traders, for traders.</p>
         <div class="d-flex gap-3">
           <a href="#" class="text-light"><i class="fab fa-twitter"></i></a>
           <a href="#" class="text-light"><i class="fab fa-linkedin"></i></a>
@@ -508,22 +508,22 @@
       <div class="col-lg-2 mb-4">
         <h6 class="fw-bold">Product</h6>
         <ul class="list-unstyled">
-          <li><a href="#features" class="text-muted text-decoration-none">Features</a></li>
-          <li><a href="#pricing" class="text-muted text-decoration-none">Pricing</a></li>
-          <li><a href="#how-it-works" class="text-muted text-decoration-none">How it Works</a></li>
+          <li><a href="#features" class="text-light text-decoration-none">Features</a></li>
+          <li><a href="#pricing" class="text-light text-decoration-none">Pricing</a></li>
+          <li><a href="#how-it-works" class="text-light text-decoration-none">How it Works</a></li>
         </ul>
       </div>
       <div class="col-lg-2 mb-4">
         <h6 class="fw-bold">Legal</h6>
         <ul class="list-unstyled">
-          <li><a href="<%= terms_path %>" class="text-muted text-decoration-none">Terms of Service</a></li>
-          <li><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
-          <li><a href="#" class="text-muted text-decoration-none">Risk Disclosure</a></li>
+          <li><a href="<%= terms_path %>" class="text-light text-decoration-none">Terms of Service</a></li>
+          <li><a href="#" class="text-light text-decoration-none">Privacy Policy</a></li>
+          <li><a href="<%= risk_disclosure_path %>" class="text-light text-decoration-none">Risk Disclosure</a></li>
         </ul>
       </div>
       <div class="col-lg-4 mb-4">
         <h6 class="fw-bold">Newsletter</h6>
-        <p class="text-muted small">Get trading tips and market insights delivered weekly.</p>
+        <p class="text-light small">Get trading tips and market insights delivered weekly.</p>
         <div class="input-group">
           <input type="email" class="form-control" placeholder="Enter your email">
           <button class="btn btn-primary" type="button">Subscribe</button>
@@ -533,11 +533,11 @@
     <hr class="my-4">
     <div class="row align-items-center">
       <div class="col-lg-6">
-        <p class="text-muted small mb-0">&copy; 2025 OptionBotPro. All rights reserved.</p>
+        <p class="text-light small mb-0">&copy; 2025 OptionBotPro. All rights reserved.</p>
       </div>
       <div class="col-lg-6 text-lg-end">
         <div class="legal-disclaimer-dropdown dropdown-hover">
-          <span class="legal-disclaimer-btn text-muted small" id="riskDisclosureDropdown">
+          <span class="legal-disclaimer-btn text-light small" id="riskDisclosureDropdown">
             <strong>Important Legal Disclaimer</strong>
           </span>
           <div class="dropdown-menu dropdown-menu-end p-3" style="max-width: 400px; right: 0; top: auto;">
@@ -548,7 +548,7 @@
               <p class="mb-2">Past performance does not guarantee future results. All trading involves risk.</p>
               <div class="border-top pt-2 mt-2">
                 <a href="<%= terms_path %>" class="btn btn-outline-primary btn-sm me-2">Terms of Service</a>
-                <a href="#" class="btn btn-outline-secondary btn-sm">Full Risk Disclosure</a>
+                <a href="<%= risk_disclosure_path %>" class="btn btn-outline-secondary btn-sm">Full Risk Disclosure</a>
               </div>
             </div>
           </div>

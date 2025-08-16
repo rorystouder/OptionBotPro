@@ -6,4 +6,7 @@ class LegalController < ApplicationController
 
   def privacy
   end
+
+  def risk_disclosure
+  end
 end
