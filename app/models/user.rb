@@ -231,6 +231,13 @@ class User < ApplicationRecord
     verify_backup_code(code)
   end
 
+  def verify_mfa_setup_code(code)
+    # For verification during setup (before MFA is enabled)
+    return false unless mfa_secret.present?
+    totp = ROTP::TOTP.new(mfa_secret)
+    totp.verify(code, drift_behind: 30, drift_ahead: 30)
+  end
+
   def verify_backup_code(code)
     return false unless mfa_backup_codes.present?
 
