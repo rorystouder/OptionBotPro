@@ -71,7 +71,7 @@
         </div>
       <% end %>
 
-      <% unless current_page?(login_path) || current_page?(signup_path) %>
+      <% unless current_page?(login_path) || current_page?(signup_path) || current_page?(root_path) %>
         <div class="container mt-3">
           <%= render 'shared/legal_disclaimer' %>
         </div>

@@ -180,6 +180,12 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
     - **Improved Profile Page**: Fixed tastytrade_customer_id error by updating to tastytrade_username
     - **Enhanced Navigation**: Clear distinction between public landing and authenticated areas
     - **Development Workflow**: Added MFA bypass option for development environment
+    - **Legal Disclaimer Enhancement**: Converted static disclaimer to hover dropdown in footer
+      - Removed intrusive red alert box from landing page
+      - Added interactive hover dropdown with comprehensive risk disclosure
+      - Smooth animations with 300ms delay to prevent accidental triggers
+      - Positioned above footer text with proper z-index and positioning
+      - Maintains legal protection while improving user experience
 
 ### 🔄 Pending Tasks
 - WebSocket connection for real-time market data (not critical for 5-min scanner)
@@ -400,6 +406,11 @@ http://localhost:3000/mfa/status       # MFA management and backup codes
   - **Fixed Profile Page Error**: Corrected tastytrade_customer_id undefined method error
   - **Enhanced Public/Private Navigation**: Clear separation between public landing and authenticated areas
   - **Development Workflow Improvements**: Added MFA bypass option for development environment
+  - **Legal Disclaimer UX Enhancement**: Converted intrusive red alert box to elegant hover dropdown
+    - Removed static disclaimer from landing page for cleaner professional appearance
+    - Added interactive footer dropdown with comprehensive risk disclosure content
+    - Implemented smooth hover animations with proper positioning and z-index
+    - Maintains all legal protections while significantly improving user experience
 
 **Previous Updates (August 1, 2025)**:
 - Updated rqrcode gem from v2.0 to v3.1 for improved QR code generation in MFA

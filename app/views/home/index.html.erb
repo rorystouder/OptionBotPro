@@ -41,6 +41,30 @@
     .section-padding {
       padding: 80px 0;
     }
+    .legal-disclaimer-dropdown .dropdown-menu {
+      font-size: 0.875rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border: none;
+      border-radius: 8px;
+      display: none !important;
+      position: absolute !important;
+      z-index: 1050;
+      transform: translateY(-100%);
+      margin-bottom: 5px;
+    }
+    .legal-disclaimer-dropdown .dropdown-menu.show {
+      display: block !important;
+    }
+    .legal-disclaimer-dropdown {
+      position: relative !important;
+    }
+    .legal-disclaimer-btn {
+      text-decoration: none !important;
+      cursor: pointer;
+    }
+    .legal-disclaimer-btn:hover {
+      text-decoration: underline !important;
+    }
   </style>
 </head>
 <body>
@@ -512,10 +536,23 @@
         <p class="text-muted small mb-0">&copy; 2025 OptionBotPro. All rights reserved.</p>
       </div>
       <div class="col-lg-6 text-lg-end">
-        <p class="text-muted small mb-0">
-          <strong>Risk Disclosure:</strong> Options trading involves substantial risk of loss. 
-          <a href="<%= terms_path %>" class="text-light">Learn more</a>
-        </p>
+        <div class="legal-disclaimer-dropdown dropdown-hover">
+          <span class="legal-disclaimer-btn text-muted small" id="riskDisclosureDropdown">
+            <strong>Important Legal Disclaimer</strong>
+          </span>
+          <div class="dropdown-menu dropdown-menu-end p-3" style="max-width: 400px; right: 0; top: auto;">
+            <div class="text-dark small">
+              <strong class="d-block mb-2 text-danger">⚠️ Risk Disclosure</strong>
+              <p class="mb-2">Options trading involves substantial risk of loss and is not suitable for all investors. You may lose more than your initial investment.</p>
+              <p class="mb-2">OptionBotPro is a software tool only. We do not provide investment advice, and all trading decisions are your responsibility.</p>
+              <p class="mb-2">Past performance does not guarantee future results. All trading involves risk.</p>
+              <div class="border-top pt-2 mt-2">
+                <a href="<%= terms_path %>" class="btn btn-outline-primary btn-sm me-2">Terms of Service</a>
+                <a href="#" class="btn btn-outline-secondary btn-sm">Full Risk Disclosure</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -530,6 +567,37 @@
       const target = document.querySelector(this.getAttribute('href'));
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Enhanced dropdown hover functionality
+  document.querySelectorAll('.dropdown-hover').forEach(dropdown => {
+    const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+    let hoverTimer;
+
+    // Show on hover
+    dropdown.addEventListener('mouseenter', function() {
+      clearTimeout(hoverTimer);
+      dropdownMenu.classList.add('show');
+    });
+
+    // Hide on mouse leave with delay
+    dropdown.addEventListener('mouseleave', function() {
+      hoverTimer = setTimeout(() => {
+        dropdownMenu.classList.remove('show');
+      }, 300);
+    });
+
+    // Keep open when hovering over menu
+    dropdownMenu.addEventListener('mouseenter', function() {
+      clearTimeout(hoverTimer);
+    });
+
+    // Hide when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!dropdown.contains(event.target)) {
+        dropdownMenu.classList.remove('show');
       }
     });
   });
