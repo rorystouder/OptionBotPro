@@ -6,7 +6,7 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "bundle exec rails assets:precompile"
+    "build": "./bin/build"
   },
   "keywords": ["rails", "ruby"],
   "license": "MIT"
