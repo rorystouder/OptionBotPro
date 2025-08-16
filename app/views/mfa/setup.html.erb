@@ -1,6 +1,6 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-lg-10 col-xl-8">
       <div class="card shadow">
         <div class="card-header bg-success text-white">
           <h3 class="mb-0">🔐 Set Up Multi-Factor Authentication</h3>
@@ -18,65 +18,73 @@
             <p class="mb-0">Multi-Factor Authentication (MFA) is required for all accounts to ensure maximum security for your trading data and funds.</p>
           </div>
 
-          <div class="row">
-            <div class="col-md-6">
-              <h5>Step 1: Install an Authenticator App</h5>
-              <p class="text-muted">Download one of these apps on your smartphone:</p>
-              <ul>
-                <li>Google Authenticator</li>
-                <li>Microsoft Authenticator</li>
-                <li>Authy</li>
-                <li>1Password</li>
-              </ul>
-
-              <h5 class="mt-4">Step 2: Scan QR Code</h5>
-              <p class="text-muted">Use your authenticator app to scan this QR code:</p>
-              
-              <div class="text-center bg-light p-3 rounded">
-                <% if @qr_code %>
-                  <%= @qr_code.as_svg(size: 200).html_safe %>
-                <% else %>
-                  <p class="text-danger">Error generating QR code. Please refresh the page.</p>
-                <% end %>
-              </div>
-
-              <div class="alert alert-warning mt-3">
-                <small>
-                  <strong>Can't scan QR code?</strong><br>
-                  Manually enter this key: <code><%= @manual_key %></code>
-                </small>
-              </div>
+          <!-- Step 1: QR Code Section -->
+          <div class="mb-4">
+            <h5>Step 1: Scan QR Code with Your Authenticator App</h5>
+            <p class="text-muted">Use Google Authenticator, Microsoft Authenticator, Authy, or 1Password to scan this code:</p>
+            
+            <div class="text-center bg-light p-4 rounded mb-3">
+              <% if @qr_code %>
+                <%= @qr_code.as_svg(
+                  offset: 0,
+                  color: '000',
+                  shape_rendering: 'crispEdges',
+                  module_size: 4,
+                  standalone: true,
+                  use_path: true
+                ).html_safe %>
+              <% else %>
+                <p class="text-danger">Error generating QR code. Please refresh the page.</p>
+              <% end %>
             </div>
 
-            <div class="col-md-6">
-              <h5>Step 3: Enter Verification Code</h5>
-              <p class="text-muted">Enter the 6-digit code from your authenticator app to complete setup:</p>
-
-              <%= form_with url: mfa_enable_path, local: true do |form| %>
-                <div class="mb-3">
-                  <%= form.label :verification_code, "Verification Code", class: "form-label" %>
-                  <%= form.text_field :verification_code, 
-                      class: "form-control text-center", 
-                      required: true, 
-                      autofocus: true,
-                      maxlength: 6,
-                      pattern: "[0-9]{6}",
-                      placeholder: "000000",
-                      style: "font-size: 1.5rem; letter-spacing: 0.5rem;" %>
-                  <div class="form-text">Enter the 6-digit code from your authenticator app</div>
-                </div>
-
-                <div class="d-grid">
-                  <%= form.submit "Enable MFA & Continue", class: "btn btn-success btn-lg" %>
-                </div>
-              <% end %>
-
-              <div class="alert alert-light mt-4">
-                <h6>🔑 Backup Codes</h6>
-                <small>After enabling MFA, you'll receive backup codes that can be used if you lose access to your authenticator app. Store them securely!</small>
-              </div>
+            <div class="alert alert-warning">
+              <strong>Can't scan the QR code?</strong> Manually enter this key in your authenticator app:<br>
+              <code style="font-size: 1.1rem; letter-spacing: 0.1rem;"><%= @manual_key %></code>
             </div>
           </div>
+
+          <!-- Step 2: Verification Code Section -->
+          <div class="mb-4">
+            <h5>Step 2: Enter Verification Code</h5>
+            <p class="text-muted">Enter the 6-digit code from your authenticator app to verify setup:</p>
+
+            <%= form_with url: mfa_enable_path, local: true do |form| %>
+              <div class="row justify-content-center">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <%= form.text_field :verification_code, 
+                        class: "form-control text-center", 
+                        required: true, 
+                        autofocus: true,
+                        maxlength: 6,
+                        pattern: "[0-9]{6}",
+                        placeholder: "000000",
+                        style: "font-size: 2rem; letter-spacing: 0.5rem; font-weight: bold;" %>
+                    <div class="form-text text-center">Enter the 6-digit code</div>
+                  </div>
+
+                  <div class="d-grid">
+                    <%= form.submit "Enable MFA & Continue", class: "btn btn-success btn-lg" %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Info Section -->
+          <div class="alert alert-info">
+            <h6>ℹ️ About Backup Codes</h6>
+            <small>After enabling MFA, you'll receive 8 backup codes. Store them securely - each can be used once if you lose access to your authenticator app.</small>
+          </div>
+          
+          <% if Rails.env.development? %>
+            <div class="alert alert-warning mt-3">
+              <h6>⚠️ Development Mode</h6>
+              <small>For testing purposes only:</small><br>
+              <%= link_to "Skip MFA Setup (Dev Only)", dashboard_path(skip_mfa: true), class: "btn btn-sm btn-outline-warning mt-2" %>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

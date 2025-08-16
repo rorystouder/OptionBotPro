@@ -1,4 +1,6 @@
 class DashboardController < ApplicationController
+  before_action :skip_mfa_in_development, only: [:index]
+  
   def index
     @user = current_user
     @recent_orders = current_user.orders.includes(:legs).order(created_at: :desc).limit(10)
@@ -10,6 +12,12 @@ class DashboardController < ApplicationController
   end
 
   private
+  
+  def skip_mfa_in_development
+    if Rails.env.development? && params[:skip_mfa] == "true"
+      session[:mfa_verified] = true
+    end
+  end
 
   def calculate_portfolio_summary
     positions = current_user.positions.where.not(quantity: 0)

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OptionBotPro - Automated Options Trading Made Simple</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .hero-section {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .benefit-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .benefit-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .pricing-card {
+      transition: transform 0.3s ease;
+    }
+    .pricing-card:hover {
+      transform: scale(1.05);
+    }
+    .testimonial-card {
+      background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    }
+    .navbar-custom {
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px);
+    }
+    .section-padding {
+      padding: 80px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-custom">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="<%= root_path %>">
+      <i class="fas fa-robot"></i> OptionBotPro
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#how-it-works">How it Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+        <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
+        <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+      </ul>
+      <div class="d-flex">
+        <a href="<%= login_path %>" class="btn btn-outline-primary me-2">Login</a>
+        <a href="<%= signup_path %>" class="btn btn-primary">Start Free Trial</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section d-flex align-items-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">
+          Automate Your Options Trading with 
+          <span class="text-warning">AI-Powered Precision</span>
+        </h1>
+        <p class="lead mb-4">
+          Stop losing money on emotional trades. OptionBotPro scans 1000s of options every minute, 
+          finds high-probability trades, and executes them automatically with built-in risk management.
+        </p>
+        <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
+          <a href="<%= signup_path %>" class="btn btn-warning btn-lg px-4">
+            <i class="fas fa-rocket"></i> Start 14-Day Free Trial
+          </a>
+          <a href="#how-it-works" class="btn btn-outline-light btn-lg px-4">
+            <i class="fas fa-play"></i> See How It Works
+          </a>
+        </div>
+        <div class="row text-center">
+          <div class="col-4">
+            <h3 class="fw-bold">65%+</h3>
+            <small>Win Rate</small>
+          </div>
+          <div class="col-4">
+            <h3 class="fw-bold">25%</h3>
+            <small>Cash Protected</small>
+          </div>
+          <div class="col-4">
+            <h3 class="fw-bold">24/7</h3>
+            <small>Automated</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="position-relative">
+          <div class="bg-white rounded-3 shadow-lg p-4 mx-auto" style="max-width: 400px;">
+            <h5 class="text-dark mb-3">Live Trading Dashboard</h5>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <div class="bg-success bg-opacity-10 p-2 rounded">
+                  <small class="text-success fw-bold">+$1,247</small><br>
+                  <small class="text-muted">Today's P&L</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="bg-primary bg-opacity-10 p-2 rounded">
+                  <small class="text-primary fw-bold">12 Active</small><br>
+                  <small class="text-muted">Positions</small>
+                </div>
+              </div>
+            </div>
+            <div class="text-start">
+              <small class="text-muted">Recent Trades:</small>
+              <div class="border rounded p-2 mb-1">
+                <div class="d-flex justify-content-between">
+                  <span class="small">AAPL Put Credit Spread</span>
+                  <span class="small text-success">+$87</span>
+                </div>
+              </div>
+              <div class="border rounded p-2 mb-1">
+                <div class="d-flex justify-content-between">
+                  <span class="small">MSFT Iron Condor</span>
+                  <span class="small text-success">+$156</span>
+                </div>
+              </div>
+              <div class="border rounded p-2">
+                <div class="d-flex justify-content-between">
+                  <span class="small">SPY Call Credit Spread</span>
+                  <span class="small text-success">+$93</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section id="features" class="section-padding bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold">Why Options Traders Choose OptionBotPro</h2>
+      <p class="lead text-muted">Stop the guesswork. Start making consistent profits.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card benefit-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+              <i class="fas fa-brain fa-2x text-primary"></i>
+            </div>
+            <h4>AI-Powered Scanning</h4>
+            <p class="text-muted">Our AI scans 1000s of options every minute, identifying high-probability trades with 65%+ win rates based on market data and volatility patterns.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card benefit-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+              <i class="fas fa-shield-alt fa-2x text-success"></i>
+            </div>
+            <h4>Built-in Risk Management</h4>
+            <p class="text-muted">Never risk more than you can afford. Our system automatically protects 25% of your capital and stops trading if daily losses exceed 3%.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card benefit-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+              <i class="fas fa-clock fa-2x text-warning"></i>
+            </div>
+            <h4>24/7 Automation</h4>
+            <p class="text-muted">No more watching charts all day. OptionBotPro trades for you around the clock, capturing opportunities while you sleep or work.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="section-padding">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold">Get Started in 3 Simple Steps</h2>
+      <p class="lead text-muted">From setup to profit in under 10 minutes</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4 text-center">
+        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+          <span class="h3 fw-bold text-primary">1</span>
+        </div>
+        <h4>Connect Your TastyTrade Account</h4>
+        <p class="text-muted">Securely link your existing TastyTrade brokerage account. We use bank-level encryption to protect your data.</p>
+      </div>
+      <div class="col-lg-4 text-center">
+        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+          <span class="h3 fw-bold text-primary">2</span>
+        </div>
+        <h4>Set Your Risk Preferences</h4>
+        <p class="text-muted">Choose your risk level and capital allocation. Our default settings protect 25% of your account and limit daily losses to 3%.</p>
+      </div>
+      <div class="col-lg-4 text-center">
+        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+          <span class="h3 fw-bold text-primary">3</span>
+        </div>
+        <h4>Start Automated Trading</h4>
+        <p class="text-muted">Activate the bot and watch it find and execute high-probability options trades automatically, 24/7.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section id="pricing" class="section-padding bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold">Simple, Transparent Pricing</h2>
+      <p class="lead text-muted">Choose the plan that fits your trading capital</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-4">
+        <div class="card pricing-card h-100 border-0 shadow">
+          <div class="card-body p-4 text-center">
+            <h4 class="fw-bold">Basic Trader</h4>
+            <div class="my-4">
+              <span class="h2 fw-bold">$49</span>
+              <span class="text-muted">/month</span>
+            </div>
+            <ul class="list-unstyled text-start">
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Up to 5 trades/day</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>$10K capital limit</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Put credit spreads</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>25% cash protection</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Email support</li>
+            </ul>
+            <a href="<%= signup_path %>" class="btn btn-outline-primary w-100">Start Free Trial</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card pricing-card h-100 border-primary shadow">
+          <div class="card-header bg-primary text-white text-center">
+            <span class="badge bg-warning">Most Popular</span>
+          </div>
+          <div class="card-body p-4 text-center">
+            <h4 class="fw-bold">Pro Trader</h4>
+            <div class="my-4">
+              <span class="h2 fw-bold">$149</span>
+              <span class="text-muted">/month</span>
+            </div>
+            <ul class="list-unstyled text-start">
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Up to 20 trades/day</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>$100K capital limit</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>All option strategies</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Real-time alerts</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority support</li>
+            </ul>
+            <a href="<%= signup_path %>" class="btn btn-primary w-100">Start Free Trial</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card pricing-card h-100 border-0 shadow">
+          <div class="card-body p-4 text-center">
+            <h4 class="fw-bold">Elite Trader</h4>
+            <div class="my-4">
+              <span class="h2 fw-bold">$299</span>
+              <span class="text-muted">/month</span>
+            </div>
+            <ul class="list-unstyled text-start">
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Unlimited trades</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Unlimited capital</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced strategies</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>API access</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Phone support</li>
+            </ul>
+            <a href="<%= signup_path %>" class="btn btn-outline-primary w-100">Start Free Trial</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <p class="text-muted">All plans include a 14-day free trial. No credit card required.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="section-padding">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold">Loved by Traders Worldwide</h2>
+      <p class="lead text-muted">See what our users say about their results</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card testimonial-card h-100 border-0">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+            </div>
+            <p class="fst-italic">"OptionBotPro has transformed my trading. I'm up 23% this quarter with zero emotional decisions. The risk management gives me peace of mind."</p>
+            <div class="d-flex align-items-center">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                <span class="text-white fw-bold">MJ</span>
+              </div>
+              <div>
+                <h6 class="mb-0">Michael Johnson</h6>
+                <small class="text-muted">Professional Trader</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card testimonial-card h-100 border-0">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+            </div>
+            <p class="fst-italic">"I was skeptical about automated trading, but the results speak for themselves. 67% win rate and I haven't had a losing month since I started."</p>
+            <div class="d-flex align-items-center">
+              <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                <span class="text-white fw-bold">SC</span>
+              </div>
+              <div>
+                <h6 class="mb-0">Sarah Chen</h6>
+                <small class="text-muted">Investment Advisor</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card testimonial-card h-100 border-0">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+              <i class="fas fa-star text-warning"></i>
+            </div>
+            <p class="fst-italic">"Finally, a trading bot that actually works. The 25% cash protection saved me during the last market downturn. Worth every penny."</p>
+            <div class="d-flex align-items-center">
+              <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                <span class="text-white fw-bold">DR</span>
+              </div>
+              <div>
+                <h6 class="mb-0">David Rodriguez</h6>
+                <small class="text-muted">Retail Trader</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq" class="section-padding bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-5 fw-bold">Frequently Asked Questions</h2>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="accordion" id="faqAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                How does OptionBotPro make money for me?
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                OptionBotPro uses advanced algorithms to scan thousands of options contracts every minute, identifying high-probability trades with favorable risk/reward ratios. It focuses on credit spreads and iron condors with 65%+ probability of profit.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                Is my money safe? What about risk management?
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Yes, your capital is protected by multiple safety measures: 25% of your account is always kept in cash reserves, daily loss limits are capped at 3%, and maximum position sizes are limited to 0.5% of your account value. Emergency stops activate if losses exceed thresholds.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                Do I need a TastyTrade account?
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Yes, OptionBotPro integrates with TastyTrade for order execution. TastyTrade offers competitive options pricing and is designed for active traders. You can open an account for free at tastytrade.com.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                Can I cancel anytime?
+              </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Absolutely. You can cancel your subscription anytime with no cancellation fees. Your access continues until the end of your current billing period, and you can reactivate anytime.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="gradient-bg text-white section-padding">
+  <div class="container text-center">
+    <h2 class="display-5 fw-bold mb-4">Ready to Automate Your Options Trading?</h2>
+    <p class="lead mb-4">Join thousands of traders who've stopped guessing and started profiting consistently.</p>
+    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+      <a href="<%= signup_path %>" class="btn btn-warning btn-lg px-5">
+        <i class="fas fa-rocket"></i> Start Your 14-Day Free Trial
+      </a>
+      <a href="<%= login_path %>" class="btn btn-outline-light btn-lg px-5">
+        <i class="fas fa-sign-in-alt"></i> Login to Your Account
+      </a>
+    </div>
+    <p class="mt-3 text-light"><small>No credit card required • Cancel anytime • 30-day money-back guarantee</small></p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-light py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <h5 class="fw-bold">
+          <i class="fas fa-robot"></i> OptionBotPro
+        </h5>
+        <p class="text-muted">Automated options trading made simple and safe. Built by traders, for traders.</p>
+        <div class="d-flex gap-3">
+          <a href="#" class="text-light"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-light"><i class="fab fa-linkedin"></i></a>
+          <a href="#" class="text-light"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-2 mb-4">
+        <h6 class="fw-bold">Product</h6>
+        <ul class="list-unstyled">
+          <li><a href="#features" class="text-muted text-decoration-none">Features</a></li>
+          <li><a href="#pricing" class="text-muted text-decoration-none">Pricing</a></li>
+          <li><a href="#how-it-works" class="text-muted text-decoration-none">How it Works</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 mb-4">
+        <h6 class="fw-bold">Legal</h6>
+        <ul class="list-unstyled">
+          <li><a href="<%= terms_path %>" class="text-muted text-decoration-none">Terms of Service</a></li>
+          <li><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
+          <li><a href="#" class="text-muted text-decoration-none">Risk Disclosure</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 mb-4">
+        <h6 class="fw-bold">Newsletter</h6>
+        <p class="text-muted small">Get trading tips and market insights delivered weekly.</p>
+        <div class="input-group">
+          <input type="email" class="form-control" placeholder="Enter your email">
+          <button class="btn btn-primary" type="button">Subscribe</button>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <p class="text-muted small mb-0">&copy; 2025 OptionBotPro. All rights reserved.</p>
+      </div>
+      <div class="col-lg-6 text-lg-end">
+        <p class="text-muted small mb-0">
+          <strong>Risk Disclosure:</strong> Options trading involves substantial risk of loss. 
+          <a href="<%= terms_path %>" class="text-light">Learn more</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
