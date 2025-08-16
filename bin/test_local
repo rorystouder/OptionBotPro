@@ -1,0 +1,28 @@
+#!/bin/bash
+# Test if the app runs locally in production mode
+
+echo "Testing production build locally..."
+
+# Set environment
+export RAILS_ENV=production
+export RAILS_SERVE_STATIC_FILES=true
+export SECRET_KEY_BASE=50df9ebac297d916792751d674f88078a32cd646fd9f00cdc7f684c2aada8a204ec25c213613fba65354cfbf08d97d3eef61e0cd843c1aa3a80a2883f9abde72
+export RAILS_MASTER_KEY=f0ba9719f1b640c7557048389e3f254e
+
+# Install production dependencies
+echo "Installing dependencies..."
+bundle install --without development test
+
+# Precompile assets
+echo "Precompiling assets..."
+bundle exec rails assets:precompile
+
+# Setup database
+echo "Setting up database..."
+bundle exec rails db:create
+bundle exec rails db:migrate
+bundle exec rails db:seed
+
+# Start server
+echo "Starting server on port 3000..."
+bundle exec rails server -b 0.0.0.0 -p 3000
