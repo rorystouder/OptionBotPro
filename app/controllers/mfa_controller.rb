@@ -8,9 +8,11 @@ class MfaController < ApplicationController
       return
     end
 
-    # Generate new MFA secret for setup
-    current_user.mfa_secret = ROTP::Base32.random
-    current_user.save!
+    # Only generate new MFA secret if one doesn't exist
+    unless current_user.mfa_secret.present?
+      current_user.mfa_secret = ROTP::Base32.random
+      current_user.save!
+    end
 
     @qr_code = current_user.mfa_qr_code
     @manual_key = current_user.mfa_secret
@@ -23,7 +25,9 @@ class MfaController < ApplicationController
     end
 
     code = params[:verification_code]
-    if current_user.verify_mfa_code(code)
+    Rails.logger.info "MFA Enable: User #{current_user.id}, Code: #{code}, Secret: #{current_user.mfa_secret}"
+    
+    if current_user.verify_mfa_setup_code(code)
       current_user.enable_mfa!
       session[:mfa_verified] = true
 
@@ -31,6 +35,7 @@ class MfaController < ApplicationController
       redirect_path = session.delete(:pending_redirect) || dashboard_path
       redirect_to redirect_path, notice: "MFA has been successfully enabled! Your account is now secure."
     else
+      Rails.logger.info "MFA Enable: Verification failed for code #{code}"
       redirect_to mfa_setup_path, alert: "Invalid verification code. Please try again."
     end
   end
