@@ -9,6 +9,53 @@
   </div>
 
   <% if @latest_scan %>
+    <!-- Scan Metadata -->
+    <% if @scan_metadata.present? %>
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="alert alert-info">
+          <div class="row">
+            <div class="col-md-3">
+              <strong>Scan Mode:</strong> 
+              <span class="badge bg-<%= @scan_metadata['scan_mode'] == 'live' ? 'success' : 'warning' %>">
+                <%= (@scan_metadata['scan_mode'] || 'unknown').upcase %>
+              </span>
+            </div>
+            <div class="col-md-3">
+              <strong>Symbols Scanned:</strong> <%= @scan_metadata['symbols_scanned'] || 0 %>
+            </div>
+            <div class="col-md-3">
+              <strong>Opportunities Found:</strong> <%= @scan_metadata['total_opportunities_found'] || 0 %>
+            </div>
+            <div class="col-md-3">
+              <strong>Scan Duration:</strong> <%= @scan_metadata['scan_duration_ms'] || 0 %>ms
+            </div>
+          </div>
+          <% if @scan_metadata['symbols_requested'].present? %>
+          <div class="row mt-2">
+            <div class="col-12">
+              <small><strong>Symbols Analyzed:</strong> <%= @scan_metadata['symbols_requested'].join(', ') %></small>
+            </div>
+          </div>
+          <% end %>
+          <% if @scan_metadata['scan_criteria'].present? %>
+          <div class="row mt-2">
+            <div class="col-12">
+              <small>
+                <strong>Scan Criteria:</strong> 
+                Min POP: <%= (@scan_metadata.dig('scan_criteria', 'min_pop') || 0) * 100 %>% |
+                Min Risk/Reward: <%= @scan_metadata.dig('scan_criteria', 'min_risk_reward') || 0 %> |
+                Max Loss: <%= @scan_metadata.dig('scan_criteria', 'max_loss_percentage') || 0 %>% NAV |
+                Max Trades: <%= @scan_metadata.dig('scan_criteria', 'max_trades_per_cycle') || 0 %>
+              </small>
+            </div>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <% end %>
+    
     <!-- Latest Scan Results -->
     <div class="row mb-4">
       <div class="col-12">
@@ -18,7 +65,7 @@
               Latest Scan Results
               <small class="text-muted">
                 - <%= @latest_scan.scan_timestamp.strftime("%m/%d/%Y at %I:%M %p") %>
-                (<%= @latest_scan.trades_found %> trades found)
+                (<%= @latest_scan.trades_found %> trades found<%= @scan_metadata['opportunities_after_filters'] ? " from #{@scan_metadata['opportunities_after_filters']} filtered" : "" %>)
               </small>
             </h5>
           </div>
@@ -29,13 +76,17 @@
                   <thead>
                     <tr>
                       <th>Symbol</th>
+                      <th>Price</th>
                       <th>Strategy</th>
-                      <th>Legs</th>
+                      <th>Strikes</th>
+                      <th>DTE</th>
                       <th>Credit</th>
                       <th>Max Loss</th>
                       <th>POP</th>
-                      <th>Risk/Reward</th>
-                      <th>Model Score</th>
+                      <th>R/R</th>
+                      <th>IV Rank</th>
+                      <th>Greeks</th>
+                      <th>Score</th>
                       <th>Thesis</th>
                     </tr>
                   </thead>
@@ -43,14 +94,45 @@
                     <% @scan_data.each do |trade| %>
                       <tr>
                         <td><strong><%= trade['symbol'] %></strong></td>
-                        <td><%= trade['strategy'] %></td>
+                        <td>$<%= number_with_precision(trade['current_price'] || 0, precision: 2) %></td>
+                        <td>
+                          <span class="badge bg-<%= trade['strategy'].include?('Put') ? 'success' : trade['strategy'].include?('Call') ? 'danger' : 'primary' %>">
+                            <%= trade['strategy'] %>
+                          </span>
+                        </td>
                         <td><code><%= trade['legs'] %></code></td>
+                        <td><%= trade['days_to_expiration'] || 'N/A' %></td>
                         <td class="text-success">$<%= number_with_precision(trade['credit'], precision: 2) %></td>
                         <td class="text-danger">$<%= number_with_precision(trade['max_loss'], precision: 2) %></td>
-                        <td><%= number_to_percentage(trade['pop'] * 100, precision: 1) %></td>
+                        <td>
+                          <span class="badge bg-<%= trade['pop'] >= 0.7 ? 'success' : 'warning' %>">
+                            <%= number_to_percentage(trade['pop'] * 100, precision: 0) %>
+                          </span>
+                        </td>
                         <td><%= number_with_precision(trade['risk_reward'], precision: 2) %></td>
-                        <td><%= number_with_precision(trade['model_score'], precision: 2) %></td>
-                        <td class="text-muted"><%= truncate(trade['thesis'], length: 60) %></td>
+                        <td>
+                          <% if trade['iv_rank'] %>
+                            <span class="badge bg-<%= trade['iv_rank'] >= 50 ? 'success' : 'secondary' %>">
+                              <%= trade['iv_rank'] %>%
+                            </span>
+                          <% else %>
+                            -
+                          <% end %>
+                        </td>
+                        <td class="small">
+                          <% if trade['delta'] %>
+                            Δ: <%= number_with_precision(trade['delta'], precision: 2) %><br>
+                            Θ: <%= number_with_precision(trade['theta'], precision: 2) %>
+                          <% else %>
+                            -
+                          <% end %>
+                        </td>
+                        <td>
+                          <span class="badge bg-<%= trade['model_score'] >= 0.8 ? 'success' : trade['model_score'] >= 0.6 ? 'warning' : 'secondary' %>">
+                            <%= number_with_precision(trade['model_score'], precision: 2) %>
+                          </span>
+                        </td>
+                        <td class="text-muted small" title="<%= trade['thesis'] %>"><%= truncate(trade['thesis'], length: 40) %></td>
                       </tr>
                     <% end %>
                   </tbody>

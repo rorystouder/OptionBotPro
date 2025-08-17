@@ -17,38 +17,93 @@ class MarketScannerService
   end
 
   def scan_for_opportunities
+    scan_result = scan_for_opportunities_with_details
+    scan_result[:trades]
+  end
+
+  def scan_for_opportunities_with_details
     Rails.logger.info "[MarketScanner] Starting scan for user #{user.id}"
+    start_time = Time.current
+
+    # Initialize scan metadata
+    scan_metadata = {
+      scan_start: start_time,
+      scan_mode: nil,
+      symbols_requested: [],
+      symbols_scanned: 0,
+      symbols_with_opportunities: 0,
+      total_opportunities_found: 0,
+      opportunities_after_filters: 0,
+      filters_applied: [],
+      scan_criteria: {
+        min_pop: MIN_POP,
+        min_risk_reward: MIN_RISK_REWARD,
+        max_loss_percentage: MAX_LOSS_PER_TRADE_PERCENTAGE,
+        max_trades_per_cycle: MAX_TRADES_PER_CYCLE
+      }
+    }
 
     # Check if user has TastyTrade authentication
     if !@user.tastytrade_authenticated?
       Rails.logger.info "[MarketScanner] User not authenticated, returning demo trades"
-      return generate_demo_trades
+      scan_metadata[:scan_mode] = "demo"
+      demo_trades = generate_demo_trades_with_details
+      scan_metadata[:scan_end] = Time.current
+      scan_metadata[:scan_duration_ms] = ((Time.current - start_time) * 1000).round
+      scan_metadata[:symbols_requested] = demo_trades[:symbols]
+      scan_metadata[:symbols_scanned] = demo_trades[:symbols].size
+      scan_metadata[:symbols_with_opportunities] = demo_trades[:trades].size
+      scan_metadata[:total_opportunities_found] = demo_trades[:trades].size
+      scan_metadata[:opportunities_after_filters] = demo_trades[:trades].size
+      
+      return {
+        trades: demo_trades[:trades],
+        metadata: scan_metadata
+      }
     end
 
+    scan_metadata[:scan_mode] = "live"
     candidates = []
+    symbols_with_data = []
 
     # Get watchlist symbols (for now, using popular options trading symbols)
     symbols = get_watchlist_symbols
+    scan_metadata[:symbols_requested] = symbols
 
     # Scan each symbol for opportunities
     symbols.each do |symbol|
       begin
         opportunities = scan_symbol(symbol)
-        candidates.concat(opportunities) if opportunities.any?
+        if opportunities.any?
+          candidates.concat(opportunities)
+          symbols_with_data << symbol
+          scan_metadata[:symbols_with_opportunities] += 1
+        end
+        scan_metadata[:symbols_scanned] += 1
       rescue => e
         Rails.logger.error "[MarketScanner] Error scanning #{symbol}: #{e.message}"
       end
     end
 
+    scan_metadata[:total_opportunities_found] = candidates.size
+
     # Apply hard filters
+    scan_metadata[:filters_applied] = ["POP >= #{MIN_POP}", "Risk/Reward >= #{MIN_RISK_REWARD}", "Max Loss <= #{MAX_LOSS_PER_TRADE_PERCENTAGE}% NAV"]
     filtered_candidates = apply_hard_filters(candidates)
+    scan_metadata[:opportunities_after_filters] = filtered_candidates.size
 
     # Rank and select top trades
     selected_trades = select_top_trades(filtered_candidates)
 
-    Rails.logger.info "[MarketScanner] Found #{selected_trades.size} trades meeting criteria"
+    scan_metadata[:scan_end] = Time.current
+    scan_metadata[:scan_duration_ms] = ((Time.current - start_time) * 1000).round
 
-    selected_trades
+    Rails.logger.info "[MarketScanner] Scan complete: #{selected_trades.size} trades selected from #{candidates.size} candidates across #{symbols.size} symbols"
+
+    {
+      trades: selected_trades,
+      metadata: scan_metadata
+    }
   end
 
   def scan_symbol(symbol)
@@ -474,6 +529,11 @@ class MarketScannerService
   end
 
   def generate_demo_trades
+    result = generate_demo_trades_with_details
+    result[:trades]
+  end
+
+  def generate_demo_trades_with_details
     # Generate realistic demo trades for testing without API connection
     demo_trades = [
       {
@@ -488,7 +548,13 @@ class MarketScannerService
         model_score: 0.85,
         momentum_z: 0.5,
         flow_z: 0.3,
-        thesis: "SPY showing bullish momentum with support at 570, IV rank 45%"
+        thesis: "SPY showing bullish momentum with support at 570, IV rank 45%",
+        current_price: 580.25,
+        iv_rank: 45,
+        delta: -0.28,
+        theta: 0.12,
+        vega: -0.08,
+        days_to_expiration: 35
       },
       {
         symbol: "AAPL",
@@ -502,7 +568,13 @@ class MarketScannerService
         model_score: 0.78,
         momentum_z: -0.3,
         flow_z: 0.2,
-        thesis: "AAPL at resistance level, overbought RSI, elevated IV rank 52%"
+        thesis: "AAPL at resistance level, overbought RSI, elevated IV rank 52%",
+        current_price: 228.50,
+        iv_rank: 52,
+        delta: 0.32,
+        theta: 0.10,
+        vega: -0.06,
+        days_to_expiration: 30
       },
       {
         symbol: "QQQ",
@@ -516,7 +588,13 @@ class MarketScannerService
         model_score: 0.92,
         momentum_z: 0.1,
         flow_z: -0.1,
-        thesis: "QQQ range-bound between support/resistance, high IV rank 58%"
+        thesis: "QQQ range-bound between support/resistance, high IV rank 58%",
+        current_price: 502.75,
+        iv_rank: 58,
+        delta: -0.02,
+        theta: 0.18,
+        vega: -0.12,
+        days_to_expiration: 40
       },
       {
         symbol: "NVDA",
@@ -530,7 +608,13 @@ class MarketScannerService
         model_score: 0.71,
         momentum_z: 0.8,
         flow_z: 0.6,
-        thesis: "NVDA strong uptrend with AI sector momentum, IV rank 38%"
+        thesis: "NVDA strong uptrend with AI sector momentum, IV rank 38%",
+        current_price: 132.40,
+        iv_rank: 38,
+        delta: -0.34,
+        theta: 0.08,
+        vega: -0.05,
+        days_to_expiration: 28
       },
       {
         symbol: "TSLA",
@@ -544,11 +628,23 @@ class MarketScannerService
         model_score: 0.82,
         momentum_z: 0.4,
         flow_z: 0.5,
-        thesis: "TSLA bouncing off support, bullish flow detected, IV rank 62%"
+        thesis: "TSLA bouncing off support, bullish flow detected, IV rank 62%",
+        current_price: 258.90,
+        iv_rank: 62,
+        delta: -0.30,
+        theta: 0.14,
+        vega: -0.09,
+        days_to_expiration: 32
       }
     ]
 
-    Rails.logger.info "[MarketScanner] Generated #{demo_trades.size} demo trades"
-    demo_trades
+    symbols_list = demo_trades.map { |t| t[:symbol] }.uniq
+
+    Rails.logger.info "[MarketScanner] Generated #{demo_trades.size} demo trades for #{symbols_list.size} symbols"
+    
+    {
+      trades: demo_trades,
+      symbols: symbols_list
+    }
   end
 end

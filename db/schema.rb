@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_31_164007) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_17_002658) do
   create_table "order_legs", force: :cascade do |t|
     t.integer "order_id", null: false
     t.string "symbol", null: false
@@ -179,6 +179,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_164007) do
     t.boolean "mfa_enabled", default: false
     t.string "mfa_secret"
     t.text "mfa_backup_codes"
+    t.text "tastytrade_oauth_token"
+    t.text "tastytrade_oauth_refresh_token"
+    t.datetime "tastytrade_oauth_expires_at"
     t.index ["active"], name: "index_users_on_active"
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true

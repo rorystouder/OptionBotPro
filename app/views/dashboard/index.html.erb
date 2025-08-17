@@ -227,7 +227,15 @@
             </div>
             <div class="col-md-3 mb-2">
               <% unless @tastytrade_authenticated %>
-                <%= link_to "Connect TastyTrade", tastytrade_connect_path, class: "btn btn-success w-100" %>
+                <div class="dropdown w-100">
+                  <button class="btn btn-success w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Connect TastyTrade
+                  </button>
+                  <ul class="dropdown-menu w-100">
+                    <li><%= link_to "OAuth Connection (Recommended)", tastytrade_oauth_setup_path, class: "dropdown-item" %></li>
+                    <li><%= link_to "Username/Password", tastytrade_connect_path, class: "dropdown-item" %></li>
+                  </ul>
+                </div>
               <% else %>
                 <div class="dropdown w-100">
                   <button class="btn btn-outline-success w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown">
