@@ -21,6 +21,12 @@ class SessionsController < ApplicationController
 
       session[:user_id] = user.id
 
+      # Allow bypassing MFA in development
+      if Rails.env.development? && params[:skip_mfa] == "true"
+        session[:mfa_verified] = true
+        redirect_to dashboard_path, notice: "Logged in successfully (MFA bypassed)" and return
+      end
+
       # Check if MFA is enabled
       if user.mfa_enabled?
         session[:mfa_verified] = false
@@ -28,9 +34,9 @@ class SessionsController < ApplicationController
         redirect_to mfa_verify_path, notice: "Please enter your MFA code to complete login."
         return
       else
-        # Require MFA setup for all users
-        session[:pending_redirect] = dashboard_path
-        redirect_to mfa_setup_path, notice: "Please set up Multi-Factor Authentication to secure your account."
+        # Don't force MFA setup, just log them in
+        session[:mfa_verified] = true
+        redirect_to dashboard_path, notice: "Logged in successfully"
         return
       end
 

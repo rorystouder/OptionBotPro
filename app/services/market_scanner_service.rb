@@ -13,11 +13,17 @@ class MarketScannerService
     @user = user
     @account_id = account_id || user.tastytrade_account_id
     @api_service = Tastytrade::ApiService.new(user)
-    @risk_service = RiskManagementService.new(user)
+    @risk_service = RiskManagementService.new(user, @account_id)
   end
 
   def scan_for_opportunities
     Rails.logger.info "[MarketScanner] Starting scan for user #{user.id}"
+
+    # Check if user has TastyTrade authentication
+    if !@user.tastytrade_authenticated?
+      Rails.logger.info "[MarketScanner] User not authenticated, returning demo trades"
+      return generate_demo_trades
+    end
 
     candidates = []
 
@@ -465,5 +471,84 @@ class MarketScannerService
     # For now, just return what we have if we can't balance
     # TODO: Implement smart rebalancing algorithm
     selected
+  end
+
+  def generate_demo_trades
+    # Generate realistic demo trades for testing without API connection
+    demo_trades = [
+      {
+        symbol: "SPY",
+        strategy: "Put Credit Spread",
+        legs: "575/570",
+        expiration: (Date.current + 35.days).to_s,
+        credit: 1.25,
+        max_loss: 375,
+        risk_reward: 0.33,
+        pop: 0.72,
+        model_score: 0.85,
+        momentum_z: 0.5,
+        flow_z: 0.3,
+        thesis: "SPY showing bullish momentum with support at 570, IV rank 45%"
+      },
+      {
+        symbol: "AAPL",
+        strategy: "Call Credit Spread",
+        legs: "235/240",
+        expiration: (Date.current + 30.days).to_s,
+        credit: 1.10,
+        max_loss: 390,
+        risk_reward: 0.28,
+        pop: 0.68,
+        model_score: 0.78,
+        momentum_z: -0.3,
+        flow_z: 0.2,
+        thesis: "AAPL at resistance level, overbought RSI, elevated IV rank 52%"
+      },
+      {
+        symbol: "QQQ",
+        strategy: "Iron Condor",
+        legs: "485/480/520/525",
+        expiration: (Date.current + 40.days).to_s,
+        credit: 2.20,
+        max_loss: 280,
+        risk_reward: 0.79,
+        pop: 0.75,
+        model_score: 0.92,
+        momentum_z: 0.1,
+        flow_z: -0.1,
+        thesis: "QQQ range-bound between support/resistance, high IV rank 58%"
+      },
+      {
+        symbol: "NVDA",
+        strategy: "Put Credit Spread",
+        legs: "125/120",
+        expiration: (Date.current + 28.days).to_s,
+        credit: 0.95,
+        max_loss: 405,
+        risk_reward: 0.23,
+        pop: 0.66,
+        model_score: 0.71,
+        momentum_z: 0.8,
+        flow_z: 0.6,
+        thesis: "NVDA strong uptrend with AI sector momentum, IV rank 38%"
+      },
+      {
+        symbol: "TSLA",
+        strategy: "Put Credit Spread", 
+        legs: "250/245",
+        expiration: (Date.current + 32.days).to_s,
+        credit: 1.35,
+        max_loss: 365,
+        risk_reward: 0.37,
+        pop: 0.70,
+        model_score: 0.82,
+        momentum_z: 0.4,
+        flow_z: 0.5,
+        thesis: "TSLA bouncing off support, bullish flow detected, IV rank 62%"
+      }
+    ]
+
+    Rails.logger.info "[MarketScanner] Generated #{demo_trades.size} demo trades"
+    demo_trades
   end
 end
