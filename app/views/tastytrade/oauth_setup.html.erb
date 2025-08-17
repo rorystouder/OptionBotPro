@@ -1,0 +1,67 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h4>Configure TastyTrade OAuth API</h4>
+        </div>
+        <div class="card-body">
+          <%= form_with url: tastytrade_oauth_save_path, method: :post, local: true do |form| %>
+            <div class="alert alert-warning">
+              <h6><strong>⚠️ OAuth Client Registration Required</strong></h6>
+              <p class="mb-2">Before using OAuth, you must:</p>
+              <ol class="mb-2">
+                <li>Create an account at <a href="https://developer.tastyworks.com" target="_blank">developer.tastyworks.com</a></li>
+                <li>Register an OAuth client application</li>
+                <li>Provide your redirect URI: <code><%= url_for(controller: 'tastytrade', action: 'oauth_callback', only_path: false) %></code></li>
+                <li>Request the scopes: <code>read</code>, <code>trade</code>, <code>openid</code></li>
+                <li>Get your Client ID and Client Secret from TastyTrade</li>
+              </ol>
+              <p class="mb-0"><strong>If you get "404 Client not found":</strong> Your OAuth client isn't registered yet.</p>
+            </div>
+            
+            <div class="alert alert-info">
+              <h6><strong>💡 Environment URLs</strong></h6>
+              <ul class="mb-0">
+                <li><strong>Sandbox:</strong> Uses <code>cert-my.staging-tasty.works</code> for OAuth and <code>api.cert.tastyworks.com</code> for API</li>
+                <li><strong>Production:</strong> Uses <code>my.tastytrade.com</code> for OAuth and <code>api.tastyworks.com</code> for API</li>
+              </ul>
+            </div>
+            
+            <div class="mb-3">
+              <%= form.label :client_id, "OAuth Client ID", class: "form-label" %>
+              <%= form.text_field :client_id, class: "form-control", placeholder: "Your OAuth Client ID", value: ENV['TASTYTRADE_CLIENT_ID'] %>
+            </div>
+            
+            <div class="mb-3">
+              <%= form.label :client_secret, "OAuth Client Secret", class: "form-label" %>
+              <%= form.password_field :client_secret, class: "form-control", placeholder: "Your OAuth Client Secret", value: ENV['TASTYTRADE_CLIENT_SECRET'] %>
+            </div>
+            
+            <div class="mb-3">
+              <%= form.label :environment, "Environment", class: "form-label" %>
+              <%= form.select :environment, 
+                  options_for_select([
+                    ["Production (Real Money)", "production"],
+                    ["Sandbox (Test)", "sandbox"]
+                  ], ENV['TASTYTRADE_ENV'] || 'production'),
+                  {}, 
+                  class: "form-select" %>
+            </div>
+            
+            <div class="d-grid">
+              <%= form.submit "Save OAuth Credentials", class: "btn btn-primary" %>
+            </div>
+          <% end %>
+          
+          <hr class="my-4">
+          
+          <div class="text-center">
+            <p class="text-muted">After saving, you'll be redirected to TastyTrade for authorization.</p>
+            <%= link_to "Back to Dashboard", dashboard_path, class: "btn btn-secondary" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

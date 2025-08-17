@@ -14,7 +14,8 @@ module Tastytrade
     end
 
     def get_accounts
-      make_request(:get, "/customers/#{@user.tastytrade_username}/accounts")
+      # TastyTrade API uses /customers/me/accounts for authenticated user
+      make_request(:get, "/customers/me/accounts")
     end
 
     def get_positions(account_id)
@@ -127,7 +128,7 @@ module Tastytrade
 
     def make_request(method, path, params = nil, body = nil)
       options = {
-        headers: @auth_service.authenticated_headers(@user.tastytrade_username).merge({
+        headers: get_auth_headers.merge({
           "Content-Type" => "application/json",
           "Accept" => "application/json"
         })
@@ -140,8 +141,18 @@ module Tastytrade
 
       handle_response(response)
     rescue Tastytrade::AuthService::TokenExpiredError => e
-      Rails.logger.warn "Token expired for user #{@user.tastytrade_username}: #{e.message}"
+      Rails.logger.warn "Token expired for user #{@user.email}: #{e.message}"
       raise TokenExpiredError, "Please re-authenticate"
+    end
+    
+    def get_auth_headers
+      # Try OAuth token first (preferred method)
+      if @user.tastytrade_oauth_token.present? && @user.tastytrade_oauth_expires_at > Time.current
+        return { "Authorization" => "Bearer #{@user.tastytrade_oauth_token}" }
+      end
+      
+      # Fallback to session-based authentication
+      @auth_service.authenticated_headers(@user.tastytrade_username)
     end
 
     def handle_response(response)
