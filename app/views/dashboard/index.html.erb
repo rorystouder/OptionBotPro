@@ -6,6 +6,25 @@
           <%= @tastytrade_authenticated ? 'TastyTrade Connected' : 'TastyTrade Not Connected' %>
         </span>
       </h1>
+      
+      <% if @tastytrade_authenticated && @accounts.any? %>
+        <div class="alert alert-info">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h6 class="mb-1">🔗 Connected Account: <%= @accounts.first.dig("account", "account-number") %></h6>
+              <p class="mb-0 small">Live data from TastyTrade • <strong>Cash Balance:</strong> $<%= number_with_precision(@balances.dig("cash-balance") || 0, precision: 2) %></p>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <span class="badge bg-success">Live Data</span>
+            </div>
+          </div>
+        </div>
+      <% elsif @tastytrade_authenticated %>
+        <div class="alert alert-warning">
+          <h6 class="mb-1">⚠️ No TastyTrade Accounts Found</h6>
+          <p class="mb-0 small">Connected but no trading accounts available. Please check your TastyTrade account.</p>
+        </div>
+      <% end %>
     </div>
   </div>
 
@@ -129,6 +148,7 @@
                 <thead>
                   <tr>
                     <th>Symbol</th>
+                    <th>Type</th>
                     <th>Qty</th>
                     <th>Avg Price</th>
                     <th>Current</th>
@@ -137,15 +157,38 @@
                 </thead>
                 <tbody>
                   <% @positions.each do |position| %>
-                    <tr>
-                      <td><strong><%= position.symbol %></strong></td>
-                      <td><%= position.quantity %></td>
-                      <td>$<%= number_with_precision(position.average_price, precision: 2) %></td>
-                      <td>$<%= number_with_precision(position.current_price || 0, precision: 2) %></td>
-                      <td class="<%= (position.unrealized_pnl || 0) >= 0 ? 'text-success' : 'text-danger' %>">
-                        <strong>$<%= number_with_precision(position.unrealized_pnl || 0, precision: 2) %></strong>
-                      </td>
-                    </tr>
+                    <% if @tastytrade_authenticated %>
+                      <% 
+                        instrument = position["instrument"]
+                        symbol = instrument["symbol"]
+                        quantity = position["quantity"].to_i
+                        avg_price = position["average-price"]&.to_f || 0
+                        mark_price = position["mark-price"]&.to_f || 0
+                        unrealized_pnl = mark_price > 0 && avg_price > 0 ? (mark_price - avg_price) * quantity : 0
+                        instrument_type = instrument["instrument-type"]
+                      %>
+                      <tr>
+                        <td><strong><%= symbol %></strong></td>
+                        <td><span class="badge bg-<%= instrument_type.include?('Option') ? 'primary' : 'info' %>"><%= instrument_type %></span></td>
+                        <td><%= quantity %></td>
+                        <td>$<%= number_with_precision(avg_price, precision: 2) %></td>
+                        <td>$<%= number_with_precision(mark_price, precision: 2) %></td>
+                        <td class="<%= unrealized_pnl >= 0 ? 'text-success' : 'text-danger' %>">
+                          <strong>$<%= number_with_precision(unrealized_pnl, precision: 2) %></strong>
+                        </td>
+                      </tr>
+                    <% else %>
+                      <tr>
+                        <td><strong><%= position.symbol %></strong></td>
+                        <td><span class="badge bg-secondary">Local</span></td>
+                        <td><%= position.quantity %></td>
+                        <td>$<%= number_with_precision(position.average_price, precision: 2) %></td>
+                        <td>$<%= number_with_precision(position.current_price || 0, precision: 2) %></td>
+                        <td class="<%= (position.unrealized_pnl || 0) >= 0 ? 'text-success' : 'text-danger' %>">
+                          <strong>$<%= number_with_precision(position.unrealized_pnl || 0, precision: 2) %></strong>
+                        </td>
+                      </tr>
+                    <% end %>
                   <% end %>
                 </tbody>
               </table>
@@ -184,11 +227,19 @@
             </div>
             <div class="col-md-3 mb-2">
               <% unless @tastytrade_authenticated %>
-                <%= link_to "Connect TastyTrade", login_path, class: "btn btn-success w-100" %>
+                <%= link_to "Connect TastyTrade", tastytrade_connect_path, class: "btn btn-success w-100" %>
               <% else %>
-                <button class="btn btn-outline-success w-100" disabled>
-                  ✅ TastyTrade Connected
-                </button>
+                <div class="dropdown w-100">
+                  <button class="btn btn-outline-success w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    ✅ TastyTrade Connected
+                  </button>
+                  <ul class="dropdown-menu w-100">
+                    <li><%= link_to "Reconnect", tastytrade_connect_path, class: "dropdown-item" %></li>
+                    <li><%= link_to "Disconnect", tastytrade_disconnect_path, method: :delete, 
+                               class: "dropdown-item text-danger",
+                               confirm: "Are you sure? This will remove your TastyTrade connection." %></li>
+                  </ul>
+                </div>
               <% end %>
             </div>
           </div>

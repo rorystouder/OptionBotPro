@@ -8,17 +8,32 @@
 
 ## 🐛 ACTIVE BUGS & ISSUES
 
-### 1. "Connect TastyTrade" Button Non-Functional
-- **Status:** 🔴 Open
+### 1. "Connect TastyTrade" Button Non-Functional + Live Data Integration
+- **Status:** 🟢 Fixed & Enhanced
 - **Priority:** High
 - **Component:** TastyTrade Integration
-- **Description:** The "Connect TastyTrade" button is not working/functional
-- **Impact:** Users cannot connect their brokerage accounts
-- **Location:** TBD (need to identify where this button appears)
-- **Steps to Reproduce:** TBD
-- **Expected Behavior:** Should connect user's TastyTrade account
-- **Actual Behavior:** Button does not function
-- **Notes:** Need to investigate button location and implementation
+- **Description:** The "Connect TastyTrade" button is not working/functional + dashboard needs live account data
+- **Impact:** Users cannot connect their brokerage accounts or see live trading data
+- **Location:** Dashboard (/dashboard) - Quick Actions section
+- **Expected Behavior:** Should connect user's TastyTrade account and display live data
+- **Actual Behavior:** ~~Button linked to login page instead of TastyTrade connection~~ **FIXED**
+- **Resolution:** ✅ **COMPLETED**
+  - ✅ Created `TastytradeController` with connect/disconnect functionality
+  - ✅ Added routes: `GET/POST /tastytrade/connect`, `DELETE /tastytrade/disconnect`
+  - ✅ Built secure credential storage form with encryption
+  - ✅ Integrated with existing `Tastytrade::AuthService`
+  - ✅ Updated dashboard button to link to proper connection form
+  - ✅ Added environment selection (Sandbox/Production)
+  - ✅ Implemented disconnect functionality with dropdown menu
+  - ✅ **Enhanced Dashboard with Live TastyTrade Integration:**
+    - ✅ Updated `DashboardController#fetch_tastytrade_data` to pull live account data
+    - ✅ Integrated real-time positions, balances, and transactions from TastyTrade API
+    - ✅ Enhanced dashboard view to show connection status and account information
+    - ✅ Added live data badges and account details display
+    - ✅ Implemented `calculate_tastytrade_portfolio_summary` for live portfolio calculations
+    - ✅ Updated positions table to handle TastyTrade API response format with instrument types
+    - ✅ Added proper error handling for API failures
+    - ✅ Connection works (user successfully authenticated) with token caching system
 
 ### 2. "Check Risk Status" Button Not Working
 - **Status:** 🔴 Open
@@ -151,8 +166,8 @@
 ## 📝 COLLECTION STATUS
 - **Issues Collected:** 9
 - **Collection Complete:** ✅ Yes
-- **Issues Fixed:** 1 (#9)
-- **Issues Remaining:** 8
+- **Issues Fixed:** 2 (#1 Enhanced, #9)
+- **Issues Remaining:** 7
 
 ---
 
