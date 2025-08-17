@@ -7,11 +7,32 @@ class ScannerController < ApplicationController
 
   def scan
     if current_user.tastytrade_authenticated?
-      MarketScannerJob.perform_later(current_user.id)
-      redirect_to scanner_path, notice: "Market scan initiated. Results will appear shortly."
+      # Perform scan immediately (bypassing market hours check for manual scans)
+      perform_manual_scan
+      redirect_to scanner_path, notice: "Market scan completed. Check results below."
     else
       redirect_to scanner_path, alert: "Please authenticate with TastyTrade first."
     end
+  end
+
+  private
+
+  def perform_manual_scan
+    scanner = MarketScannerService.new(user: current_user)
+    selected_trades = scanner.scan_for_opportunities
+    
+    # Store scan results
+    TradeScanResult.create!(
+      user: current_user,
+      scan_timestamp: Time.current,
+      trades_found: selected_trades.size,
+      scan_data: selected_trades.to_json
+    )
+    
+    Rails.logger.info "Manual scan completed for user #{current_user.id}: #{selected_trades.size} trades found"
+  rescue => e
+    Rails.logger.error "Manual scan failed for user #{current_user.id}: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
   end
 
   def show

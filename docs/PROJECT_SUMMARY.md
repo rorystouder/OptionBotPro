@@ -3,7 +3,7 @@
 ## Project Overview
 A Ruby on Rails automated trading system for TastyTrade with a critical **25% cash reserve protection** requirement. The system automatically scans for option trading opportunities and can execute trades while ensuring the last 25% of available funds are never used.
 
-## Current Status (As of August 16, 2025)
+## Current Status (As of August 17, 2025)
 
 ### ✅ Completed Features
 
@@ -207,8 +207,48 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
       - PROJECT_SUMMARY.md → `docs/`
       - Maintained clean root directory with only README.md
 
+20. **TastyTrade Integration Enhancement** (August 17, 2025)
+    - **Complete Dashboard Integration**: Live account data display when connected
+      - Real-time positions with instrument type badges (Options/Stocks)
+      - Live account balances and cash available
+      - Transaction history and recent orders
+      - Portfolio summary with live P&L calculations
+      - Connection status indicators and account information
+    - **Enhanced API Service**: Full integration with TastyTrade endpoints
+      - Account data fetching with proper error handling
+      - Live position and balance updates
+      - Graceful fallback to local data when not connected
+    - **Connection Management**: Secure credential storage and token caching
+      - Encrypted username/password storage per user
+      - 24-hour token caching for session management
+      - Connect/Disconnect functionality with dropdown menu
+
+21. **Market Scanner Implementation** (August 17, 2025)
+    - **Manual Scan Functionality**: Working scanner page at `/scanner`
+      - Fixed "Run New Scan" button (changed to button_to for Rails 7+)
+      - Bypassed market hours check for manual scans
+      - Fixed RiskManagementService initialization issue
+    - **Demo Trading Mode**: Scanner works without TastyTrade connection
+      - Generates 5 realistic demo trades when not authenticated
+      - Includes SPY, AAPL, QQQ, NVDA, TSLA positions
+      - Shows proper metrics: POP, Risk/Reward, Model Score
+    - **Scan Results Display**: Professional table with trade opportunities
+      - Symbol, Strategy, Strike Legs, Expiration
+      - Credit, Max Loss, Risk/Reward calculations
+      - Trading thesis for each opportunity
+    - **Recent Scans History**: Track and review previous scans
+
+22. **MFA System Improvements** (August 17, 2025)
+    - **Fixed MFA Lock-out Issue**: Users can now access accounts
+    - **MFA Bypass in Development**: Added `?skip_mfa=true` parameter
+    - **Removed Forced MFA Setup**: System no longer requires MFA on login
+    - **Helper Scripts Created**:
+      - `disable_mfa.rb` - Quickly disable MFA for any user
+      - `reset_admin.rb` - Complete admin account reset
+    - **Simplified Login Flow**: Direct dashboard access when MFA not enabled
+
 ### 🔄 Pending Tasks
-- **Critical Priority**: Fix core trading functionality (Place Order button, TastyTrade connection)
+- **Critical Priority**: Fix core trading functionality (Place Order button)
 - **Critical Priority**: Implement payment processing integration (Stripe) for subscription billing
 - **High Priority**: Fix API integration issues (Risk Status, Refresh Positions buttons)
 - **High Priority**: Resolve cloud deployment build failures (Render.com, Railway.com)
@@ -216,7 +256,10 @@ A Ruby on Rails automated trading system for TastyTrade with a critical **25% ca
 - WebSocket connection for real-time market data (not critical for 5-min scanner)
 - Email marketing automation for user onboarding and retention
 
-**📋 Active Bug Tracker**: `docs/development/BUG_TRACKER.md` (9 issues total, 1 resolved)
+**📋 Active Bug Tracker**: `docs/development/BUG_TRACKER.md` (9 issues total, 2 resolved)
+- ✅ Fixed: TastyTrade Connection & Dashboard Integration (#1)
+- ✅ Fixed: Documentation Organization (#9)
+- 🔴 Open: 7 remaining issues (see BUG_TRACKER.md for details)
 
 ## Critical Implementation Details
 
@@ -294,7 +337,21 @@ rails console
 User.first.tastytrade_authenticated?
 ```
 
-### 3. Key Commands
+### 3. Quick Access Commands
+```bash
+# Reset admin account if locked out
+rails runner reset_admin.rb
+
+# Disable MFA for troubleshooting
+rails runner disable_mfa.rb
+
+# Manual market scan
+rails console
+scanner = MarketScannerService.new(user: User.first)
+results = scanner.scan_for_opportunities
+```
+
+### 4. Key Commands
 ```bash
 # Switch between environments
 ./bin/switch_environment
