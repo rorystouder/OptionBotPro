@@ -42,7 +42,7 @@ gem "sidekiq-cron", "~> 2.3"
 gem "redis", "~> 5.0"
 
 # PostgreSQL adapter
-gem "pg", "~> 1.5"
+gem "pg", "~> 1.6"
 
 # Environment variables
 gem "dotenv-rails", "~> 3.1"
