@@ -26,7 +26,7 @@ class MfaController < ApplicationController
 
     code = params[:verification_code]
     Rails.logger.info "MFA Enable: User #{current_user.id}, Code: #{code}, Secret: #{current_user.mfa_secret}"
-    
+
     if current_user.verify_mfa_setup_code(code)
       current_user.enable_mfa!
       session[:mfa_verified] = true

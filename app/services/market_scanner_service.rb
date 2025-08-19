@@ -55,7 +55,7 @@ class MarketScannerService
       scan_metadata[:symbols_with_opportunities] = demo_trades[:trades].size
       scan_metadata[:total_opportunities_found] = demo_trades[:trades].size
       scan_metadata[:opportunities_after_filters] = demo_trades[:trades].size
-      
+
       return {
         trades: demo_trades[:trades],
         metadata: scan_metadata
@@ -88,7 +88,7 @@ class MarketScannerService
     scan_metadata[:total_opportunities_found] = candidates.size
 
     # Apply hard filters
-    scan_metadata[:filters_applied] = ["POP >= #{MIN_POP}", "Risk/Reward >= #{MIN_RISK_REWARD}", "Max Loss <= #{MAX_LOSS_PER_TRADE_PERCENTAGE}% NAV"]
+    scan_metadata[:filters_applied] = [ "POP >= #{MIN_POP}", "Risk/Reward >= #{MIN_RISK_REWARD}", "Max Loss <= #{MAX_LOSS_PER_TRADE_PERCENTAGE}% NAV" ]
     filtered_candidates = apply_hard_filters(candidates)
     scan_metadata[:opportunities_after_filters] = filtered_candidates.size
 
@@ -618,7 +618,7 @@ class MarketScannerService
       },
       {
         symbol: "TSLA",
-        strategy: "Put Credit Spread", 
+        strategy: "Put Credit Spread",
         legs: "250/245",
         expiration: (Date.current + 32.days).to_s,
         credit: 1.35,
@@ -641,7 +641,7 @@ class MarketScannerService
     symbols_list = demo_trades.map { |t| t[:symbol] }.uniq
 
     Rails.logger.info "[MarketScanner] Generated #{demo_trades.size} demo trades for #{symbols_list.size} symbols"
-    
+
     {
       trades: demo_trades,
       symbols: symbols_list

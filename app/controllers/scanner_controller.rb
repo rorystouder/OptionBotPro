@@ -2,10 +2,10 @@ class ScannerController < ApplicationController
   def index
     @recent_scans = current_user.trade_scan_results.order(scan_timestamp: :desc).limit(10)
     @latest_scan = @recent_scans.first
-    
+
     if @latest_scan
       parsed_data = JSON.parse(@latest_scan.scan_data)
-      
+
       # Handle both old and new scan data formats
       if parsed_data.is_a?(Hash) && parsed_data["scan_version"] == "2.0"
         @scan_data = parsed_data["trades"] || []
@@ -36,18 +36,18 @@ class ScannerController < ApplicationController
   def perform_manual_scan
     scanner = MarketScannerService.new(user: current_user)
     scan_result = scanner.scan_for_opportunities_with_details
-    
+
     # Extract trades and metadata
     selected_trades = scan_result[:trades]
     scan_metadata = scan_result[:metadata]
-    
+
     # Create enhanced scan data with metadata
     enhanced_scan_data = {
       trades: selected_trades,
       metadata: scan_metadata,
       scan_version: "2.0"
     }
-    
+
     # Store scan results with metadata
     TradeScanResult.create!(
       user: current_user,
@@ -55,7 +55,7 @@ class ScannerController < ApplicationController
       trades_found: selected_trades.size,
       scan_data: enhanced_scan_data.to_json
     )
-    
+
     Rails.logger.info "Manual scan completed for user #{current_user.id}: #{selected_trades.size} trades found from #{scan_metadata[:symbols_scanned]} symbols"
   rescue => e
     Rails.logger.error "Manual scan failed for user #{current_user.id}: #{e.message}"

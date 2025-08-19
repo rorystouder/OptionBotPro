@@ -1,6 +1,6 @@
 class DashboardController < ApplicationController
-  before_action :skip_mfa_in_development, only: [:index]
-  
+  before_action :skip_mfa_in_development, only: [ :index ]
+
   def index
     @user = current_user
     @tastytrade_authenticated = current_user.tastytrade_authenticated?
@@ -21,26 +21,26 @@ class DashboardController < ApplicationController
   def fetch_tastytrade_data
     begin
       api_service = Tastytrade::ApiService.new(current_user)
-      
+
       # Get accounts
       accounts_response = api_service.get_accounts
       @accounts = accounts_response.dig("data", "items") || []
-      
+
       if @accounts.any?
         # Use the first account for now
         account_id = @accounts.first["account"]["account-number"]
-        
+
         # Get positions
         positions_response = api_service.get_positions(account_id)
         @positions = positions_response.dig("data", "items") || []
-        
+
         # Get account balances
         balances_response = api_service.get_balances(account_id)
         @balances = balances_response.dig("data") || {}
-        
+
         # Calculate portfolio summary from live data
         @portfolio_summary = calculate_tastytrade_portfolio_summary
-        
+
         # Get recent orders (transactions)
         transactions_response = api_service.get_transactions(account_id, { limit: 10 })
         @recent_orders = transactions_response.dig("data", "items") || []
@@ -50,7 +50,7 @@ class DashboardController < ApplicationController
         @portfolio_summary = { total_positions: 0, total_market_value: 0, total_unrealized_pnl: 0, options_count: 0, stocks_count: 0 }
         @recent_orders = []
       end
-      
+
     rescue => e
       Rails.logger.error "Failed to fetch TastyTrade data: #{e.message}"
       flash[:alert] = "Unable to fetch TastyTrade data. Please check your connection."
@@ -61,7 +61,7 @@ class DashboardController < ApplicationController
       @recent_orders = []
     end
   end
-  
+
   def skip_mfa_in_development
     if Rails.env.development? && params[:skip_mfa] == "true"
       session[:mfa_verified] = true
@@ -91,15 +91,15 @@ class DashboardController < ApplicationController
     @positions.each do |position|
       instrument = position["instrument"]
       quantity = position["quantity"].to_i
-      
+
       next if quantity == 0
-      
+
       if instrument["instrument-type"] == "Equity Option"
         options_count += 1
       elsif instrument["instrument-type"] == "Equity"
         stocks_count += 1
       end
-      
+
       # Calculate unrealized P&L if available
       if position["mark-price"] && position["average-price"]
         mark_price = position["mark-price"].to_f

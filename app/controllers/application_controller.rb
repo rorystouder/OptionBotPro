@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
     Rails.logger.info "[AUTH] authenticate_user called for #{controller_name}##{action_name}"
     Rails.logger.info "[AUTH] session[:user_id]: #{session[:user_id]}"
     Rails.logger.info "[AUTH] logged_in?: #{logged_in?}"
-    
+
     unless logged_in?
       Rails.logger.warn "[AUTH] User not logged in, redirecting to login"
       redirect_to login_path, alert: "Please log in to continue"
@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
     Rails.logger.info "[MFA] current_user.mfa_enabled?: #{logged_in? && current_user&.mfa_enabled?}"
     Rails.logger.info "[MFA] skip_mfa_verification?: #{skip_mfa_verification?}"
     Rails.logger.info "[MFA] session[:mfa_verified]: #{session[:mfa_verified]}"
-    
+
     return unless logged_in? && current_user.mfa_enabled?
 
     # Skip MFA check for certain controllers/actions
@@ -66,7 +66,7 @@ class ApplicationController < ActionController::Base
     exempt = controller_name.in?(mfa_exempt_controllers) ||
              action_name.in?(mfa_exempt_actions) ||
              (controller_name == "users" && action_name.in?(%w[new create change_password update_password]))
-    
+
     Rails.logger.info "[MFA] Skip check - controller: #{controller_name}, action: #{action_name}, exempt: #{exempt}"
     exempt
   end

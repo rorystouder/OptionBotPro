@@ -30,7 +30,7 @@ class User < ApplicationRecord
     if tastytrade_oauth_token.present? && tastytrade_oauth_expires_at.present?
       return tastytrade_oauth_expires_at > Time.current
     end
-    
+
     # Fallback to username/password authentication
     username = tastytrade_username
     return false if username.nil?
