@@ -24,7 +24,7 @@ git push heroku main
 
 # Set environment variables
 echo "Setting environment variables..."
-heroku config:set RAILS_MASTER_KEY=f0ba9719f1b640c7557048389e3f254e
+heroku config:set RAILS_MASTER_KEY=#use new key
 heroku config:set RAILS_ENV=production
 heroku config:set RAILS_SERVE_STATIC_FILES=true
 heroku config:set RAILS_LOG_TO_STDOUT=true
