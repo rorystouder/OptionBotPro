@@ -144,13 +144,13 @@ module Tastytrade
       Rails.logger.warn "Token expired for user #{@user.email}: #{e.message}"
       raise TokenExpiredError, "Please re-authenticate"
     end
-    
+
     def get_auth_headers
       # Try OAuth token first (preferred method)
       if @user.tastytrade_oauth_token.present? && @user.tastytrade_oauth_expires_at > Time.current
         return { "Authorization" => "Bearer #{@user.tastytrade_oauth_token}" }
       end
-      
+
       # Fallback to session-based authentication
       @auth_service.authenticated_headers(@user.tastytrade_username)
     end

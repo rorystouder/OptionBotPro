@@ -4,7 +4,7 @@ class HealthController < ApplicationController
 
   def show
     health_status = {
-      status: 'ok',
+      status: "ok",
       timestamp: Time.current.iso8601,
       rails: Rails.version,
       ruby: RUBY_VERSION,
@@ -15,20 +15,20 @@ class HealthController < ApplicationController
 
     render json: health_status, status: :ok
   rescue StandardError => e
-    render json: { status: 'error', message: e.message }, status: :service_unavailable
+    render json: { status: "error", message: e.message }, status: :service_unavailable
   end
 
   private
 
   def health_check_request?
-    action_name == 'show'
+    action_name == "show"
   end
 
   def database_health
-    ActiveRecord::Base.connection.execute('SELECT 1')
-    'connected'
+    ActiveRecord::Base.connection.execute("SELECT 1")
+    "connected"
   rescue StandardError
-    'disconnected'
+    "disconnected"
   end
 
   def sidekiq_health
@@ -41,16 +41,16 @@ class HealthController < ApplicationController
         workers: stats.workers_size
       }
     else
-      'not configured'
+      "not configured"
     end
   rescue StandardError
-    'unavailable'
+    "unavailable"
   end
 
   def cache_health
-    Rails.cache.write('health_check', Time.current.to_i, expires_in: 10.seconds)
-    Rails.cache.read('health_check') ? 'working' : 'failed'
+    Rails.cache.write("health_check", Time.current.to_i, expires_in: 10.seconds)
+    Rails.cache.read("health_check") ? "working" : "failed"
   rescue StandardError
-    'unavailable'
+    "unavailable"
   end
 end

@@ -9,19 +9,19 @@ if user
   # Reset password
   user.password = 'admin123'
   user.password_confirmation = 'admin123'
-  
+
   # Disable MFA
   user.mfa_enabled = false
   user.mfa_secret = nil
   user.mfa_backup_codes = nil
-  
+
   # Clear any password reset requirements
   user.password_reset_required = false
   user.password_reset_token = nil
   user.password_reset_sent_at = nil
-  
+
   user.save!
-  
+
   puts "✅ Admin account reset successfully!"
   puts "   Email: admin@optionbotpro.com"
   puts "   Password: admin123"

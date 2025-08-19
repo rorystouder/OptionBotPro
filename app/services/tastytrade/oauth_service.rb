@@ -9,10 +9,10 @@ module Tastytrade
           grant_type: "authorization_code",
           code: code,
           redirect_uri: redirect_uri,
-          client_id: ENV['TASTYTRADE_CLIENT_ID'],
-          client_secret: ENV['TASTYTRADE_CLIENT_SECRET']
+          client_id: ENV["TASTYTRADE_CLIENT_ID"],
+          client_secret: ENV["TASTYTRADE_CLIENT_SECRET"]
         }.to_json,
-        headers: { 
+        headers: {
           "Content-Type" => "application/json",
           "Accept" => "application/json"
         }
@@ -47,10 +47,10 @@ module Tastytrade
         body: {
           grant_type: "refresh_token",
           refresh_token: refresh_token,
-          client_id: ENV['TASTYTRADE_CLIENT_ID'],
-          client_secret: ENV['TASTYTRADE_CLIENT_SECRET']
+          client_id: ENV["TASTYTRADE_CLIENT_ID"],
+          client_secret: ENV["TASTYTRADE_CLIENT_SECRET"]
         }.to_json,
-        headers: { 
+        headers: {
           "Content-Type" => "application/json",
           "Accept" => "application/json"
         }

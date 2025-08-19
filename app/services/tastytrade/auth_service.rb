@@ -15,7 +15,7 @@ module Tastytrade
           password: password,
           remember_me: true
         }.to_json,
-        headers: { 
+        headers: {
           "Content-Type" => "application/json",
           "Accept" => "application/json"
         }
@@ -23,13 +23,13 @@ module Tastytrade
 
       if response.code == 201 || response.code == 200
         data = response.parsed_response
-        
+
         # TastyTrade returns the token in different places depending on the endpoint
-        @access_token = data.dig("data", "session-token") || 
-                       data.dig("data", "sessionToken") || 
+        @access_token = data.dig("data", "session-token") ||
+                       data.dig("data", "sessionToken") ||
                        data.dig("session-token") ||
                        data.dig("sessionToken")
-                       
+
         if @access_token
           Rails.cache.write("tastytrade_token_#{username}", @access_token, expires_in: 24.hours)
           Rails.logger.info "TastyTrade authentication successful for #{username}"
@@ -52,7 +52,7 @@ module Tastytrade
           return { "Authorization" => "Bearer #{user.tastytrade_oauth_token}" }
         end
       end
-      
+
       # Fallback to session token
       token = @access_token || Rails.cache.read("tastytrade_token_#{username}")
       raise TokenExpiredError, "No valid token found" unless token

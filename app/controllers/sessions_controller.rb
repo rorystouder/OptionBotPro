@@ -83,14 +83,14 @@ class SessionsController < ApplicationController
     Rails.logger.info "[BROWSER_CLOSE] Browser close logout called"
     Rails.logger.info "[BROWSER_CLOSE] Referer: #{request.referer}"
     Rails.logger.info "[BROWSER_CLOSE] Current user: #{current_user&.email}"
-    
+
     # Don't clear session if user is in OAuth flow
-    if request.referer&.include?('/tastytrade/oauth')
+    if request.referer&.include?("/tastytrade/oauth")
       Rails.logger.info "[BROWSER_CLOSE] Skipping logout - OAuth flow detected"
       head :ok
       return
     end
-    
+
     if current_user
       # Logout from TastyTrade API
       begin
@@ -105,9 +105,9 @@ class SessionsController < ApplicationController
     session[:user_id] = nil
     session[:mfa_verified] = nil
     session[:pending_redirect] = nil
-    
+
     Rails.logger.info "[BROWSER_CLOSE] Session cleared"
-    
+
     # Return minimal response for browser close
     head :ok
   end
