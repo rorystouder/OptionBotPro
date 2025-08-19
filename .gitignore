@@ -63,13 +63,13 @@ Thumbs.db
 /vendor/bundle
 /vendor/ruby
 /.bundle
-/config/database.yml
-/config/secrets.yml
 .byebug_history
 .ruby-gemset
 .rvmrc
 /vendor/
-/config/
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+/config/credentials.yml.enc
+/config/database.yml
+/config/secrets.yml
 /docs
