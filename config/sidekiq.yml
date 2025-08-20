@@ -1,0 +1,41 @@
+# Sidekiq configuration for background jobs
+:concurrency: 5
+:max_retries: 3
+:timeout: 60
+
+:queues:
+  - critical
+  - urgent
+  - default
+  - low
+
+production:
+  :concurrency: 10
+  :queues:
+    - [critical, 5]  # Market scanner jobs
+    - [urgent, 3]     # Trade execution jobs
+    - [default, 2]    # Regular jobs
+    - [low, 1]        # Analytics jobs
+
+development:
+  :concurrency: 5
+
+# Cron jobs for scheduled tasks
+:schedule:
+  market_scanner:
+    cron: "*/5 9-16 * * 1-5"  # Every 5 minutes during market hours (9:30 AM - 4 PM ET, Mon-Fri)
+    class: MarketScannerJob
+    queue: critical
+    description: "Scan market for trading opportunities"
+  
+  daily_report:
+    cron: "0 17 * * 1-5"  # 5 PM ET on weekdays
+    class: DailyReportJob
+    queue: low
+    description: "Generate daily trading report"
+  
+  risk_check:
+    cron: "*/1 9-16 * * 1-5"  # Every minute during market hours
+    class: RiskMonitorJob
+    queue: urgent
+    description: "Monitor portfolio risk metrics"
