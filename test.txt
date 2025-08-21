@@ -1,0 +1,2 @@
+This is a test file for OptionBotPro repository.
+Created to verify Git commits are working properly.
