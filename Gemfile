@@ -29,7 +29,7 @@ gem "rotp", "~> 6.0"
 
 # HTTP requests
 gem "httparty", "~> 0.21"
-gem "faraday", "~> 2.0"
+gem "faraday", "~> 2.14"
 
 # WebSocket support
 gem "faye-websocket", "~> 0.11"
